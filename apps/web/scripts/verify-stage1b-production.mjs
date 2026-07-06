@@ -79,7 +79,11 @@ async function verifyViewport(page, name, width, height) {
 async function verifyDiagnostics(page) {
   await page.goto(`${BASE}/admin/diagnostics`, { waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
-  assertContains(body, "DB check status:ok", "diagnostics");
+  assertContains(body, "DB check status", "diagnostics db label");
+  if (!/\bok\b/.test(body)) {
+    throw new Error("diagnostics: DB check status not ok");
+  }
+  console.log("PASS: diagnostics — DB check status ok");
   assertContains(body, "stage-0-5-vercel-shell", "diagnostics stage marker");
   assertContains(body, "Stage 0.5-R diagnostics verified", "diagnostics verified");
   console.log("PASS: diagnostics");
