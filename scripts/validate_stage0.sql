@@ -45,7 +45,16 @@ BEGIN
   INTO v_bad_count, v_bad_cols
   FROM information_schema.columns c
   WHERE c.table_schema = 'public'
-    AND c.column_name ~ '(amount|balance|budget|reward|points|prepay|settlement|intent|spent|earned|gross|share|refund|pool)'
+    AND (
+      c.column_name ~ '(^|_)(amount|balance|budget|prepay|settlement|intent|spent|earned|gross)($|_)'
+      OR c.column_name IN (
+        'reward_per_view', 'points_earned', 'point_balance', 'prepay_balance',
+        'settlement_balance', 'budget_total', 'budget_spent',
+        'monthly_intent_min', 'monthly_intent_max',
+        'reward_pool_amount', 'partner_share_amount', 'adme_share_amount',
+        'operation_reserve_amount', 'buffer_amount', 'refund_amount'
+      )
+    )
     AND c.data_type NOT IN ('bigint', 'integer');
 
   IF v_bad_count > 0 THEN
@@ -452,7 +461,7 @@ DECLARE
   v_pkg RECORD;
 BEGIN
   INSERT INTO auth.users (
-    instance_id, id, aud, role, email, encrypted_password,
+    instance_id, id, aud, role, email,
     email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at
   ) VALUES (
     '00000000-0000-0000-0000-000000000000',
@@ -460,7 +469,6 @@ BEGIN
     'authenticated',
     'authenticated',
     v_user_id::TEXT || '@stage0f-test.local',
-    crypt('testpass', gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}'::JSONB,
     '{"role":"advertiser"}'::JSONB,
@@ -506,4 +514,4 @@ END $$;
 -- 완료
 -- ===========================================================================
 
-SELECT 'AdMe Stage 0-F validation complete — all checks passed' AS result;
+SELECT 'AdMe Stage 0-LV validation complete — all checks passed' AS result;

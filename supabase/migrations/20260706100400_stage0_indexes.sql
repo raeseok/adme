@@ -50,7 +50,7 @@ CREATE INDEX idx_ad_views_campaign ON public.ad_views (campaign_id, viewed_at DE
 CREATE UNIQUE INDEX idx_ad_views_consumer_campaign_day ON public.ad_views (
   consumer_user_id,
   campaign_id,
-  (viewed_at::DATE)
+  ((viewed_at AT TIME ZONE 'UTC')::date)
 );
 
 -- point_ledger (SSOT 조회·대조 성능)
