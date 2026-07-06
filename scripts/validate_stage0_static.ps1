@@ -19,7 +19,7 @@ function Assert-Check($name, $condition) {
 $migDir = Join-Path $root "supabase\migrations"
 $migrations = Get-ChildItem $migDir -Filter "*.sql" -ErrorAction SilentlyContinue
 
-Assert-Check "migration files exist (>=7)" ($migrations.Count -ge 7)
+Assert-Check "migration files exist (>=8)" ($migrations.Count -ge 8)
 
 $tablesSql = Get-Content (Join-Path $migDir "20260706100100_stage0_tables.sql") -Raw
 Assert-Check "15 CREATE TABLE statements" (([regex]::Matches($tablesSql, "CREATE TABLE public\.")).Count -eq 15)
@@ -32,15 +32,18 @@ Assert-Check "REVOKE quizzes FROM anon" ($rlsSql -match "REVOKE ALL ON TABLE pub
 Assert-Check "RLS ENABLE count >= 15" (([regex]::Matches($rlsSql, "ENABLE ROW LEVEL SECURITY")).Count -ge 15)
 
 $auditSql = Get-Content (Join-Path $migDir "20260706100600_stage0_r_audit_fixes.sql") -Raw -ErrorAction SilentlyContinue
+$stage0fSql = Get-Content (Join-Path $migDir "20260706100700_stage0_f_point_packages_compat_view.sql") -Raw -ErrorAction SilentlyContinue
 Assert-Check "append-only trigger exists" ($auditSql -match "point_ledger_no_update")
 Assert-Check "validate insert trigger exists" ($auditSql -match "point_ledger_validate_insert")
 Assert-Check "advertiser quiz policies" ($auditSql -match "quizzes_advertiser_select")
+Assert-Check "point_packages VIEW exists" ($stage0fSql -match "CREATE OR REPLACE VIEW public\.point_packages")
+Assert-Check "partner prepayments policy" ($stage0fSql -match "advertiser_prepayments_partner_select")
 
 $funcSql = Get-Content (Join-Path $migDir "20260706100300_stage0_functions_triggers.sql") -Raw
 Assert-Check "grade_quiz_answer returns boolean" ($funcSql -match "RETURNS BOOLEAN[\s\S]*grade_quiz_answer" -or $funcSql -match "grade_quiz_answer[\s\S]*RETURNS BOOLEAN")
 
 $validateSql = Get-Content (Join-Path $root "scripts\validate_stage0.sql") -Raw
-Assert-Check "validate_stage0 has 14 check blocks" (([regex]::Matches($validateSql, "PASS \[\d+\]")).Count -ge 14)
+Assert-Check "validate_stage0 has 16 check blocks" (([regex]::Matches($validateSql, "PASS \[\d+\]")).Count -ge 16)
 
 $gitignore = Get-Content (Join-Path $root ".gitignore") -Raw
 Assert-Check ".gitignore includes .env" ($gitignore -match "\.env")

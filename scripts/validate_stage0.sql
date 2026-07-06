@@ -362,7 +362,148 @@ BEGIN
 END $$;
 
 -- ===========================================================================
+-- 15. point_packages (VIEW) 존재 및 컬럼 호환성
+-- ===========================================================================
+
+DO $$
+DECLARE
+  v_relkind CHAR;
+  v_missing_cols TEXT;
+  v_required TEXT[] := ARRAY[
+    'id', 'advertiser_id', 'amount',
+    'reward_pool_amount', 'partner_share_amount', 'adme_share_amount',
+    'operation_reserve_amount', 'buffer_amount',
+    'paid_at', 'refunded', 'refund_amount', 'memo', 'created_by', 'created_at'
+  ];
+  v_col TEXT;
+  v_missing TEXT[] := '{}';
+BEGIN
+  SELECT c.relkind INTO v_relkind
+  FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public' AND c.relname = 'point_packages';
+
+  IF v_relkind IS NULL THEN
+    RAISE EXCEPTION 'FAIL [15a]: point_packages relation does not exist';
+  END IF;
+
+  IF v_relkind != 'v' THEN
+    RAISE EXCEPTION 'FAIL [15b]: point_packages must be a VIEW, got relkind=%', v_relkind;
+  END IF;
+
+  FOREACH v_col IN ARRAY v_required LOOP
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'point_packages'
+        AND column_name = v_col
+    ) THEN
+      v_missing := array_append(v_missing, v_col);
+    END IF;
+  END LOOP;
+
+  IF array_length(v_missing, 1) > 0 THEN
+    RAISE EXCEPTION 'FAIL [15c]: point_packages missing columns: %', v_missing;
+  END IF;
+
+  RAISE NOTICE 'PASS [15]: point_packages VIEW exists with required columns';
+END $$;
+
+-- point_packages 배분 컬럼 BIGINT 및 합계 검증 (VIEW 정의 기반)
+DO $$
+DECLARE
+  v_bad_types INT;
+BEGIN
+  SELECT COUNT(*) INTO v_bad_types
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+    AND table_name = 'point_packages'
+    AND column_name ~ '(amount|reward|share|reserve|buffer|refund)'
+    AND data_type NOT IN ('bigint', 'integer', 'boolean');
+
+  IF v_bad_types > 0 THEN
+    RAISE EXCEPTION 'FAIL [15d]: point_packages has non-bigint amount columns';
+  END IF;
+  RAISE NOTICE 'PASS [15d]: point_packages amount columns are integer types';
+END $$;
+
+-- point_packages 직접 write 불가 (VIEW, INSTEAD OF 트리거 없음)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.triggers
+    WHERE event_object_schema = 'public'
+      AND event_object_table = 'point_packages'
+  ) THEN
+    RAISE EXCEPTION 'FAIL [15e]: point_packages must not have INSTEAD OF triggers';
+  END IF;
+  RAISE NOTICE 'PASS [15e]: point_packages has no write triggers (read-only view)';
+END $$;
+
+-- ===========================================================================
+-- 16. point_packages VIEW 배분 smoke test (local DB only)
+-- ===========================================================================
+
+DO $$
+DECLARE
+  v_user_id UUID := gen_random_uuid();
+  v_adv_id UUID;
+  v_prepay_id UUID;
+  v_pkg RECORD;
+BEGIN
+  INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+  ) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    v_user_id,
+    'authenticated',
+    'authenticated',
+    v_user_id::TEXT || '@stage0f-test.local',
+    crypt('testpass', gen_salt('bf')),
+    now(),
+    '{"provider":"email","providers":["email"]}'::JSONB,
+    '{"role":"advertiser"}'::JSONB,
+    now(),
+    now()
+  );
+
+  INSERT INTO public.advertisers (user_id, company_name)
+  VALUES (v_user_id, 'Stage0F Test Co')
+  RETURNING id INTO v_adv_id;
+
+  INSERT INTO public.advertiser_prepayments (advertiser_id, amount, admin_user_id, note)
+  VALUES (v_adv_id, 100, v_user_id, 'view smoke 100')
+  RETURNING id INTO v_prepay_id;
+
+  SELECT * INTO v_pkg FROM public.point_packages WHERE id = v_prepay_id;
+
+  IF v_pkg.amount != 100 OR v_pkg.reward_pool_amount != 35
+     OR v_pkg.partner_share_amount != 30 OR v_pkg.adme_share_amount != 20
+     OR v_pkg.operation_reserve_amount != 10 OR v_pkg.buffer_amount != 5 THEN
+    RAISE EXCEPTION 'FAIL [16a]: point_packages 100 won via view: %/%/%/%/%',
+      v_pkg.reward_pool_amount, v_pkg.partner_share_amount, v_pkg.adme_share_amount,
+      v_pkg.operation_reserve_amount, v_pkg.buffer_amount;
+  END IF;
+
+  INSERT INTO public.advertiser_prepayments (advertiser_id, amount, admin_user_id, note)
+  VALUES (v_adv_id, 101, v_user_id, 'view smoke 101')
+  RETURNING id INTO v_prepay_id;
+
+  SELECT * INTO v_pkg FROM public.point_packages WHERE id = v_prepay_id;
+
+  IF v_pkg.buffer_amount != 6 OR (
+    v_pkg.reward_pool_amount + v_pkg.partner_share_amount + v_pkg.adme_share_amount
+    + v_pkg.operation_reserve_amount + v_pkg.buffer_amount
+  ) != 101 THEN
+    RAISE EXCEPTION 'FAIL [16b]: point_packages 101 won via view, buffer=%', v_pkg.buffer_amount;
+  END IF;
+
+  RAISE NOTICE 'PASS [16]: point_packages VIEW split smoke test (100/101) OK';
+END $$;
+
+-- ===========================================================================
 -- 완료
 -- ===========================================================================
 
-SELECT 'AdMe Stage 0-R validation complete — all checks passed' AS result;
+SELECT 'AdMe Stage 0-F validation complete — all checks passed' AS result;
