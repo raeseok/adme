@@ -21,13 +21,6 @@ function assertContains(text, needle, label) {
   console.log(`PASS: ${label} — ${needle}`);
 }
 
-function assertNotEqual(actual, unexpected, label) {
-  if (actual === unexpected) {
-    throw new Error(`${label}: must not equal "${unexpected}"`);
-  }
-  console.log(`PASS: ${label} — not equal to leaked value`);
-}
-
 async function getFormSelection(page) {
   const selects = page.locator("select");
   return {
