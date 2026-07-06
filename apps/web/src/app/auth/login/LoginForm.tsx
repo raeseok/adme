@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { getDeployCommit } from "@/lib/deploy-info";
 import type { SessionSnapshot } from "@/lib/auth/session";
+import { loginAction, signupAction } from "./actions";
 
 export function LoginForm({
   session,
@@ -26,54 +26,26 @@ export function LoginForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     startTransition(async () => {
-      const supabase = createClient();
-      if (!supabase) {
-        setMessage("Supabase 환경변수가 설정되지 않았습니다.");
-        setAuthErrorCode("config_error");
-        return;
-      }
-
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { role: "consumer" },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-
-        if (error) {
-          setMessage(error.message);
-          setAuthErrorCode(error.name ?? "signup_error");
+        const result = await signupAction(email, password);
+        if (result.needsEmailConfirm) {
+          setMessage(result.message);
+          setAuthErrorCode(result.authErrorCode);
+          setMode("login");
           return;
         }
-
-        if (data.session) {
-          window.location.href = "/consumer/profile";
-          return;
+        if (!result.ok) {
+          setMessage(result.message);
+          setAuthErrorCode(result.authErrorCode);
         }
-
-        setMessage(
-          "가입이 완료되었습니다. 이메일 확인이 필요할 수 있습니다. 확인 후 로그인해 주세요.",
-        );
-        setAuthErrorCode("signup_email_confirm_maybe_required");
-        setMode("login");
         return;
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setMessage(error.message);
-        setAuthErrorCode(error.name ?? "login_error");
-        return;
+      const result = await loginAction(email, password);
+      if (!result.ok) {
+        setMessage(result.message);
+        setAuthErrorCode(result.authErrorCode);
       }
-
-      window.location.href = "/consumer/profile";
     });
   }
 
