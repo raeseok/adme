@@ -34,13 +34,14 @@ Stage 1-B 소비자 프로필 UI 전에 Vercel Production에서 다음을 안정
 |------|-----|
 | Project name | `web` |
 | Production URL | https://web-ashen-xi-52.vercel.app |
-| Root Directory | `apps/web` (권장 — monorepo) |
+| Root Directory | **`apps/web`** (Vercel Dashboard → Settings → General) |
 | Install Command | `npm install` |
 | Build Command | `npm run build` |
 | Framework | Next.js |
 | GitHub 연동 | `raeseok/adme` |
 
-루트 `vercel.json`은 monorepo fallback용 (`apps/web` 빌드 경로 명시).
+> monorepo이므로 GitHub 자동 배포 시 Root Directory를 반드시 `apps/web`으로 설정한다.  
+> 루트 `vercel.json`은 사용하지 않는다 (CLI 배포 충돌 방지).
 
 ---
 
