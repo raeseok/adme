@@ -10,7 +10,8 @@
     "smoke:stage1b": "node scripts/smoke-stage1b-markers.mjs",
     "verify:stage1b": "node scripts/verify-stage1b-production.mjs",
     "smoke:stage1c": "node scripts/smoke-stage1c-markers.mjs",
-    "verify:stage1c": "node scripts/verify-stage1c-production.mjs"
+    "verify:stage1c": "node scripts/verify-stage1c-production.mjs",
+    "verify:stage1c-rls": "node scripts/verify-stage1c-rls-production.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
