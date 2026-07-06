@@ -5,14 +5,18 @@ export function ShellCard({
   title,
   children,
   showHomeLink = true,
+  wide = false,
 }: {
   title: string;
   children: React.ReactNode;
   showHomeLink?: boolean;
+  wide?: boolean;
 }) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-8 sm:py-12">
-      <div className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+      <div
+        className={`w-full rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 ${wide ? "max-w-2xl" : "max-w-lg"}`}
+      >
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{title}</h1>
         <div className="mt-4 space-y-3 text-base leading-relaxed text-zinc-700">
           {children}

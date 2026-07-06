@@ -1,0 +1,303 @@
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
+import { SPEND_RANGE_OPTIONS, isSpendRangeValue } from "@/lib/consumer-profile/constants";
+import type {
+  ConsumerProfilePageData,
+  RegionOption,
+  SaveConsumerProfileResult,
+} from "@/lib/consumer-profile/types";
+import { getDeployCommit } from "@/lib/deploy-info";
+import { saveConsumerProfileAction } from "./actions";
+
+type SaveStatus = "idle" | "auth_required" | "saved" | "error";
+
+function regionLabel(regions: RegionOption[], id: string): string {
+  if (!id) return "(미선택)";
+  return regions.find((r) => r.id === id)?.label ?? id;
+}
+
+function mapSaveStatus(result: SaveConsumerProfileResult | null): SaveStatus {
+  if (!result) return "idle";
+  if (result.code === "AUTH_REQUIRED") return "auth_required";
+  if (result.ok && result.code === "SAVED") return "saved";
+  if (result.code === "VALIDATION_ERROR" || result.code === "ERROR" || result.code === "CONFIG_ERROR") {
+    return "error";
+  }
+  return "idle";
+}
+
+export function ConsumerProfileForm({
+  pageData,
+}: {
+  pageData: ConsumerProfilePageData;
+}) {
+  const [residenceRegionId, setResidenceRegionId] = useState("");
+  const [activitySlot1RegionId, setActivitySlot1RegionId] = useState("");
+  const [activitySlot2RegionId, setActivitySlot2RegionId] = useState("");
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [spendRange, setSpendRange] = useState("");
+  const [saveResult, setSaveResult] = useState<SaveConsumerProfileResult | null>(
+    null,
+  );
+  const [isPending, startTransition] = useTransition();
+
+  const saveStatus = mapSaveStatus(saveResult);
+  const saveBlockedByAuth = saveStatus === "auth_required";
+  const mutationExecuted = saveResult?.mutationExecuted ?? false;
+  const deployCommit = getDeployCommit();
+
+  const duplicateActivityWarning = useMemo(() => {
+    const slots = [activitySlot1RegionId, activitySlot2RegionId].filter(Boolean);
+    if (slots.length === 2 && slots[0] === slots[1]) {
+      return "주활동지역 1과 2가 동일합니다. 다른 지역 선택을 권장합니다.";
+    }
+    return null;
+  }, [activitySlot1RegionId, activitySlot2RegionId]);
+
+  function toggleCategory(id: string) {
+    setCategoryIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    );
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isSpendRangeValue(spendRange)) {
+      setSaveResult({
+        ok: false,
+        code: "VALIDATION_ERROR",
+        mutationExecuted: false,
+        pointLedgerMutation: false,
+        quizAnswerAccess: false,
+        serviceRoleUsed: false,
+        message: "소비 규모 범위를 선택해 주세요.",
+      });
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveConsumerProfileAction({
+        residenceRegionId,
+        activitySlot1RegionId,
+        activitySlot2RegionId,
+        categoryIds,
+        spendRange,
+      });
+      setSaveResult(result);
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <section className="space-y-2 rounded-lg bg-blue-50 px-3 py-3 text-sm text-blue-900">
+        <p className="font-semibold">AdMe 소비 의향 프로필</p>
+        <p>Stage 1-B Consumer Profile UI</p>
+        <p className="font-mono text-xs text-blue-800">stage-1-b-consumer-profile-ui</p>
+        <p className="text-blue-800">
+          이 정보는 개인 신원이 아닌 <strong>소비 의향</strong>입니다. 주거지역과
+          주활동지역은 광고 매칭에 사용되며, 주활동지역은 최대 2개까지 설정할 수
+          있습니다.
+        </p>
+      </section>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          주거지역 <span className="text-red-600">*</span> (최대 1개)
+        </legend>
+        {pageData.regionsEmpty ? (
+          <p className="text-sm text-amber-700">
+            지역 목록을 불러오지 못했습니다. stage1BRegionsEmpty=true
+          </p>
+        ) : null}
+        <select
+          value={residenceRegionId}
+          onChange={(e) => setResidenceRegionId(e.target.value)}
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          required
+        >
+          <option value="">주거지역 선택</option>
+          {pageData.regions.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          주활동지역 1 <span className="text-zinc-500">(선택)</span>
+        </legend>
+        <select
+          value={activitySlot1RegionId}
+          onChange={(e) => setActivitySlot1RegionId(e.target.value)}
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+        >
+          <option value="">선택 안 함</option>
+          {pageData.regions.map((r) => (
+            <option key={`a1-${r.id}`} value={r.id}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          주활동지역 2 <span className="text-zinc-500">(선택)</span>
+        </legend>
+        <select
+          value={activitySlot2RegionId}
+          onChange={(e) => setActivitySlot2RegionId(e.target.value)}
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+        >
+          <option value="">선택 안 함</option>
+          {pageData.regions.map((r) => (
+            <option key={`a2-${r.id}`} value={r.id}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+        {duplicateActivityWarning ? (
+          <p className="text-sm text-amber-700">{duplicateActivityWarning}</p>
+        ) : null}
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          관심 분야 <span className="text-red-600">*</span> (다중 선택)
+        </legend>
+        {pageData.categoriesEmpty ? (
+          <p className="text-sm text-amber-700">
+            관심 분야 목록을 불러오지 못했습니다. stage1BCategoriesEmpty=true
+          </p>
+        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {pageData.categories.map((c) => {
+            const selected = categoryIds.includes(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => toggleCategory(c.id)}
+                className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                  selected
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
+                }`}
+              >
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          소비 규모 범위 <span className="text-red-600">*</span>
+        </legend>
+        <div className="space-y-2">
+          {SPEND_RANGE_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
+            >
+              <input
+                type="radio"
+                name="spendRange"
+                value={opt.value}
+                checked={spendRange === opt.value}
+                onChange={() => setSpendRange(opt.value)}
+                required
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <section className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-800">
+        <p className="font-semibold">선택 항목 요약</p>
+        <ul className="mt-2 space-y-1 font-mono text-xs">
+          <li>residenceSelected={regionLabel(pageData.regions, residenceRegionId)}</li>
+          <li>
+            activitySlot1Selected=
+            {regionLabel(pageData.regions, activitySlot1RegionId)}
+          </li>
+          <li>
+            activitySlot2Selected=
+            {regionLabel(pageData.regions, activitySlot2RegionId)}
+          </li>
+          <li>selectedCategoryCount={categoryIds.length}</li>
+          <li>
+            spendRangeSelected=
+            {spendRange
+              ? (SPEND_RANGE_OPTIONS.find((o) => o.value === spendRange)?.label ??
+                spendRange)
+              : "(미선택)"}
+          </li>
+        </ul>
+      </section>
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+      >
+        {isPending ? "저장 중…" : "소비 의향 프로필 저장"}
+      </button>
+
+      {saveResult?.message ? (
+        <p
+          className={`rounded-lg px-3 py-2 text-sm font-medium ${
+            saveStatus === "auth_required"
+              ? "bg-amber-50 text-amber-900"
+              : saveStatus === "saved"
+                ? "bg-emerald-50 text-emerald-900"
+                : saveStatus === "error"
+                  ? "bg-red-50 text-red-900"
+                  : "bg-zinc-50 text-zinc-800"
+          }`}
+        >
+          {saveResult.message}
+          {saveResult.code === "AUTH_REQUIRED" ? " (AUTH_REQUIRED)" : null}
+        </p>
+      ) : null}
+
+      <section
+        aria-label="Stage 1-B visible markers"
+        className="space-y-1 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700"
+      >
+        <p>stage1BRoute=/consumer/profile</p>
+        <p>stage1BAuthIncluded=false</p>
+        <p>stage1BAuthSeparatedTo=Stage 1-C</p>
+        <p>stage1BWriteContract=auth-gated-server-action</p>
+        <p>stage1BSaveStatus={saveStatus}</p>
+        <p>stage1BSaveBlockedByAuth={String(saveBlockedByAuth)}</p>
+        <p>stage1BMutationExecuted={String(mutationExecuted)}</p>
+        <p>stage1BRegionsReadStatus={pageData.regionsReadStatus}</p>
+        <p>stage1BCategoriesReadStatus={pageData.categoriesReadStatus}</p>
+        <p>stage1BRegionCount={pageData.regionCount}</p>
+        <p>stage1BCategoryCount={pageData.categoryCount}</p>
+        {pageData.regionsEmpty ? <p>stage1BRegionsEmpty=true</p> : null}
+        {pageData.categoriesEmpty ? <p>stage1BCategoriesEmpty=true</p> : null}
+        <p>stage1BResidenceMax=1</p>
+        <p>stage1BActivityMax=2</p>
+        <p>stage1BUsesConsumerRegions=true</p>
+        <p>stage1BPointLedgerMutation=false</p>
+        <p>stage1BQuizAnswerAccess=false</p>
+        <p>stage1BServiceRoleUsed=false</p>
+        <p>stage1BDeployCommit={deployCommit}</p>
+      </section>
+
+      <Link
+        href="/consumer"
+        className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+      >
+        ← 소비자 화면으로
+      </Link>
+    </form>
+  );
+}
