@@ -62,19 +62,6 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
 export async function saveConsumerProfileAction(
   input: SaveConsumerProfileInput,
 ): Promise<SaveConsumerProfileResult> {
-  const validationError = validateInput(input);
-  if (validationError) {
-    return {
-      ok: false,
-      code: "VALIDATION_ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: validationError,
-    };
-  }
-
   const supabase = createServerClient();
   if (!supabase) {
     return {
@@ -98,7 +85,22 @@ export async function saveConsumerProfileAction(
     );
   }
 
-  const intent = spendRangeToIntent(input.spendRange);
+  const validationError = validateInput(input);
+  if (validationError) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      mutationExecuted: false,
+      pointLedgerMutation: false,
+      quizAnswerAccess: false,
+      serviceRoleUsed: false,
+      message: validationError,
+    };
+  }
+
+  const intent = spendRangeToIntent(
+    input.spendRange as Parameters<typeof spendRangeToIntent>[0],
+  );
 
   const { data: existingProfile, error: profileLookupError } = await supabase
     .from("consumer_profiles")

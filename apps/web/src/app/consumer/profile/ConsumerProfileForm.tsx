@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { SPEND_RANGE_OPTIONS, isSpendRangeValue } from "@/lib/consumer-profile/constants";
+import { SPEND_RANGE_OPTIONS } from "@/lib/consumer-profile/constants";
 import type {
   ConsumerProfilePageData,
   RegionOption,
@@ -64,18 +64,6 @@ export function ConsumerProfileForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isSpendRangeValue(spendRange)) {
-      setSaveResult({
-        ok: false,
-        code: "VALIDATION_ERROR",
-        mutationExecuted: false,
-        pointLedgerMutation: false,
-        quizAnswerAccess: false,
-        serviceRoleUsed: false,
-        message: "소비 규모 범위를 선택해 주세요.",
-      });
-      return;
-    }
     startTransition(async () => {
       const result = await saveConsumerProfileAction({
         residenceRegionId,
@@ -88,8 +76,16 @@ export function ConsumerProfileForm({
     });
   }
 
+  const pointLedgerMutation = saveResult?.pointLedgerMutation ?? false;
+  const quizAnswerAccess = saveResult?.quizAnswerAccess ?? false;
+  const serviceRoleUsed = saveResult?.serviceRoleUsed ?? false;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="space-y-6 overflow-x-hidden"
+    >
       <section className="space-y-2 rounded-lg bg-blue-50 px-3 py-3 text-sm text-blue-900">
         <p className="font-semibold">AdMe 소비 의향 프로필</p>
         <p>Stage 1-B Consumer Profile UI</p>
@@ -107,14 +103,13 @@ export function ConsumerProfileForm({
         </legend>
         {pageData.regionsEmpty ? (
           <p className="text-sm text-amber-700">
-            지역 목록을 불러오지 못했습니다. stage1BRegionsEmpty=true
+            지역 목록이 비어 있습니다. 로그인 후 Stage 1-C에서 목록을 다시 불러올 수 있습니다.
           </p>
         ) : null}
         <select
           value={residenceRegionId}
           onChange={(e) => setResidenceRegionId(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-          required
+          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
         >
           <option value="">주거지역 선택</option>
           {pageData.regions.map((r) => (
@@ -170,7 +165,7 @@ export function ConsumerProfileForm({
         </legend>
         {pageData.categoriesEmpty ? (
           <p className="text-sm text-amber-700">
-            관심 분야 목록을 불러오지 못했습니다. stage1BCategoriesEmpty=true
+            관심 분야 목록이 비어 있습니다. 로그인 후 Stage 1-C에서 목록을 다시 불러올 수 있습니다.
           </p>
         ) : null}
         <div className="flex flex-wrap gap-2">
@@ -210,7 +205,6 @@ export function ConsumerProfileForm({
                 value={opt.value}
                 checked={spendRange === opt.value}
                 onChange={() => setSpendRange(opt.value)}
-                required
               />
               {opt.label}
             </label>
@@ -249,6 +243,12 @@ export function ConsumerProfileForm({
         {isPending ? "저장 중…" : "소비 의향 프로필 저장"}
       </button>
 
+      {saveStatus === "auth_required" ? (
+        <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm font-bold text-amber-950">
+          AUTH_REQUIRED
+        </p>
+      ) : null}
+
       {saveResult?.message ? (
         <p
           className={`rounded-lg px-3 py-2 text-sm font-medium ${
@@ -268,27 +268,30 @@ export function ConsumerProfileForm({
 
       <section
         aria-label="Stage 1-B visible markers"
-        className="space-y-1 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700"
+        className="space-y-1 break-all rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700"
       >
         <p>stage1BRoute=/consumer/profile</p>
         <p>stage1BAuthIncluded=false</p>
         <p>stage1BAuthSeparatedTo=Stage 1-C</p>
         <p>stage1BWriteContract=auth-gated-server-action</p>
         <p>stage1BSaveStatus={saveStatus}</p>
+        {saveResult?.code === "AUTH_REQUIRED" ? (
+          <p>stage1BSaveCode=AUTH_REQUIRED</p>
+        ) : null}
         <p>stage1BSaveBlockedByAuth={String(saveBlockedByAuth)}</p>
         <p>stage1BMutationExecuted={String(mutationExecuted)}</p>
         <p>stage1BRegionsReadStatus={pageData.regionsReadStatus}</p>
         <p>stage1BCategoriesReadStatus={pageData.categoriesReadStatus}</p>
         <p>stage1BRegionCount={pageData.regionCount}</p>
         <p>stage1BCategoryCount={pageData.categoryCount}</p>
-        {pageData.regionsEmpty ? <p>stage1BRegionsEmpty=true</p> : null}
-        {pageData.categoriesEmpty ? <p>stage1BCategoriesEmpty=true</p> : null}
+        <p>stage1BRegionsEmpty={String(pageData.regionsEmpty)}</p>
+        <p>stage1BCategoriesEmpty={String(pageData.categoriesEmpty)}</p>
         <p>stage1BResidenceMax=1</p>
         <p>stage1BActivityMax=2</p>
         <p>stage1BUsesConsumerRegions=true</p>
-        <p>stage1BPointLedgerMutation=false</p>
-        <p>stage1BQuizAnswerAccess=false</p>
-        <p>stage1BServiceRoleUsed=false</p>
+        <p>stage1BPointLedgerMutation={String(pointLedgerMutation)}</p>
+        <p>stage1BQuizAnswerAccess={String(quizAnswerAccess)}</p>
+        <p>stage1BServiceRoleUsed={String(serviceRoleUsed)}</p>
         <p>stage1BDeployCommit={deployCommit}</p>
       </section>
 

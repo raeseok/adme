@@ -1,5 +1,3 @@
-import type { SpendRangeValue } from "./constants";
-
 export type RegionOption = {
   id: string;
   code: string;
@@ -28,7 +26,7 @@ export type SaveConsumerProfileInput = {
   activitySlot1RegionId: string;
   activitySlot2RegionId: string;
   categoryIds: string[];
-  spendRange: SpendRangeValue;
+  spendRange: string;
 };
 
 export type SaveConsumerProfileResult = {
