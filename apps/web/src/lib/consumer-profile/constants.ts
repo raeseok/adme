@@ -18,3 +18,14 @@ export function spendRangeToIntent(value: SpendRangeValue): {
   const option = SPEND_RANGE_OPTIONS.find((o) => o.value === value)!;
   return { monthly_intent_min: option.min, monthly_intent_max: option.max };
 }
+
+export function intentToSpendRange(
+  min: number | null,
+  max: number | null,
+): string {
+  if (min == null && max == null) return "";
+  const match = SPEND_RANGE_OPTIONS.find(
+    (o) => o.min === min && o.max === max,
+  );
+  return match?.value ?? "";
+}

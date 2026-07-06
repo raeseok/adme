@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "smoke:stage1b": "node scripts/smoke-stage1b-markers.mjs",
-    "verify:stage1b": "node scripts/verify-stage1b-production.mjs"
+    "verify:stage1b": "node scripts/verify-stage1b-production.mjs",
+    "smoke:stage1c": "node scripts/smoke-stage1c-markers.mjs",
+    "verify:stage1c": "node scripts/verify-stage1c-production.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.110.0",
     "next": "16.2.10",
     "react": "19.2.4",

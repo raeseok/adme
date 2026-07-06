@@ -2,9 +2,12 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { logoutAction } from "@/app/auth/logout/actions";
 import { SPEND_RANGE_OPTIONS } from "@/lib/consumer-profile/constants";
+import type { ConsumerProfileDraft } from "@/lib/consumer-profile/page-data";
 import type {
   ConsumerProfilePageData,
+  ConsumerProfileStage1CContext,
   RegionOption,
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
@@ -22,7 +25,11 @@ function mapSaveStatus(result: SaveConsumerProfileResult | null): SaveStatus {
   if (!result) return "idle";
   if (result.code === "AUTH_REQUIRED") return "auth_required";
   if (result.ok && result.code === "SAVED") return "saved";
-  if (result.code === "VALIDATION_ERROR" || result.code === "ERROR" || result.code === "CONFIG_ERROR") {
+  if (
+    result.code === "VALIDATION_ERROR" ||
+    result.code === "ERROR" ||
+    result.code === "CONFIG_ERROR"
+  ) {
     return "error";
   }
   return "idle";
@@ -30,23 +37,61 @@ function mapSaveStatus(result: SaveConsumerProfileResult | null): SaveStatus {
 
 export function ConsumerProfileForm({
   pageData,
+  stage1C,
+  initialDraft,
 }: {
   pageData: ConsumerProfilePageData;
+  stage1C: ConsumerProfileStage1CContext;
+  initialDraft: ConsumerProfileDraft | null;
 }) {
-  const [residenceRegionId, setResidenceRegionId] = useState("");
-  const [activitySlot1RegionId, setActivitySlot1RegionId] = useState("");
-  const [activitySlot2RegionId, setActivitySlot2RegionId] = useState("");
-  const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [spendRange, setSpendRange] = useState("");
+  const [residenceRegionId, setResidenceRegionId] = useState(
+    initialDraft?.residenceRegionId ?? "",
+  );
+  const [activitySlot1RegionId, setActivitySlot1RegionId] = useState(
+    initialDraft?.activitySlot1RegionId ?? "",
+  );
+  const [activitySlot2RegionId, setActivitySlot2RegionId] = useState(
+    initialDraft?.activitySlot2RegionId ?? "",
+  );
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    initialDraft?.categoryIds ?? [],
+  );
+  const [spendRange, setSpendRange] = useState(initialDraft?.spendRange ?? "");
   const [saveResult, setSaveResult] = useState<SaveConsumerProfileResult | null>(
     null,
   );
   const [isPending, startTransition] = useTransition();
+  const [logoutPending, startLogout] = useTransition();
 
   const saveStatus = mapSaveStatus(saveResult);
   const saveBlockedByAuth = saveStatus === "auth_required";
   const mutationExecuted = saveResult?.mutationExecuted ?? false;
   const deployCommit = getDeployCommit();
+  const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
+
+  const stage1CProfileSaveStatus =
+    saveResult?.stage1CProfileSaveStatus ??
+    (saveStatus === "auth_required"
+      ? "auth_required"
+      : saveStatus === "saved"
+        ? "saved"
+        : saveStatus === "error"
+          ? "error"
+          : "idle");
+
+  const stage1CConsumerProfileWriteStatus =
+    saveResult?.stage1CConsumerProfileWriteStatus ??
+    (isAuthenticated && saveStatus === "idle"
+      ? stage1C.consumerProfileReadStatus === "ok"
+        ? "saved"
+        : "idle"
+      : "idle");
+
+  const stage1CConsumerRegionsWriteStatus =
+    saveResult?.stage1CConsumerRegionsWriteStatus ?? "idle";
+  const stage1CInterestCategoriesWriteStatus =
+    saveResult?.stage1CInterestCategoriesWriteStatus ?? "idle";
+  const stage1CMutationExecuted = saveResult?.stage1CMutationExecuted ?? false;
 
   const duplicateActivityWarning = useMemo(() => {
     const slots = [activitySlot1RegionId, activitySlot2RegionId].filter(Boolean);
@@ -76,6 +121,12 @@ export function ConsumerProfileForm({
     });
   }
 
+  function handleLogout() {
+    startLogout(async () => {
+      await logoutAction();
+    });
+  }
+
   const pointLedgerMutation = saveResult?.pointLedgerMutation ?? false;
   const quizAnswerAccess = saveResult?.quizAnswerAccess ?? false;
   const serviceRoleUsed = saveResult?.serviceRoleUsed ?? false;
@@ -97,13 +148,46 @@ export function ConsumerProfileForm({
         </p>
       </section>
 
+      <section className="space-y-2 rounded-lg bg-violet-50 px-3 py-3 text-sm text-violet-900">
+        <p className="font-semibold">Stage 1-C Authenticated Consumer Profile</p>
+        <p className="font-mono text-xs">stage-1-c-authenticated-consumer-profile</p>
+        {isAuthenticated ? (
+          <>
+            <p>
+              로그인됨
+              {stage1C.session.maskedEmail
+                ? ` (${stage1C.session.maskedEmail})`
+                : ""}
+            </p>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={logoutPending}
+              className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-sm font-medium text-violet-800 hover:bg-violet-100 disabled:opacity-60"
+            >
+              {logoutPending ? "로그아웃 중…" : "로그아웃"}
+            </button>
+          </>
+        ) : (
+          <p>
+            로그인이 필요합니다.{" "}
+            <Link href="/auth/login" className="font-medium underline">
+              /auth/login
+            </Link>
+          </p>
+        )}
+      </section>
+
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">
           주거지역 <span className="text-red-600">*</span> (최대 1개)
         </legend>
         {pageData.regionsEmpty ? (
           <p className="text-sm text-amber-700">
-            지역 목록이 비어 있습니다. 로그인 후 Stage 1-C에서 목록을 다시 불러올 수 있습니다.
+            지역 목록이 비어 있습니다.
+            {!isAuthenticated
+              ? " 로그인 후 다시 시도해 주세요."
+              : " seed 데이터 또는 RLS를 확인해 주세요."}
           </p>
         ) : null}
         <select
@@ -165,7 +249,10 @@ export function ConsumerProfileForm({
         </legend>
         {pageData.categoriesEmpty ? (
           <p className="text-sm text-amber-700">
-            관심 분야 목록이 비어 있습니다. 로그인 후 Stage 1-C에서 목록을 다시 불러올 수 있습니다.
+            관심 분야 목록이 비어 있습니다.
+            {!isAuthenticated
+              ? " 로그인 후 다시 시도해 주세요."
+              : " seed 데이터 또는 RLS를 확인해 주세요."}
           </p>
         ) : null}
         <div className="flex flex-wrap gap-2">
@@ -293,6 +380,50 @@ export function ConsumerProfileForm({
         <p>stage1BQuizAnswerAccess={String(quizAnswerAccess)}</p>
         <p>stage1BServiceRoleUsed={String(serviceRoleUsed)}</p>
         <p>stage1BDeployCommit={deployCommit}</p>
+      </section>
+
+      <section
+        aria-label="Stage 1-C visible markers"
+        className="space-y-1 break-all rounded-lg border border-dashed border-violet-300 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-900"
+      >
+        <p>stage1CProfileRoute=/consumer/profile</p>
+        <p>stage1CSessionStatus={stage1C.session.sessionStatus}</p>
+        <p>stage1CAuthUserPresent={String(stage1C.session.authUserPresent)}</p>
+        <p>stage1CAuthUserIdVisible=false</p>
+        <p>
+          stage1CAuthEmailMasked=
+          {stage1C.session.maskedEmail ? "true" : "false"}
+        </p>
+        <p>stage1CMasterReadMode={stage1C.masterReadMode}</p>
+        <p>stage1CRegionsReadStatus={stage1C.regionsReadStatusAuth}</p>
+        <p>stage1CRegionCountAuth={stage1C.regionCountAuth}</p>
+        <p>stage1CCategoriesReadStatus={stage1C.categoriesReadStatusAuth}</p>
+        <p>stage1CCategoryCountAuth={stage1C.categoryCountAuth}</p>
+        <p>stage1CProfileSaveStatus={stage1CProfileSaveStatus}</p>
+        <p>
+          stage1CConsumerProfileReadStatus=
+          {stage1C.consumerProfileReadStatus}
+        </p>
+        <p>
+          stage1CConsumerProfileWriteStatus={stage1CConsumerProfileWriteStatus}
+        </p>
+        <p>
+          stage1CConsumerRegionsWriteStatus={stage1CConsumerRegionsWriteStatus}
+        </p>
+        <p>
+          stage1CInterestCategoriesWriteStatus=
+          {stage1CInterestCategoriesWriteStatus}
+        </p>
+        <p>stage1CResidenceMax=1</p>
+        <p>stage1CActivityMax=2</p>
+        <p>stage1CUsesConsumerRegions=true</p>
+        <p>stage1CMutationExecuted={String(stage1CMutationExecuted)}</p>
+        <p>stage1CPointLedgerMutation=false</p>
+        <p>stage1CQuizAnswerAccess=false</p>
+        <p>stage1CServiceRoleUsed=false</p>
+        <p>stage1CLogoutAvailable=true</p>
+        <p>stage1CLogoutStatus={logoutPending ? "signing_out" : "idle"}</p>
+        <p>stage1CDeployCommit={deployCommit}</p>
       </section>
 
       <Link

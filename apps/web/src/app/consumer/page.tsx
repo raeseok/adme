@@ -13,10 +13,10 @@ export default function ConsumerPage() {
         소비 의향 프로필 설정
       </Link>
       <Link
-        href="/consumer/profile"
-        className="ml-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        href="/auth/login"
+        className="ml-2 inline-block text-sm font-medium text-violet-700 hover:text-violet-900"
       >
-        프로필 입력하기 →
+        로그인 →
       </Link>
     </ShellCard>
   );

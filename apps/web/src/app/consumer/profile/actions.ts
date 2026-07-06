@@ -1,11 +1,14 @@
 "use server";
 
-import { isSpendRangeValue, spendRangeToIntent } from "@/lib/consumer-profile/constants";
+import {
+  isSpendRangeValue,
+  spendRangeToIntent,
+} from "@/lib/consumer-profile/constants";
 import type {
   SaveConsumerProfileInput,
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -19,6 +22,28 @@ function authRequiredResult(message: string): SaveConsumerProfileResult {
     quizAnswerAccess: false,
     serviceRoleUsed: false,
     message,
+    stage1CProfileSaveStatus: "auth_required",
+    stage1CConsumerProfileWriteStatus: "skipped",
+    stage1CConsumerRegionsWriteStatus: "skipped",
+    stage1CInterestCategoriesWriteStatus: "skipped",
+    stage1CMutationExecuted: false,
+  };
+}
+
+function errorResult(message: string): SaveConsumerProfileResult {
+  return {
+    ok: false,
+    code: "ERROR",
+    mutationExecuted: false,
+    pointLedgerMutation: false,
+    quizAnswerAccess: false,
+    serviceRoleUsed: false,
+    message,
+    stage1CProfileSaveStatus: "error",
+    stage1CConsumerProfileWriteStatus: "error",
+    stage1CConsumerRegionsWriteStatus: "error",
+    stage1CInterestCategoriesWriteStatus: "error",
+    stage1CMutationExecuted: false,
   };
 }
 
@@ -36,10 +61,6 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
     if (!UUID_RE.test(id)) {
       return "주활동지역 형식이 올바르지 않습니다.";
     }
-  }
-
-  if (activityIds.length > 2) {
-    return "주활동지역은 최대 2개까지 선택할 수 있습니다.";
   }
 
   if (!input.categoryIds.length) {
@@ -62,7 +83,7 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
 export async function saveConsumerProfileAction(
   input: SaveConsumerProfileInput,
 ): Promise<SaveConsumerProfileResult> {
-  const supabase = createServerClient();
+  const supabase = await createClient();
   if (!supabase) {
     return {
       ok: false,
@@ -72,6 +93,8 @@ export async function saveConsumerProfileAction(
       quizAnswerAccess: false,
       serviceRoleUsed: false,
       message: "Supabase 환경변수가 설정되지 않았습니다.",
+      stage1CProfileSaveStatus: "error",
+      stage1CMutationExecuted: false,
     };
   }
 
@@ -81,7 +104,7 @@ export async function saveConsumerProfileAction(
 
   if (!user) {
     return authRequiredResult(
-      "로그인이 필요합니다. Stage 1-C에서 인증 후 저장할 수 있습니다.",
+      "로그인이 필요합니다. /auth/login 에서 로그인 후 저장할 수 있습니다.",
     );
   }
 
@@ -95,6 +118,8 @@ export async function saveConsumerProfileAction(
       quizAnswerAccess: false,
       serviceRoleUsed: false,
       message: validationError,
+      stage1CProfileSaveStatus: "error",
+      stage1CMutationExecuted: false,
     };
   }
 
@@ -109,15 +134,7 @@ export async function saveConsumerProfileAction(
     .maybeSingle();
 
   if (profileLookupError) {
-    return {
-      ok: false,
-      code: "ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: profileLookupError.message,
-    };
+    return errorResult(profileLookupError.message);
   }
 
   let profileId = existingProfile?.id as string | undefined;
@@ -135,15 +152,7 @@ export async function saveConsumerProfileAction(
       .single();
 
     if (createError || !created) {
-      return {
-        ok: false,
-        code: "ERROR",
-        mutationExecuted: false,
-        pointLedgerMutation: false,
-        quizAnswerAccess: false,
-        serviceRoleUsed: false,
-        message: createError?.message ?? "프로필 생성에 실패했습니다.",
-      };
+      return errorResult(createError?.message ?? "프로필 생성에 실패했습니다.");
     }
     profileId = created.id as string;
   } else {
@@ -157,15 +166,7 @@ export async function saveConsumerProfileAction(
       .eq("id", profileId);
 
     if (updateError) {
-      return {
-        ok: false,
-        code: "ERROR",
-        mutationExecuted: false,
-        pointLedgerMutation: false,
-        quizAnswerAccess: false,
-        serviceRoleUsed: false,
-        message: updateError.message,
-      };
+      return errorResult(updateError.message);
     }
   }
 
@@ -175,15 +176,7 @@ export async function saveConsumerProfileAction(
     .eq("consumer_profile_id", profileId);
 
   if (deleteRegionsError) {
-    return {
-      ok: false,
-      code: "ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: deleteRegionsError.message,
-    };
+    return errorResult(deleteRegionsError.message);
   }
 
   const regionRows: {
@@ -223,15 +216,7 @@ export async function saveConsumerProfileAction(
     .insert(regionRows);
 
   if (insertRegionsError) {
-    return {
-      ok: false,
-      code: "ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: insertRegionsError.message,
-    };
+    return errorResult(insertRegionsError.message);
   }
 
   const { error: deleteCategoriesError } = await supabase
@@ -240,15 +225,7 @@ export async function saveConsumerProfileAction(
     .eq("consumer_profile_id", profileId);
 
   if (deleteCategoriesError) {
-    return {
-      ok: false,
-      code: "ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: deleteCategoriesError.message,
-    };
+    return errorResult(deleteCategoriesError.message);
   }
 
   const categoryRows = input.categoryIds.map((categoryId) => ({
@@ -261,15 +238,7 @@ export async function saveConsumerProfileAction(
     .insert(categoryRows);
 
   if (insertCategoriesError) {
-    return {
-      ok: false,
-      code: "ERROR",
-      mutationExecuted: false,
-      pointLedgerMutation: false,
-      quizAnswerAccess: false,
-      serviceRoleUsed: false,
-      message: insertCategoriesError.message,
-    };
+    return errorResult(insertCategoriesError.message);
   }
 
   return {
@@ -280,5 +249,10 @@ export async function saveConsumerProfileAction(
     quizAnswerAccess: false,
     serviceRoleUsed: false,
     message: "소비 의향 프로필이 저장되었습니다.",
+    stage1CProfileSaveStatus: "saved",
+    stage1CConsumerProfileWriteStatus: "saved",
+    stage1CConsumerRegionsWriteStatus: "saved",
+    stage1CInterestCategoriesWriteStatus: "saved",
+    stage1CMutationExecuted: true,
   };
 }

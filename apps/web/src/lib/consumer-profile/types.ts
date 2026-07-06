@@ -1,3 +1,6 @@
+import type { SessionSnapshot } from "@/lib/auth/session";
+import type { ConsumerProfileReadMeta } from "@/lib/consumer-profile/page-data";
+
 export type RegionOption = {
   id: string;
   code: string;
@@ -21,6 +24,16 @@ export type ConsumerProfilePageData = {
   categoriesEmpty: boolean;
 };
 
+export type ConsumerProfileStage1CContext = {
+  session: SessionSnapshot;
+  masterReadMode: "authenticated-client" | "anonymous-client";
+  regionsReadStatusAuth: "ok" | "error" | "skipped";
+  categoriesReadStatusAuth: "ok" | "error" | "skipped";
+  regionCountAuth: number;
+  categoryCountAuth: number;
+  consumerProfileReadStatus: ConsumerProfileReadMeta["consumerProfileReadStatus"];
+};
+
 export type SaveConsumerProfileInput = {
   residenceRegionId: string;
   activitySlot1RegionId: string;
@@ -37,4 +50,9 @@ export type SaveConsumerProfileResult = {
   quizAnswerAccess: false;
   serviceRoleUsed: false;
   message?: string;
+  stage1CProfileSaveStatus?: "idle" | "auth_required" | "saved" | "error";
+  stage1CConsumerProfileWriteStatus?: "idle" | "saved" | "error" | "skipped";
+  stage1CConsumerRegionsWriteStatus?: "idle" | "saved" | "error" | "skipped";
+  stage1CInterestCategoriesWriteStatus?: "idle" | "saved" | "skipped" | "error";
+  stage1CMutationExecuted?: boolean;
 };

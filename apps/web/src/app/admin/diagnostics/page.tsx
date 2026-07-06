@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import {
   getAppStage,
   getDeployCommit,
@@ -7,6 +7,7 @@ import {
   isSupabaseUrlConfigured,
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,7 @@ type DbCheckResult = {
   summary: string;
 };
 
-async function countTable(
-  supabase: NonNullable<ReturnType<typeof createServerClient>>,
-  table: string,
-) {
+async function countTable(supabase: SupabaseClient, table: string) {
   return supabase.from(table).select("*", { count: "exact", head: true });
 }
 
@@ -34,7 +32,7 @@ async function runDbCheck(): Promise<DbCheckResult> {
     };
   }
 
-  const supabase = createServerClient();
+  const supabase = await createClient();
   if (!supabase) {
     return {
       status: "not tested",
@@ -128,6 +126,11 @@ export default async function DiagnosticsPage() {
       <p className="text-xs text-zinc-500">
         service role key 미사용 · anon key 값 미노출
       </p>
+      <section className="mt-4 space-y-1 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700">
+        <p>stage1CDiagnosticsAuthReady=true</p>
+        <p>stage1CDiagnosticsServiceRoleUsed=false</p>
+        <p>stage1CDiagnosticsDeployCommit={getDeployCommit()}</p>
+      </section>
     </ShellCard>
   );
 }
