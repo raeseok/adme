@@ -113,6 +113,8 @@ Stage 1-B 소비자 프로필 UI 전에 Vercel Production에서 다음을 안정
 2. UI만 2지역 표시, 저장은 단일 region (확장 예정 marker)
 3. **권장**: Stage 0.6에서 `consumer_regions` 등 DB 확장 후 Stage 1-B 진입
 
+→ **Stage 0.6 완료:** [stage-0-6-consumer-regions.md](./stage-0-6-consumer-regions.md)
+
 ---
 
 ## 9. 로컬 개발

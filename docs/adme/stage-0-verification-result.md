@@ -76,6 +76,14 @@
 ```powershell
 cd c:\Adme
 powershell -File scripts/run_live_validation_pg17.ps1
+# Stage 0.6 포함:
+powershell -File scripts/run_live_validation_stage0_6_pg17.ps1
 # Docker 사용 시:
 powershell -File scripts/run_live_validation.ps1
 ```
+
+---
+
+## 7. Stage 0.6 (consumer_regions)
+
+Stage 0.6 migration 및 검증은 [stage-0-6-consumer-regions.md](./stage-0-6-consumer-regions.md) 참조.

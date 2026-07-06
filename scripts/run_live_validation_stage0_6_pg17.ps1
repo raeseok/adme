@@ -1,5 +1,6 @@
-# AdMe Stage 0-LV: live validation via local PostgreSQL 17 (Docker-free fallback)
-# Usage: powershell -File scripts/run_live_validation_pg17.ps1
+# AdMe Stage 0.6-LV: live validation via local PostgreSQL 17
+# Applies Stage 0 + Stage 0.6 migrations, then runs both validation suites.
+# Usage: powershell -File scripts/run_live_validation_stage0_6_pg17.ps1
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -37,34 +38,40 @@ function Run-PsqlFile($file) {
   if ($LASTEXITCODE -ne 0) { throw "psql failed: $file" }
 }
 
-Write-Host "=== AdMe Stage 0-LV Live Validation (PostgreSQL 17) ===" -ForegroundColor Cyan
+Write-Host "=== AdMe Stage 0.6-LV Live Validation (PostgreSQL 17) ===" -ForegroundColor Cyan
 
 try {
   Stop-LocalPg
 
-  if (-not (Test-Path $pgData)) {
-    Write-Host "[1] initdb..." -ForegroundColor Yellow
-    & $initdb -D $pgData -U postgres -A trust -E UTF8 --locale=C
-    if ($LASTEXITCODE -ne 0) { throw "initdb failed" }
+  if (Test-Path $pgData) {
+    Write-Host "[1] Removing stale .pgdata for clean migration apply..." -ForegroundColor Yellow
+    Remove-Item $pgData -Recurse -Force
   }
 
-  Write-Host "[2] Starting PostgreSQL on port $pgPort..." -ForegroundColor Yellow
+  Write-Host "[2] initdb..." -ForegroundColor Yellow
+  & $initdb -D $pgData -U postgres -A trust -E UTF8 --locale=C
+  if ($LASTEXITCODE -ne 0) { throw "initdb failed" }
+
+  Write-Host "[3] Starting PostgreSQL on port $pgPort..." -ForegroundColor Yellow
   & $pgCtl -D $pgData -l $pgLog start -o "-p $pgPort"
   if ($LASTEXITCODE -ne 0) { throw "pg_ctl start failed" }
 
   Start-Sleep -Seconds 2
 
-  Write-Host "[3] Bootstrap minimal auth..." -ForegroundColor Yellow
+  Write-Host "[4] Bootstrap minimal auth..." -ForegroundColor Yellow
   Run-PsqlFile (Join-Path $root "scripts\bootstrap_supabase_minimal_auth.sql")
 
-  Write-Host "[4] Applying migrations..." -ForegroundColor Yellow
+  Write-Host "[5] Applying migrations (Stage 0 + 0.6)..." -ForegroundColor Yellow
   $migs = Get-ChildItem (Join-Path $root "supabase\migrations") -Filter "*.sql" | Sort-Object Name
   foreach ($m in $migs) { Run-PsqlFile $m.FullName }
 
-  Write-Host "[5] Running validate_stage0.sql..." -ForegroundColor Yellow
+  Write-Host "[6] Running validate_stage0.sql..." -ForegroundColor Yellow
   Run-PsqlFile (Join-Path $root "scripts\validate_stage0.sql")
 
-  Write-Host "`n=== All live validations PASSED ===" -ForegroundColor Green
+  Write-Host "[7] Running validate_stage0_6_consumer_regions.sql..." -ForegroundColor Yellow
+  Run-PsqlFile (Join-Path $root "supabase\validation\validate_stage0_6_consumer_regions.sql")
+
+  Write-Host "`n=== Stage 0.6 live validations PASSED ===" -ForegroundColor Green
   exit 0
 }
 catch {
