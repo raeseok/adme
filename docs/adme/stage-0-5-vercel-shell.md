@@ -49,15 +49,17 @@ Stage 1-B 소비자 프로필 UI 전에 Vercel Production에서 다음을 안정
 
 ## 4. Supabase env (Production)
 
-| 변수 | 필수 |
-|------|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ |
+| 변수 | 필수 | 상태 |
+|------|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | ✅ Production 설정됨 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | ✅ Production 설정됨 |
 
-- **service role key 사용 금지**
+- **service role key 사용 금지** — 미사용
 - anon key 원문 화면/문서 출력 금지
 
 설정 경로: Vercel Dashboard → Project `web` → Settings → Environment Variables → Production
+
+**검증 (2026-07-07):** Production redeploy 후 `/admin/diagnostics` DB check `ok`, checked table `regions`
 
 ---
 
