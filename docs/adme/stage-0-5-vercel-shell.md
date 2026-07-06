@@ -88,7 +88,10 @@ Stage 1-B 소비자 프로필 UI 전에 Vercel Production에서 다음을 안정
 
 1. `main`에 push
 2. Vercel GitHub integration이 Production 배포 트리거
-3. Production URL에서 `deploy commit` 및 marker 확인
+3. 루트 `vercel.json`이 `apps/web` 빌드 수행
+4. Production URL에서 `deploy commit` 및 marker 확인
+
+**검증 (2026-07-06):** commit `cc0f99b` push → Production `Ready` (GitHub 연동 자동 배포 성공)
 
 ---
 
