@@ -12,6 +12,7 @@ node_modules/
 
 # Supabase local
 .supabase/
+.pgdata/
 .branches
 .temp
 supabase/.branches

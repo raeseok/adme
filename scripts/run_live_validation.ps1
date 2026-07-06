@@ -1,6 +1,9 @@
 # AdMe Stage 0 live validation runner
 # Prerequisites: Docker Desktop installed and running
 # Usage: powershell -File scripts/run_live_validation.ps1
+#
+# Docker-free fallback (incomplete PG17 install may fail):
+#   powershell -File scripts/run_live_validation_pg17.ps1
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
