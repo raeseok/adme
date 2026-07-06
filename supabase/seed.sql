@@ -1,0 +1,3 @@
+-- AdMe Stage 0 seed (참조용)
+-- 실제 시드는 migration 20260706100500_stage0_seed.sql 에 포함되어 있다.
+-- supabase db reset 시 migrations 가 seed 역할을 수행한다.

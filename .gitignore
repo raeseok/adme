@@ -1,0 +1,27 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Next.js / Vercel
+.next/
+.vercel/
+
+# Supabase local
+.supabase/
+.branches
+.temp
+supabase/.branches
+supabase/.temp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
