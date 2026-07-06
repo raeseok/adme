@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { safeNextPath } from "@/lib/auth/oauth";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/consumer/profile";
+  const next = safeNextPath(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();
@@ -15,11 +16,11 @@ export async function GET(request: Request) {
       }
     }
     return NextResponse.redirect(
-      `${origin}/auth/login?error=callback_failed&stage1CCallbackError=callback_failed`,
+      `${origin}/auth/login?error=callback_failed&stage1CCallbackError=callback_failed&stage1DCallbackError=callback_failed`,
     );
   }
 
   return NextResponse.redirect(
-    `${origin}/auth/login?error=missing_code&stage1CCallbackError=missing_code`,
+    `${origin}/auth/login?error=missing_code&stage1CCallbackError=missing_code&stage1DCallbackError=missing_code`,
   );
 }

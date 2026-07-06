@@ -1,10 +1,12 @@
 import type { User } from "@supabase/supabase-js";
+import { getSocialAuthProvider, type OAuthProvider } from "@/lib/auth/oauth";
 import { createClient } from "@/lib/supabase/server";
 
 export type SessionSnapshot = {
   sessionStatus: "anonymous" | "authenticated";
   authUserPresent: boolean;
   maskedEmail: string | null;
+  socialAuthProvider: OAuthProvider | null;
 };
 
 export function maskEmail(email: string | undefined | null): string | null {
@@ -27,6 +29,7 @@ export async function getSessionSnapshot(): Promise<{
         sessionStatus: "anonymous",
         authUserPresent: false,
         maskedEmail: null,
+        socialAuthProvider: null,
       },
     };
   }
@@ -42,6 +45,7 @@ export async function getSessionSnapshot(): Promise<{
         sessionStatus: "anonymous",
         authUserPresent: false,
         maskedEmail: null,
+        socialAuthProvider: null,
       },
     };
   }
@@ -52,6 +56,7 @@ export async function getSessionSnapshot(): Promise<{
       sessionStatus: "authenticated",
       authUserPresent: true,
       maskedEmail: maskEmail(user.email),
+      socialAuthProvider: getSocialAuthProvider(user),
     },
   };
 }

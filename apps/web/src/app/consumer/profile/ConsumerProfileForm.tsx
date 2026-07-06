@@ -39,10 +39,12 @@ export function ConsumerProfileForm({
   pageData,
   stage1C,
   initialDraft,
+  socialLogoutStatus = "not_tested",
 }: {
   pageData: ConsumerProfilePageData;
   stage1C: ConsumerProfileStage1CContext;
   initialDraft: ConsumerProfileDraft | null;
+  socialLogoutStatus?: "signed_out" | "not_tested" | "error";
 }) {
   const [residenceRegionId, setResidenceRegionId] = useState(
     initialDraft?.residenceRegionId ?? "",
@@ -68,6 +70,20 @@ export function ConsumerProfileForm({
   const mutationExecuted = saveResult?.mutationExecuted ?? false;
   const deployCommit = getDeployCommit();
   const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
+  const socialAuthProvider = stage1C.session.socialAuthProvider;
+  const stage1DSocialProviderAuthenticated = socialAuthProvider ?? "not_tested";
+  const stage1DSocialProfileSaveStatus =
+    socialAuthProvider && saveStatus === "saved"
+      ? "saved"
+      : socialAuthProvider && saveStatus === "error"
+        ? "error"
+        : "not_tested";
+  const stage1DSocialLogoutStatus =
+    socialLogoutStatus === "signed_out"
+      ? "signed_out"
+      : logoutPending
+        ? "signing_out"
+        : "not_tested";
 
   const stage1CProfileSaveStatus =
     saveResult?.stage1CProfileSaveStatus ??
@@ -424,6 +440,18 @@ export function ConsumerProfileForm({
         <p>stage1CLogoutAvailable=true</p>
         <p>stage1CLogoutStatus={logoutPending ? "signing_out" : "idle"}</p>
         <p>stage1CDeployCommit={deployCommit}</p>
+      </section>
+
+      <section
+        aria-label="Stage 1-D social auth markers"
+        className="space-y-1 break-all rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
+      >
+        <p>stage1DSocialProviderAuthenticated={stage1DSocialProviderAuthenticated}</p>
+        <p>stage1DSocialProfileSaveStatus={stage1DSocialProfileSaveStatus}</p>
+        <p>stage1DSocialLogoutStatus={stage1DSocialLogoutStatus}</p>
+        <p>stage1DServiceRoleUsed=false</p>
+        <p>stage1DPointLedgerMutation=false</p>
+        <p>stage1DQuizAnswerAccess=false</p>
       </section>
 
       <Link

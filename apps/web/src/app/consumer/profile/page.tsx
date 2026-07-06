@@ -10,9 +10,16 @@ import { ConsumerProfileForm } from "./ConsumerProfileForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function ConsumerProfilePage() {
+export default async function ConsumerProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stage1DSocialLogout?: string }>;
+}) {
   const supabase = await createClient();
   const { user, snapshot } = await getSessionSnapshot();
+  const params = await searchParams;
+  const socialLogoutStatus =
+    params.stage1DSocialLogout === "signed_out" ? "signed_out" : "not_tested";
 
   const pageData = await getConsumerProfilePageData(supabase);
   const isAuthenticated = snapshot.sessionStatus === "authenticated";
@@ -50,6 +57,7 @@ export default async function ConsumerProfilePage() {
         pageData={pageData}
         stage1C={stage1C}
         initialDraft={initialDraft}
+        socialLogoutStatus={socialLogoutStatus}
       />
     </ShellCard>
   );
