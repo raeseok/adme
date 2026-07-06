@@ -69,6 +69,16 @@ async function authenticate(page) {
       console.log(`PASS: signup session — email ${email.slice(0, 2)}***@${email.split("@")[1]}`);
       return { email, password, mode: "signup" };
     }
+    if (
+      afterSignup.includes("이메일 확인") ||
+      afterSignup.includes("signup_email_confirm_maybe_required")
+    ) {
+      const masked = `${email.slice(0, 2)}***@${email.split("@")[1]}`;
+      console.log(
+        `SKIP: authenticated flow — email confirmation required after signup (${masked})`,
+      );
+      return { email, password, mode: "signup_confirm_required", skipped: true };
+    }
     await page.getByRole("button", { name: "이미 계정이 있으신가요? 로그인" }).click();
   }
 
@@ -84,7 +94,8 @@ async function authenticate(page) {
     if (
       body.includes("이메일 확인") ||
       body.includes("Email not confirmed") ||
-      body.includes("signup_email_confirm_maybe_required")
+      body.includes("signup_email_confirm_maybe_required") ||
+      body.includes("Invalid login credentials")
     ) {
       console.log(
         `SKIP: authenticated flow — email confirmation required (${masked})`,
