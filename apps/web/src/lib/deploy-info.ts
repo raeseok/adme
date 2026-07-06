@@ -1,4 +1,10 @@
 export function getDeployCommit(): string {
+  const sha =
+    process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ??
+    process.env.VERCEL_GIT_COMMIT_SHA;
+  if (sha) {
+    return sha.slice(0, 7);
+  }
   return process.env.NEXT_PUBLIC_DEPLOY_COMMIT ?? "unknown";
 }
 

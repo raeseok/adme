@@ -1,5 +1,4 @@
 import { NavLinks, ShellCard } from "@/components/ShellCard";
-import { getDeployCommit } from "@/lib/deploy-info";
 
 export default function HomePage() {
   return (
@@ -10,9 +9,6 @@ export default function HomePage() {
       </p>
       <p className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">
         Stage 0.5 Vercel Shell
-      </p>
-      <p className="text-sm text-zinc-600">
-        deploy commit: {getDeployCommit()}
       </p>
       <NavLinks />
     </ShellCard>

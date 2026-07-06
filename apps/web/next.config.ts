@@ -18,7 +18,9 @@ function resolveDeployCommit(): string {
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_DEPLOY_COMMIT: resolveDeployCommit(),
-    NEXT_PUBLIC_APP_STAGE: process.env.NEXT_PUBLIC_APP_STAGE ?? "stage-0-5-vercel-shell",
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA ?? "",
+    NEXT_PUBLIC_APP_STAGE:
+      process.env.NEXT_PUBLIC_APP_STAGE ?? "stage-0-5-vercel-shell",
   },
 };
 
