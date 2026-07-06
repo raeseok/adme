@@ -14,18 +14,26 @@ AdMe MVP — Supabase PostgreSQL 기반 Stage 0 데이터베이스 스키마.
 ## 디렉터리 구조
 
 ```
+apps/web/          # Next.js App Router (Stage 0.5 Vercel shell)
 supabase/
-  config.toml
   migrations/
-    20260706100000_stage0_extensions_enums.sql
-    20260706100100_stage0_tables.sql
-    20260706100200_stage0_rls.sql
-    20260706100300_stage0_functions_triggers.sql
-    20260706100400_stage0_indexes.sql
-    20260706100500_stage0_seed.sql
 scripts/
-  validate_stage0.sql
+docs/adme/
 ```
+
+### Web 앱 (Stage 0.5)
+
+```bash
+cd apps/web
+cp .env.example .env.local   # Supabase URL + anon key
+npm run dev
+```
+
+Vercel Root Directory: `apps/web`
+
+---
+
+## Stage 0 DB (supabase/)
 
 ## 사전 요구 사항
 
