@@ -211,16 +211,19 @@ async function verifyAuthenticatedSave(page, label, auth) {
   assertContains(body, "1990", `${label} birth year persisted`);
   assertContains(body, "여성", `${label} gender persisted`);
 
-  await page.getByRole("button", { name: "전체", exact: true }).click();
   const firstCategory = page
     .locator("fieldset")
     .filter({ hasText: "관심정보" })
     .locator("button[type='button']")
     .nth(1);
   await firstCategory.click();
+  await page.waitForTimeout(500);
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(4000);
   body = await page.locator("body").innerText();
+  if (!body.includes("소비 의향 프로필이 저장되었습니다")) {
+    console.log(`DEBUG: ${label} selected save body snippet: ${body.slice(0, 1200)}`);
+  }
   assertContains(body, "소비 의향 프로필이 저장되었습니다", `${label} save selected interests`);
 
   await page.goto(`${BASE}/consumer`, { waitUntil: "networkidle" });
