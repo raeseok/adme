@@ -19,12 +19,12 @@ export default async function ConsumerPage() {
     const { draft, pageData } = await loadConsumerProfileSummary(supabase, user.id);
     if (draft) {
       profileExists = true;
-      const validRegionIds = new Set(pageData.regions.map((r) => r.id));
+      const savableRegionIds = new Set(pageData.savableRegionIds);
       completionPercent = computeProfileCompletion({
         birthYear: draft.birthYear,
         gender: draft.gender,
         residenceRegionId: draft.residenceRegionId,
-        validRegionIds,
+        savableRegionIds,
         interestScope: draft.interestScope,
         categoryIds: draft.categoryIds,
       }).percent;

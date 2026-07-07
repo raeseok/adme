@@ -12,6 +12,8 @@ import type {
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
 import { createClient } from "@/lib/supabase/server";
+import { getSavableRegionIds } from "@/lib/regions/region-options";
+import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -101,6 +103,39 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
   return null;
 }
 
+async function validateSavableRegionIds(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  input: SaveConsumerProfileInput,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("regions")
+    .select("id, code, name, parent_id, sort_order")
+    .eq("is_active", true);
+
+  if (error) {
+    return "지역 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+  }
+
+  const savable = getSavableRegionIds((data ?? []) as RegionRow[]);
+
+  if (!savable.has(input.residenceRegionId)) {
+    return "주거지역은 시·군·구 또는 읍·면·동 단위까지 선택해 주세요.";
+  }
+
+  const activityIds = [
+    input.activitySlot1RegionId,
+    input.activitySlot2RegionId,
+  ].filter((id) => id.length > 0);
+
+  for (const id of activityIds) {
+    if (!savable.has(id)) {
+      return "주활동지역은 시·군·구 또는 읍·면·동 단위까지 선택해 주세요.";
+    }
+  }
+
+  return null;
+}
+
 export async function saveConsumerProfileAction(
   input: SaveConsumerProfileInput,
 ): Promise<SaveConsumerProfileResult> {
@@ -139,6 +174,21 @@ export async function saveConsumerProfileAction(
       quizAnswerAccess: false,
       serviceRoleUsed: false,
       message: validationError,
+      stage1CProfileSaveStatus: "error",
+      stage1CMutationExecuted: false,
+    };
+  }
+
+  const savableRegionError = await validateSavableRegionIds(supabase, input);
+  if (savableRegionError) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      mutationExecuted: false,
+      pointLedgerMutation: false,
+      quizAnswerAccess: false,
+      serviceRoleUsed: false,
+      message: savableRegionError,
       stage1CProfileSaveStatus: "error",
       stage1CMutationExecuted: false,
     };

@@ -16,6 +16,7 @@ import type {
   ConsumerProfileStage1CContext,
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
+import { RegionHierarchySelector } from "@/components/RegionHierarchySelector";
 import { saveConsumerProfileAction } from "./actions";
 
 type SaveStatus = "idle" | "auth_required" | "saved" | "error";
@@ -75,9 +76,9 @@ export function ConsumerProfileForm({
   const saveStatus = mapSaveStatus(saveResult);
   const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
   const birthYearOptions = useMemo(() => buildBirthYearOptions(), []);
-  const validRegionIds = useMemo(
-    () => new Set(pageData.regions.map((r) => r.id)),
-    [pageData.regions],
+  const savableRegionIds = useMemo(
+    () => new Set(pageData.savableRegionIds),
+    [pageData.savableRegionIds],
   );
 
   const completion = useMemo(
@@ -86,11 +87,11 @@ export function ConsumerProfileForm({
         birthYear,
         gender,
         residenceRegionId,
-        validRegionIds,
+        savableRegionIds,
         interestScope,
         categoryIds,
       }),
-    [birthYear, gender, residenceRegionId, validRegionIds, interestScope, categoryIds],
+    [birthYear, gender, residenceRegionId, savableRegionIds, interestScope, categoryIds],
   );
 
   const duplicateActivityWarning = useMemo(() => {
@@ -248,73 +249,47 @@ export function ConsumerProfileForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          주거지역 (시·군·구, 최대 1개) <span className="text-red-600">*</span>
-        </legend>
-        {legacyRegionWarning ? (
-          <p className="text-sm text-amber-700">{legacyRegionWarning}</p>
-        ) : null}
-        {pageData.regionsEmpty ? (
-          <p className="text-sm text-amber-700">
-            지역 목록이 비어 있습니다.
-            {!isAuthenticated
-              ? " 로그인 후 다시 시도해 주세요."
-              : " seed 데이터 또는 RLS를 확인해 주세요."}
-          </p>
-        ) : null}
-        <select
-          value={residenceRegionId}
-          onChange={(e) => setResidenceRegionId(e.target.value)}
-          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">주거지역 선택</option>
-          {pageData.regions.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.label}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+      <RegionHierarchySelector
+        legend="주거지역 (최대 1개)"
+        required
+        regionRows={pageData.regionRows}
+        value={residenceRegionId}
+        onChange={setResidenceRegionId}
+        disabled={pageData.regionsEmpty}
+        emptyPlaceholder="주거지역 선택"
+      />
+      {legacyRegionWarning ? (
+        <p className="text-sm text-amber-700">{legacyRegionWarning}</p>
+      ) : null}
+      {pageData.regionsEmpty ? (
+        <p className="text-sm text-amber-700">
+          지역 목록이 비어 있습니다.
+          {!isAuthenticated
+            ? " 로그인 후 다시 시도해 주세요."
+            : " seed 데이터 또는 RLS를 확인해 주세요."}
+        </p>
+      ) : null}
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          주활동지역 1 (시·군·구, 선택)
-        </legend>
-        <select
-          value={activitySlot1RegionId}
-          onChange={(e) => setActivitySlot1RegionId(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">선택 안 함</option>
-          {pageData.regions.map((r) => (
-            <option key={`a1-${r.id}`} value={r.id}>
-              {r.label}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+      <RegionHierarchySelector
+        legend="주활동지역 1 (선택)"
+        regionRows={pageData.regionRows}
+        value={activitySlot1RegionId}
+        onChange={setActivitySlot1RegionId}
+        disabled={pageData.regionsEmpty}
+      />
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          주활동지역 2 (시·군·구, 선택)
-        </legend>
-        <select
+      <div className="space-y-2">
+        <RegionHierarchySelector
+          legend="주활동지역 2 (선택)"
+          regionRows={pageData.regionRows}
           value={activitySlot2RegionId}
-          onChange={(e) => setActivitySlot2RegionId(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">선택 안 함</option>
-          {pageData.regions.map((r) => (
-            <option key={`a2-${r.id}`} value={r.id}>
-              {r.label}
-            </option>
-          ))}
-        </select>
+          onChange={setActivitySlot2RegionId}
+          disabled={pageData.regionsEmpty}
+        />
         {duplicateActivityWarning ? (
           <p className="text-sm text-amber-700">{duplicateActivityWarning}</p>
         ) : null}
-      </fieldset>
+      </div>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">

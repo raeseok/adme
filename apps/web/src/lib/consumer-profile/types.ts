@@ -1,6 +1,7 @@
 import type { SessionSnapshot } from "@/lib/auth/session";
 import type { ConsumerProfileReadMeta } from "@/lib/consumer-profile/page-data";
 import type { InterestScopeValue } from "@/lib/consumer-profile/constants";
+import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 export type RegionOption = {
   id: string;
@@ -16,6 +17,8 @@ export type CategoryOption = {
 
 export type ConsumerProfilePageData = {
   regions: RegionOption[];
+  regionRows: RegionRow[];
+  savableRegionIds: string[];
   categories: CategoryOption[];
   regionsReadStatus: "ok" | "error";
   categoriesReadStatus: "ok" | "error";
@@ -25,6 +28,7 @@ export type ConsumerProfilePageData = {
   categoriesEmpty: boolean;
   provinceOnlyOptionCount: number;
   basicMunicipalitySeedCoverage: "partial" | "adequate" | "unknown";
+  hierarchicalSeedCoverage: "partial" | "adequate" | "unknown";
 };
 
 export type ConsumerProfileStage1CContext = {

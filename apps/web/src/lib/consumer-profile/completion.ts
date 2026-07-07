@@ -6,7 +6,8 @@ export type ProfileCompletionInput = {
   birthYear: number | null;
   gender: string | null;
   residenceRegionId: string;
-  validRegionIds: ReadonlySet<string>;
+  /** Savable region ids (sigungu-level or dong-level leaf). Sido-only is never included. */
+  savableRegionIds: ReadonlySet<string>;
   interestScope: InterestScope;
   categoryIds: string[];
 };
@@ -41,7 +42,7 @@ export function computeProfileCompletion(
     gender: input.gender !== null && input.gender.length > 0,
     region:
       input.residenceRegionId.length > 0 &&
-      input.validRegionIds.has(input.residenceRegionId),
+      input.savableRegionIds.has(input.residenceRegionId),
     interest:
       input.interestScope === "all" ||
       (input.interestScope === "selected" && input.categoryIds.length >= 1),

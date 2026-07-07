@@ -138,6 +138,28 @@ export default async function DiagnosticsPage() {
       </p>
 
       <section
+        aria-label="Stage 1-E region hierarchical selector markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-indigo-300 bg-indigo-50 px-3 py-3 font-mono text-xs text-indigo-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-E Region Hierarchical Selector (current)
+        </p>
+        <p>stage-1-e-region-hierarchical-selector</p>
+        <p>stage1ERegionSelectorDepth=sido-sigungu-dong-optional</p>
+        <p>stage1ESidoFirst=true</p>
+        <p>stage1ESigunguSecond=true</p>
+        <p>stage1EDongOptional=true</p>
+        <p>stage1ERegionFinalSaveLevel=sigungu-or-dong</p>
+        <p>stage1ERegionSeedCoverage={pageData.hierarchicalSeedCoverage}</p>
+        <p>stage1EAdvertiserPrecisionPrepared=true</p>
+        <p>stage1EPublicDebugMarker=false</p>
+        <p>stage1EServiceRoleUsed=false</p>
+        <p>stage1EPointLedgerMutation=false</p>
+        <p>stage1EQuizAnswerAccess=false</p>
+        <p>stage1EDeployCommit={deployCommit}</p>
+      </section>
+
+      <section
         aria-label="Stage 1-D-A public UI cleanup markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
       >
@@ -163,7 +185,7 @@ export default async function DiagnosticsPage() {
         className="mt-4 space-y-1 rounded-lg border border-dashed border-sky-300 bg-sky-50 px-3 py-3 font-mono text-xs text-sky-950"
       >
         <p className="font-sans text-sm font-semibold">
-          Stage 1-D-B Consumer Profile Intent UX
+          Stage 1-D-B Consumer Profile Intent UX (history)
         </p>
         <p>stage-1-d-b-consumer-profile-intent-ux</p>
         <p>stage1DBProfileAxes=age,gender,region,interest</p>

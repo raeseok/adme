@@ -11,6 +11,7 @@ import {
   buildRegionOptions,
   type RegionRow,
 } from "./regions";
+import { getSavableRegionIds } from "@/lib/regions/region-options";
 
 const REPRESENTATIVE_MUNICIPALITY_CODES = [
   "KR-11-JONGNO",
@@ -42,6 +43,8 @@ export async function getConsumerProfilePageData(
   if (!supabase) {
     return {
       regions: [],
+      regionRows: [],
+      savableRegionIds: [],
       categories: [],
       regionsReadStatus: "error",
       categoriesReadStatus: "error",
@@ -51,6 +54,7 @@ export async function getConsumerProfilePageData(
       categoriesEmpty: true,
       provinceOnlyOptionCount: 0,
       basicMunicipalitySeedCoverage: "unknown",
+      hierarchicalSeedCoverage: "unknown",
     };
   }
 
@@ -75,6 +79,10 @@ export async function getConsumerProfilePageData(
     regionsReadStatus === "ok" ? buildRegionOptions(regionRows) : [];
   const regions =
     regionsReadStatus === "ok" ? buildBasicMunicipalityOptions(regionRows) : [];
+  const savableRegionIdSet =
+    regionsReadStatus === "ok" ? getSavableRegionIds(regionRows) : new Set<string>();
+  const savableRegionIds = [...savableRegionIdSet];
+  const hierarchicalSeedCoverage = assessBasicMunicipalitySeedCoverage(regions);
 
   const provinceOnlyOptionCount =
     regionsReadStatus === "ok"
@@ -93,15 +101,18 @@ export async function getConsumerProfilePageData(
 
   return {
     regions,
+    regionRows,
+    savableRegionIds,
     categories,
     regionsReadStatus,
     categoriesReadStatus,
     regionCount: regions.length,
     categoryCount: categories.length,
-    regionsEmpty: regions.length === 0,
+    regionsEmpty: regionRows.length === 0,
     categoriesEmpty: categories.length === 0,
     provinceOnlyOptionCount,
-    basicMunicipalitySeedCoverage: assessBasicMunicipalitySeedCoverage(regions),
+    basicMunicipalitySeedCoverage: hierarchicalSeedCoverage,
+    hierarchicalSeedCoverage,
   };
 }
 
@@ -235,7 +246,7 @@ export async function loadConsumerProfileSummary(
   pageData: ConsumerProfilePageData;
 }> {
   const pageData = await getConsumerProfilePageData(supabase);
-  const validRegionIds = new Set(pageData.regions.map((r) => r.id));
+  const validRegionIds = new Set(pageData.savableRegionIds);
   const loaded = await loadConsumerProfileDraft(supabase, userId, validRegionIds);
   return { ...loaded, pageData };
 }

@@ -29,7 +29,7 @@ export default async function ConsumerProfilePage({
 
   let initialDraft = null;
 
-  const validRegionIds = new Set(pageData.regions.map((r) => r.id));
+  const validRegionIds = new Set(pageData.savableRegionIds);
 
   if (isAuthenticated && supabase && user) {
     const loaded = await loadConsumerProfileDraft(
