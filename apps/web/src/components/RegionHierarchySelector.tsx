@@ -121,8 +121,8 @@ export function RegionHierarchySelector({
       </legend>
 
       <p className="text-xs text-zinc-500">
-        현재는 시범 운영을 위해 일부 지역부터 선택할 수 있습니다. 전국 지역은 다음
-        단계에서 확장됩니다.
+        전국 시·도, 시·군·구, 읍·면·동 단위까지 선택할 수 있습니다. 상세 지역
+        데이터가 있는 경우 읍·면·동까지 선택해야 합니다.
       </p>
 
       {selectionHint ? (

@@ -108,13 +108,6 @@ async function saveFullProfile(page, label) {
     sigungu: "강남구",
   });
 
-  const residenceBody = await page.locator("body").innerText();
-  assertContains(
-    residenceBody,
-    "이 지역은 현재 시·군·구 단위까지 선택할 수 있습니다.",
-    `${label} sigungu-only hint`,
-  );
-
   await selectRegionHierarchy(page, REGION_SELECTOR_IDS.activity1, {
     sido: "경기도",
     sigungu: "고양시",

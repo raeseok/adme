@@ -62,7 +62,7 @@ async function main() {
     await page.waitForTimeout(2000);
     await page.reload({ waitUntil: "networkidle" });
     const snap = await getProfileFormSnapshot(page);
-    if (!snap.residenceLabel.includes("강남구")) {
+    if (!snap.residence.sigunguLabel.includes("강남구")) {
       throw new Error(`${label}: residence reload failed`);
     }
     console.log(`PASS: ${label} — save/reload 서울 강남구`);

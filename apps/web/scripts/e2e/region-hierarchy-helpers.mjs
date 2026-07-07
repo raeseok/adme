@@ -17,10 +17,19 @@ export async function selectRegionHierarchy(page, testId, { sido, sigungu, dong 
   const root = getRegionSelector(page, testId);
   await root.getByTestId(`${testId}-sido`).selectOption({ label: sido });
   await root.getByTestId(`${testId}-sigungu`).selectOption({ label: sigungu });
-  if (dong) {
-    const dongSelect = root.getByTestId(`${testId}-dong`);
-    if ((await dongSelect.count()) > 0) {
-      await dongSelect.selectOption({ label: dong });
+  await page.waitForTimeout(400);
+  const dongSelect = root.getByTestId(`${testId}-dong`);
+  if (dong && (await dongSelect.count()) > 0) {
+    await dongSelect.selectOption({ label: dong });
+    return;
+  }
+  if ((await dongSelect.count()) > 0) {
+    const labels = await dongSelect.locator("option").allTextContents();
+    const pick = labels
+      .map((s) => s.trim())
+      .find((s) => s && s !== "선택 안 함" && !s.startsWith("선택"));
+    if (pick) {
+      await dongSelect.selectOption({ label: pick });
     }
   }
 }
@@ -149,7 +158,7 @@ export async function verifyHierarchicalProfileVisible(page, label) {
     "주활동지역 1",
     "주활동지역 2",
     "먼저 시·도를 선택한 뒤 시·군·구를 선택해 주세요.",
-    "현재는 시범 운영을 위해 일부 지역부터 선택할 수 있습니다.",
+    "전국 시·도, 시·군·구, 읍·면·동 단위까지 선택할 수 있습니다.",
   ]) {
     if (!body.includes(needle)) {
       throw new Error(`${label}: missing "${needle}"`);
