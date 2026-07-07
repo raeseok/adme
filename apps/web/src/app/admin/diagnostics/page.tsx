@@ -101,7 +101,7 @@ export default async function DiagnosticsPage() {
         </p>
         <p>stage-1-f-r-mois-region-source-alignment</p>
         <p>stage1FRegionSeedCoverage={stage1FCoverage}</p>
-        <p>stage1FCanonicalRegionSource={STAGE1F_R_SOURCE.canonicalRegionSource}</p>
+        <p>stage1FCanonicalRegionSource=mois-admin-dong</p>
         <p>stage1FRegionTreeStructure=parent-id</p>
         <p>stage1FSourceKind={STAGE1F_R_SOURCE.sourceKind}</p>
         <p>stage1FSourceEffectiveDate={STAGE1F_R_SOURCE.effectiveDate}</p>
