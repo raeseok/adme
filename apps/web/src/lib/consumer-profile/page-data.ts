@@ -11,7 +11,35 @@ import {
   buildRegionOptions,
   type RegionRow,
 } from "./regions";
-import { getSavableRegionIds, assessHierarchicalSeedCoverage, countRegionLevels } from "@/lib/regions/region-options";
+import { getSavableRegionIds, countRegionLevels } from "@/lib/regions/region-options";
+import {
+  fetchAllActiveRegions,
+  fetchRegionLevelCounts,
+  type RegionLevelCounts,
+} from "@/lib/regions/fetch-regions";
+import { STAGE1F_LEGACY_CODES } from "@/lib/regions/stage1f-source";
+
+function assessHierarchicalSeedCoverageFromCounts(
+  counts: RegionLevelCounts,
+  rows: RegionRow[],
+): "partial" | "adequate" | "full" | "unknown" {
+  if (counts.total === 0) return "unknown";
+  const legacyPresent = STAGE1F_LEGACY_CODES.every((code) =>
+    rows.some((r) => r.code === code),
+  );
+  if (
+    legacyPresent &&
+    counts.sido >= 17 &&
+    counts.sigungu >= 250 &&
+    counts.dong >= 3000
+  ) {
+    return "full";
+  }
+  if (legacyPresent && counts.sigungu >= 30) {
+    return "adequate";
+  }
+  return "partial";
+}
 
 export async function getConsumerProfilePageData(
   supabase: SupabaseClient | null,
@@ -35,12 +63,9 @@ export async function getConsumerProfilePageData(
     };
   }
 
-  const [regionsResult, categoriesResult] = await Promise.all([
-    supabase
-      .from("regions")
-      .select("id, code, name, parent_id, sort_order, is_active, region_level, path_key")
-      .eq("is_active", true)
-      .order("sort_order"),
+  const [regionsFetch, levelCountsFetch, categoriesResult] = await Promise.all([
+    fetchAllActiveRegions(supabase),
+    fetchRegionLevelCounts(supabase),
     supabase
       .from("interest_categories")
       .select("id, code, name, sort_order")
@@ -48,10 +73,10 @@ export async function getConsumerProfilePageData(
       .order("sort_order"),
   ]);
 
-  const regionsReadStatus = regionsResult.error ? "error" : "ok";
+  const regionsReadStatus = regionsFetch.error ? "error" : "ok";
   const categoriesReadStatus = categoriesResult.error ? "error" : "ok";
 
-  const regionRows = (regionsResult.data ?? []) as RegionRow[];
+  const regionRows = regionsReadStatus === "ok" ? regionsFetch.rows : [];
   const allRegionOptions =
     regionsReadStatus === "ok" ? buildRegionOptions(regionRows) : [];
   const regions =
@@ -59,8 +84,14 @@ export async function getConsumerProfilePageData(
   const savableRegionIdSet =
     regionsReadStatus === "ok" ? getSavableRegionIds(regionRows) : new Set<string>();
   const savableRegionIds = [...savableRegionIdSet];
-  const hierarchicalSeedCoverage = assessHierarchicalSeedCoverage(regionRows);
-  const regionLevelCounts = countRegionLevels(regionRows);
+  const regionLevelCounts =
+    !levelCountsFetch.error && levelCountsFetch.counts.total > 0
+      ? levelCountsFetch.counts
+      : countRegionLevels(regionRows);
+  const hierarchicalSeedCoverage =
+    regionLevelCounts.total > 0
+      ? assessHierarchicalSeedCoverageFromCounts(regionLevelCounts, regionRows)
+      : "unknown";
   const basicMunicipalitySeedCoverage =
     hierarchicalSeedCoverage === "unknown"
       ? "unknown"
