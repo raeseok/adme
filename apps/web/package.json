@@ -13,7 +13,9 @@
     "verify:stage1c": "node scripts/verify-stage1c-production.mjs",
     "verify:stage1c-rls": "node scripts/verify-stage1c-rls-production.mjs",
     "smoke:stage1d-auth": "node scripts/smoke-stage1d-auth-markers.mjs",
-    "verify:stage1d-auth": "node scripts/verify-stage1d-auth-production.mjs"
+    "verify:stage1d-auth": "node scripts/verify-stage1d-auth-production.mjs",
+    "smoke:stage1d-a-public-ui": "node scripts/smoke-stage1d-a-public-ui.mjs",
+    "verify:stage1d-a-public-ui": "node scripts/verify-stage1d-a-public-ui.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

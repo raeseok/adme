@@ -1,7 +1,8 @@
 /**
  * Stage 1-D Auth Production verification
- * - Social login UI markers on /auth/login
+ * - Public login UI (no dev markers)
  * - OAuth redirect start (Google/Kakao) when provider configured
+ * - Stage 1-D markers on /admin/diagnostics
  * - Email login regression (subset of Stage 1-C)
  *
  * Optional env:
@@ -21,6 +22,13 @@ function assertContains(text, needle, label) {
   console.log(`PASS: ${label} — ${needle}`);
 }
 
+function assertNotContains(text, needle, label) {
+  if (text.includes(needle)) {
+    throw new Error(`${label}: should not contain "${needle}"`);
+  }
+  console.log(`PASS: ${label} — no "${needle}"`);
+}
+
 async function checkNoHorizontalScroll(page, label) {
   const scrollWidth = await page.evaluate(
     () => document.documentElement.scrollWidth,
@@ -36,10 +44,23 @@ async function checkNoHorizontalScroll(page, label) {
   console.log(`PASS: ${label} — no horizontal scroll`);
 }
 
-async function verifyStage1DLoginMarkers(page, label) {
+async function verifyStage1DLoginUI(page, label) {
   await page.goto(`${BASE}/auth/login`, { waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
-  assertContains(body, "Stage 1-D Auth Social Login", `${label} stage1d title`);
+  assertContains(body, "AdMe 로그인", `${label} title`);
+  assertContains(body, "Google로 계속하기", `${label} google button`);
+  assertContains(body, "카카오톡으로 계속하기", `${label} kakao button`);
+  assertNotContains(body, "stage1DAuthEmailEnabled", `${label} no stage1D markers`);
+  assertNotContains(body, "stage1CAuthMethod", `${label} no stage1C markers`);
+  await page.getByRole("button", { name: "Google로 계속하기" }).isVisible();
+  await page.getByRole("button", { name: "카카오톡으로 계속하기" }).isVisible();
+  console.log(`PASS: ${label} — OAuth buttons visible`);
+  await checkNoHorizontalScroll(page, label);
+}
+
+async function verifyStage1DDiagnostics(page, label) {
+  await page.goto(`${BASE}/admin/diagnostics`, { waitUntil: "networkidle" });
+  const body = await page.locator("body").innerText();
   assertContains(body, "stage-1-d-auth-social-login", `${label} stage1d header`);
   assertContains(body, "stage1DAuthEmailEnabled=true", `${label} email enabled`);
   assertContains(body, "stage1DAuthGoogleEnabled=true", `${label} google enabled`);
@@ -72,10 +93,6 @@ async function verifyStage1DLoginMarkers(page, label) {
   );
   assertContains(body, "stage1DQuizAnswerAccess=false", `${label} no quiz answer`);
   assertContains(body, "stage1CAuthMethod=email-password", `${label} email method kept`);
-  await page.getByRole("button", { name: "Google로 계속하기" }).isVisible();
-  await page.getByRole("button", { name: "카카오톡으로 계속하기" }).isVisible();
-  console.log(`PASS: ${label} — OAuth buttons visible`);
-  await checkNoHorizontalScroll(page, label);
 }
 
 async function tryOAuthRedirectStart(page, providerLabel, buttonName, label) {
@@ -98,14 +115,8 @@ async function tryOAuthRedirectStart(page, providerLabel, buttonName, label) {
     return "redirect_started";
   }
 
-  if (body.includes("stage1DOAuthStartStatus=redirecting")) {
-    console.log(`PASS: ${label} ${providerLabel} OAuth start status redirecting`);
-    return "redirecting_marker";
-  }
-
   if (
     body.includes("provider 설정") ||
-    body.includes("stage1DOAuthStartStatus=error") ||
     body.includes("oauth_start_error") ||
     body.includes("oauth_missing_url")
   ) {
@@ -125,6 +136,10 @@ async function tryOAuthRedirectStart(page, providerLabel, buttonName, label) {
   return "not_detected";
 }
 
+async function isAuthenticatedOnProfile(body) {
+  return body.includes("로그인됨");
+}
+
 async function verifyEmailRegression(page, label) {
   const email =
     process.env.STAGE1C_TEST_EMAIL ?? `stage1d-${Date.now()}@example.com`;
@@ -141,7 +156,7 @@ async function verifyEmailRegression(page, label) {
     await page.waitForURL("**/consumer/profile**", { timeout: 20000 }).catch(() => null);
     await page.waitForTimeout(2000);
     const afterSignup = await page.locator("body").innerText();
-    if (afterSignup.includes("stage1CSessionStatus=authenticated")) {
+    if (isAuthenticatedOnProfile(afterSignup)) {
       console.log(`PASS: ${label} email signup session`);
       return;
     }
@@ -163,12 +178,11 @@ async function verifyEmailRegression(page, label) {
   await page.waitForTimeout(2000);
 
   const body = await page.locator("body").innerText();
-  if (!body.includes("stage1CSessionStatus=authenticated")) {
+  if (!isAuthenticatedOnProfile(body)) {
     console.log(`SKIP: ${label} email regression — login blocked`);
     return;
   }
-  assertContains(body, "stage1DSocialProviderAuthenticated=not_tested", `${label} email not social`);
-  assertContains(body, "stage1CServiceRoleUsed=false", `${label} no service role`);
+  assertNotContains(body, "stage1DSocialProvider", `${label} no stage1D on profile`);
   console.log(`PASS: ${label} email login regression`);
 }
 
@@ -177,19 +191,21 @@ async function verifyDiagnostics(page) {
   const body = await page.locator("body").innerText();
   assertContains(body, "DB check status", "diagnostics");
   assertContains(body, "stage1CDiagnosticsAuthReady=true", "diagnostics stage1c");
+  assertContains(body, "stage1DAPublicLoginClean=true", "diagnostics stage1da");
 }
 
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage();
   await page.setViewportSize({ width: 390, height: 844 });
-  await verifyStage1DLoginMarkers(page, "mobile-390-login");
+  await verifyStage1DLoginUI(page, "mobile-390-login");
+  await verifyStage1DDiagnostics(page, "mobile-diagnostics");
   await tryOAuthRedirectStart(page, "Google", "Google로 계속하기", "mobile-google");
   await tryOAuthRedirectStart(page, "Kakao", "카카오톡으로 계속하기", "mobile-kakao");
   await verifyEmailRegression(page, "mobile-email-regression");
 
   await page.setViewportSize({ width: 1280, height: 800 });
-  await verifyStage1DLoginMarkers(page, "desktop-1280-login");
+  await verifyStage1DLoginUI(page, "desktop-1280-login");
   await tryOAuthRedirectStart(page, "Google", "Google로 계속하기", "desktop-google");
   await tryOAuthRedirectStart(page, "Kakao", "카카오톡으로 계속하기", "desktop-kakao");
   await verifyDiagnostics(page);

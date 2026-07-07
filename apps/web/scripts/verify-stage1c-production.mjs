@@ -16,6 +16,13 @@ function assertContains(text, needle, label) {
   console.log(`PASS: ${label} — ${needle}`);
 }
 
+function assertNotContains(text, needle, label) {
+  if (text.includes(needle)) {
+    throw new Error(`${label}: should not contain "${needle}"`);
+  }
+  console.log(`PASS: ${label} — no "${needle}"`);
+}
+
 function skipOrFail(message) {
   if (REQUIRE_AUTH) {
     throw new Error(message);
@@ -36,12 +43,12 @@ async function checkNoHorizontalScroll(page, label) {
 async function verifyAnonymous(page, label) {
   await page.goto(`${BASE}/consumer/profile`, { waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=anonymous", `${label} anonymous`);
-  assertContains(body, "stage-1-c-authenticated-consumer-profile", `${label} stage1c header`);
+  assertContains(body, "로그인이 필요합니다", `${label} anonymous prompt`);
+  assertNotContains(body, "stage1CSessionStatus", `${label} no stage1C markers`);
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(2500);
   const after = await page.locator("body").innerText();
-  assertContains(after, "AUTH_REQUIRED", `${label} auth required`);
+  assertContains(after, "로그인이 필요합니다", `${label} auth required message`);
   assertContains(after, "stage1BSaveStatus=auth_required", `${label} save status`);
   await checkNoHorizontalScroll(page, label);
 }
@@ -49,11 +56,15 @@ async function verifyAnonymous(page, label) {
 async function verifyLoginPage(page, label) {
   await page.goto(`${BASE}/auth/login`, { waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
-  assertContains(body, "Stage 1-C Supabase Auth", `${label} login title`);
-  assertContains(body, "stage-1-c-supabase-auth", `${label} login marker`);
-  assertContains(body, "stage1CAuthMethod=email-password", `${label} auth method`);
-  assertContains(body, "stage1CServiceRoleUsed=false", `${label} no service role`);
+  assertContains(body, "AdMe 로그인", `${label} login title`);
+  assertContains(body, "Google로 계속하기", `${label} google button`);
+  assertNotContains(body, "stage1C", `${label} no stage1C on login`);
+  assertNotContains(body, "stage1D", `${label} no stage1D on login`);
   await checkNoHorizontalScroll(page, label);
+}
+
+async function isAuthenticatedOnProfile(body) {
+  return body.includes("로그인됨") && !body.includes("로그인이 필요합니다. 로그인하기");
 }
 
 async function authenticate(page) {
@@ -74,7 +85,7 @@ async function authenticate(page) {
     await page.waitForURL("**/consumer/profile**", { timeout: 20000 }).catch(() => null);
     await page.waitForTimeout(2000);
     const afterSignup = await page.locator("body").innerText();
-    if (afterSignup.includes("stage1CSessionStatus=authenticated")) {
+    if (isAuthenticatedOnProfile(afterSignup)) {
       console.log(`PASS: signup session — email ${email.slice(0, 2)}***@${email.split("@")[1]}`);
       return { email, password, mode: "signup" };
     }
@@ -100,7 +111,7 @@ async function authenticate(page) {
   await page.waitForTimeout(2000);
 
   const body = await page.locator("body").innerText();
-  if (!body.includes("stage1CSessionStatus=authenticated")) {
+  if (!isAuthenticatedOnProfile(body)) {
     const masked = `${email.slice(0, 2)}***@${email.split("@")[1]}`;
     if (
       body.includes("이메일 확인") ||
@@ -128,34 +139,24 @@ async function verifyAuthenticatedSave(page, label, authResult) {
   }
   await page.goto(`${BASE}/consumer/profile`, { waitUntil: "networkidle" });
   let body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=authenticated", `${label} authenticated`);
-  assertContains(body, "stage1CAuthUserPresent=true", `${label} auth user present`);
-  assertContains(body, "stage1CAuthUserIdVisible=false", `${label} auth user id hidden`);
-  assertContains(body, "stage1CAuthEmailMasked=true", `${label} email masked`);
-  assertContains(body, "stage1CMasterReadMode=authenticated-client", `${label} master read`);
-  assertContains(body, "stage1CRegionsReadStatus=ok", `${label} regions read ok`);
-  assertContains(body, "stage1CCategoriesReadStatus=ok", `${label} categories read ok`);
-  assertContains(body, "stage1CResidenceMax=1", `${label} residence max`);
-  assertContains(body, "stage1CActivityMax=2", `${label} activity max`);
-  assertContains(body, "stage1CUsesConsumerRegions=true", `${label} uses consumer regions`);
-  assertContains(body, "stage1CServiceRoleUsed=false", `${label} no service role`);
+  assertContains(body, "로그인됨", `${label} authenticated`);
+  assertContains(body, "***@", `${label} email masked`);
+  assertNotContains(body, "stage1CSessionStatus", `${label} no stage1C markers`);
 
-  const regionCountMatch = body.match(/stage1CRegionCountAuth=(\d+)/);
-  const categoryCountMatch = body.match(/stage1CCategoryCountAuth=(\d+)/);
-  const regionCount = Number(regionCountMatch?.[1] ?? 0);
-  const categoryCount = Number(categoryCountMatch?.[1] ?? 0);
-  console.log(
-    `INFO: ${label} regionCountAuth=${regionCount} categoryCountAuth=${categoryCount}`,
-  );
-
-  if (regionCount <= 0) {
-    throw new Error(`${label}: stage1CRegionCountAuth must be > 0 (got ${regionCount})`);
+  const regionOptions = await page.locator("select").first().locator("option").count();
+  if (regionOptions <= 1) {
+    throw new Error(`${label}: region options must be > 1 (got ${regionOptions})`);
   }
-  if (categoryCount <= 0) {
-    throw new Error(`${label}: stage1CCategoryCountAuth must be > 0 (got ${categoryCount})`);
+  console.log(`PASS: ${label} — region options available (${regionOptions})`);
+
+  const categoryButtons = page
+    .locator("fieldset")
+    .filter({ hasText: "관심 분야" })
+    .locator("button[type='button']");
+  if ((await categoryButtons.count()) === 0) {
+    throw new Error(`${label}: no category buttons found`);
   }
 
-  // residence + activity slots
   await page.locator("select").first().selectOption({ index: 1 });
   const activitySelects = page.locator("select");
   if ((await activitySelects.count()) >= 2) {
@@ -168,32 +169,18 @@ async function verifyAuthenticatedSave(page, label, authResult) {
     throw new Error(`${label}: unexpected activity slot 3+ UI`);
   }
 
-  const categoryButtons = page
-    .locator("fieldset")
-    .filter({ hasText: "관심 분야" })
-    .locator("button[type='button']");
-  if ((await categoryButtons.count()) === 0) {
-    throw new Error(`${label}: no category buttons found`);
-  }
   await categoryButtons.first().click();
-
   await page.getByRole("radio", { name: "1만 원대" }).click();
 
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(4000);
   body = await page.locator("body").innerText();
 
-  assertContains(body, "stage1CProfileSaveStatus=saved", `${label} save saved`);
-  assertContains(body, "stage1CConsumerProfileWriteStatus=saved", `${label} profile write`);
-  assertContains(body, "stage1CConsumerRegionsWriteStatus=saved", `${label} regions write`);
-  assertContains(body, "stage1CInterestCategoriesWriteStatus=saved", `${label} categories write`);
-  assertContains(body, "stage1CMutationExecuted=true", `${label} mutation true`);
-  assertContains(body, "stage1CPointLedgerMutation=false", `${label} no point ledger`);
-  assertContains(body, "stage1CQuizAnswerAccess=false", `${label} no quiz answer`);
+  assertContains(body, "소비 의향 프로필이 저장되었습니다", `${label} save success`);
 
   await page.reload({ waitUntil: "networkidle" });
   const reloaded = await page.locator("body").innerText();
-  assertContains(reloaded, "stage1CSessionStatus=authenticated", `${label} reload auth`);
+  assertContains(reloaded, "로그인됨", `${label} reload auth`);
   if (reloaded.includes("residenceSelected=(미선택)")) {
     throw new Error(`${label}: residence not persisted after reload`);
   }
@@ -202,21 +189,22 @@ async function verifyAuthenticatedSave(page, label, authResult) {
   await page.getByRole("button", { name: "로그아웃" }).click();
   await page.waitForTimeout(3000);
   body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=anonymous", `${label} logout anonymous`);
-  assertContains(body, "stage1CAuthUserPresent=false", `${label} logout no user`);
+  assertContains(body, "로그인이 필요합니다", `${label} logout anonymous`);
 
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(2500);
   const afterLogout = await page.locator("body").innerText();
-  assertContains(afterLogout, "AUTH_REQUIRED", `${label} logout auth required`);
+  assertContains(afterLogout, "로그인이 필요합니다", `${label} logout auth required`);
 }
 
 async function verifyDiagnostics(page) {
   await page.goto(`${BASE}/admin/diagnostics`, { waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
   assertContains(body, "DB check status", "diagnostics");
-  assertContains(body, "stage-0-5-vercel-shell", "diagnostics stage0");
   assertContains(body, "stage1CDiagnosticsAuthReady=true", "diagnostics stage1c");
+  assertContains(body, "stage1CAuthMethod=email-password", "diagnostics auth method");
+  assertContains(body, "stage1CServiceRoleUsed=false", "diagnostics no service role");
+  assertContains(body, "stage1DAPublicLoginClean=true", "diagnostics stage1da login");
 }
 
 const browser = await chromium.launch();

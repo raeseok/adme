@@ -4,15 +4,14 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const files = [
-  "src/app/auth/login/LoginForm.tsx",
-  "src/app/consumer/profile/ConsumerProfileForm.tsx",
+  "src/app/admin/diagnostics/page.tsx",
   "src/lib/supabase/server.ts",
   "src/middleware.ts",
+  "src/app/consumer/profile/actions.ts",
 ];
 
 const requiredLiterals = [
   "stage-1-c-supabase-auth",
-  "stage-1-c-authenticated-consumer-profile",
   "stage1CLoginRoute=/auth/login",
   "stage1CProfileRoute=/consumer/profile",
   "stage1CServiceRoleUsed=false",

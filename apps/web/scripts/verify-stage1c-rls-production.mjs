@@ -64,7 +64,7 @@ async function signupOrLogin(page, label, email, password) {
   await page.waitForTimeout(1500);
 
   let body = await page.locator("body").innerText();
-  if (body.includes("stage1CSessionStatus=authenticated")) {
+  if (body.includes("로그인됨")) {
     console.log(`PASS: ${label} signup — ${maskEmail(email)}`);
     return;
   }
@@ -79,8 +79,8 @@ async function signupOrLogin(page, label, email, password) {
   await page.waitForURL("**/consumer/profile**", { timeout: 20000 });
   await page.waitForTimeout(1500);
 
-  body = await page.locator("body").innerText();
-  if (!body.includes("stage1CSessionStatus=authenticated")) {
+  let body = await page.locator("body").innerText();
+  if (!body.includes("로그인됨")) {
     throw new Error(`${label} login failed for ${maskEmail(email)}`);
   }
   console.log(`PASS: ${label} login — ${maskEmail(email)}`);
@@ -101,8 +101,7 @@ async function saveProfile(page, label, opts) {
 
   await gotoProfile(page);
   let body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=authenticated", `${label} authenticated`);
-  assertContains(body, "stage1CServiceRoleUsed=false", `${label} no service role`);
+  assertContains(body, "로그인됨", `${label} authenticated`);
 
   const selects = page.locator("select");
   await selects.first().selectOption({ index: residenceIndex });
@@ -124,12 +123,7 @@ async function saveProfile(page, label, opts) {
   await page.waitForTimeout(4000);
 
   body = await page.locator("body").innerText();
-  assertContains(body, "stage1CProfileSaveStatus=saved", `${label} save saved`);
-  assertContains(body, "stage1CConsumerProfileWriteStatus=saved", `${label} profile write`);
-  assertContains(body, "stage1CConsumerRegionsWriteStatus=saved", `${label} regions write`);
-  assertContains(body, "stage1CMutationExecuted=true", `${label} mutation true`);
-  assertContains(body, "stage1CPointLedgerMutation=false", `${label} no point ledger`);
-  assertContains(body, "stage1CQuizAnswerAccess=false", `${label} no quiz answer`);
+  assertContains(body, "소비 의향 프로필이 저장되었습니다", `${label} save saved`);
 
   const form = await getFormSelection(page);
   return { summary: parseSummary(body), form };
@@ -138,7 +132,7 @@ async function saveProfile(page, label, opts) {
 async function reloadAndGetSummary(page, label) {
   await page.reload({ waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=authenticated", `${label} reload auth`);
+  assertContains(body, "로그인됨", `${label} reload auth`);
   return parseSummary(body);
 }
 
@@ -147,8 +141,7 @@ async function logout(page, label) {
   await page.getByRole("button", { name: "로그아웃" }).click();
   await page.waitForTimeout(3000);
   const body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=anonymous", `${label} logout anonymous`);
-  assertContains(body, "stage1CAuthUserPresent=false", `${label} logout no user`);
+  assertContains(body, "로그인이 필요합니다", `${label} logout anonymous`);
   return body;
 }
 
@@ -156,8 +149,8 @@ async function verifyAnonymousSaveBlocked(page, label) {
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(2500);
   const body = await page.locator("body").innerText();
-  assertContains(body, "AUTH_REQUIRED", `${label} auth required`);
-  assertContains(body, "stage1CPointLedgerMutation=false", `${label} no point ledger anon`);
+  assertContains(body, "로그인이 필요합니다", `${label} auth required`);
+  assertContains(body, "stage1BSaveStatus=auth_required", `${label} save blocked`);
 }
 
 function assertSummaryEquals(actual, expected, label) {
@@ -199,17 +192,8 @@ function assertSummaryDiffers(actual, other, label) {
 async function verifyUserBNoLeak(page, label, userASummary, userAForm) {
   await gotoProfile(page);
   const body = await page.locator("body").innerText();
-  assertContains(body, "stage1CSessionStatus=authenticated", `${label} B authenticated`);
-  assertContains(body, "stage1CAuthUserPresent=true", `${label} B auth present`);
-  assertContains(body, "stage1CAuthUserIdVisible=false", `${label} B id hidden`);
-  assertContains(body, "stage1CAuthEmailMasked=true", `${label} B email masked`);
-
-  const readStatus = body.match(/stage1CConsumerProfileReadStatus=(\w+)/)?.[1];
-  if (readStatus === "not_found") {
-    console.log(`PASS: ${label} — stage1CConsumerProfileReadStatus=not_found`);
-  } else {
-    console.log(`INFO: ${label} readStatus=${readStatus ?? "unknown"}`);
-  }
+  assertContains(body, "로그인됨", `${label} B authenticated`);
+  assertContains(body, "***@", `${label} B email masked`);
 
   const summary = parseSummary(body);
   assertSummaryDiffers(summary, userASummary, `${label} summary isolation`);
@@ -242,6 +226,7 @@ async function verifyDiagnostics(page) {
   const body = await page.locator("body").innerText();
   assertContains(body, "DB check status", "diagnostics");
   assertContains(body, "stage1CDiagnosticsAuthReady=true", "diagnostics stage1c");
+  assertContains(body, "stage1DAPublicProfileClean=true", "diagnostics stage1da profile");
 }
 
 async function runCrossUserFlow(page, viewportLabel) {

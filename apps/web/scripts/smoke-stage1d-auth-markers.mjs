@@ -4,10 +4,9 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const files = [
-  "src/app/auth/login/LoginForm.tsx",
+  "src/app/admin/diagnostics/page.tsx",
   "src/app/auth/login/actions.ts",
   "src/app/auth/callback/route.ts",
-  "src/app/consumer/profile/ConsumerProfileForm.tsx",
   "src/lib/auth/oauth.ts",
 ];
 
@@ -21,18 +20,12 @@ const requiredLiterals = [
   "stage1DGoogleLoginButtonVisible=true",
   "stage1DKakaoLoginButtonVisible=true",
   "stage1DEmailLoginFormVisible=true",
-  "stage1DOAuthLastProvider=",
-  "stage1DOAuthStartStatus=",
-  "stage1DOAuthErrorCode=",
   "stage1DCallbackSupportsOAuth=true",
   "stage1DCallbackRedirectTarget=/consumer/profile",
   "stage1DCallbackServiceRoleUsed=false",
   "stage1DServiceRoleUsed=false",
   "stage1DPointLedgerMutation=false",
   "stage1DQuizAnswerAccess=false",
-  "stage1DSocialProviderAuthenticated=",
-  "stage1DSocialProfileSaveStatus=",
-  "stage1DSocialLogoutStatus=",
   "signInWithOAuth",
 ];
 

@@ -11,7 +11,6 @@ import type {
   RegionOption,
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
-import { getDeployCommit } from "@/lib/deploy-info";
 import { saveConsumerProfileAction } from "./actions";
 
 type SaveStatus = "idle" | "auth_required" | "saved" | "error";
@@ -68,46 +67,7 @@ export function ConsumerProfileForm({
   const saveStatus = mapSaveStatus(saveResult);
   const saveBlockedByAuth = saveStatus === "auth_required";
   const mutationExecuted = saveResult?.mutationExecuted ?? false;
-  const deployCommit = getDeployCommit();
   const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
-  const socialAuthProvider = stage1C.session.socialAuthProvider;
-  const stage1DSocialProviderAuthenticated = socialAuthProvider ?? "not_tested";
-  const stage1DSocialProfileSaveStatus =
-    socialAuthProvider && saveStatus === "saved"
-      ? "saved"
-      : socialAuthProvider && saveStatus === "error"
-        ? "error"
-        : "not_tested";
-  const stage1DSocialLogoutStatus =
-    socialLogoutStatus === "signed_out"
-      ? "signed_out"
-      : logoutPending
-        ? "signing_out"
-        : "not_tested";
-
-  const stage1CProfileSaveStatus =
-    saveResult?.stage1CProfileSaveStatus ??
-    (saveStatus === "auth_required"
-      ? "auth_required"
-      : saveStatus === "saved"
-        ? "saved"
-        : saveStatus === "error"
-          ? "error"
-          : "idle");
-
-  const stage1CConsumerProfileWriteStatus =
-    saveResult?.stage1CConsumerProfileWriteStatus ??
-    (isAuthenticated && saveStatus === "idle"
-      ? stage1C.consumerProfileReadStatus === "ok"
-        ? "saved"
-        : "idle"
-      : "idle");
-
-  const stage1CConsumerRegionsWriteStatus =
-    saveResult?.stage1CConsumerRegionsWriteStatus ?? "idle";
-  const stage1CInterestCategoriesWriteStatus =
-    saveResult?.stage1CInterestCategoriesWriteStatus ?? "idle";
-  const stage1CMutationExecuted = saveResult?.stage1CMutationExecuted ?? false;
 
   const duplicateActivityWarning = useMemo(() => {
     const slots = [activitySlot1RegionId, activitySlot2RegionId].filter(Boolean);
@@ -155,8 +115,6 @@ export function ConsumerProfileForm({
     >
       <section className="space-y-2 rounded-lg bg-blue-50 px-3 py-3 text-sm text-blue-900">
         <p className="font-semibold">AdMe 소비 의향 프로필</p>
-        <p>Stage 1-B Consumer Profile UI</p>
-        <p className="font-mono text-xs text-blue-800">stage-1-b-consumer-profile-ui</p>
         <p className="text-blue-800">
           이 정보는 개인 신원이 아닌 <strong>소비 의향</strong>입니다. 주거지역과
           주활동지역은 광고 매칭에 사용되며, 주활동지역은 최대 2개까지 설정할 수
@@ -165,8 +123,6 @@ export function ConsumerProfileForm({
       </section>
 
       <section className="space-y-2 rounded-lg bg-violet-50 px-3 py-3 text-sm text-violet-900">
-        <p className="font-semibold">Stage 1-C Authenticated Consumer Profile</p>
-        <p className="font-mono text-xs">stage-1-c-authenticated-consumer-profile</p>
         {isAuthenticated ? (
           <>
             <p>
@@ -175,6 +131,9 @@ export function ConsumerProfileForm({
                 ? ` (${stage1C.session.maskedEmail})`
                 : ""}
             </p>
+            {socialLogoutStatus === "signed_out" ? (
+              <p className="text-violet-800">로그아웃되었습니다.</p>
+            ) : null}
             <button
               type="button"
               onClick={handleLogout}
@@ -188,7 +147,7 @@ export function ConsumerProfileForm({
           <p>
             로그인이 필요합니다.{" "}
             <Link href="/auth/login" className="font-medium underline">
-              /auth/login
+              로그인하기
             </Link>
           </p>
         )}
@@ -346,12 +305,6 @@ export function ConsumerProfileForm({
         {isPending ? "저장 중…" : "소비 의향 프로필 저장"}
       </button>
 
-      {saveStatus === "auth_required" ? (
-        <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm font-bold text-amber-950">
-          AUTH_REQUIRED
-        </p>
-      ) : null}
-
       {saveResult?.message ? (
         <p
           className={`rounded-lg px-3 py-2 text-sm font-medium ${
@@ -365,7 +318,6 @@ export function ConsumerProfileForm({
           }`}
         >
           {saveResult.message}
-          {saveResult.code === "AUTH_REQUIRED" ? " (AUTH_REQUIRED)" : null}
         </p>
       ) : null}
 
@@ -395,63 +347,6 @@ export function ConsumerProfileForm({
         <p>stage1BPointLedgerMutation={String(pointLedgerMutation)}</p>
         <p>stage1BQuizAnswerAccess={String(quizAnswerAccess)}</p>
         <p>stage1BServiceRoleUsed={String(serviceRoleUsed)}</p>
-        <p>stage1BDeployCommit={deployCommit}</p>
-      </section>
-
-      <section
-        aria-label="Stage 1-C visible markers"
-        className="space-y-1 break-all rounded-lg border border-dashed border-violet-300 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-900"
-      >
-        <p>stage1CProfileRoute=/consumer/profile</p>
-        <p>stage1CSessionStatus={stage1C.session.sessionStatus}</p>
-        <p>stage1CAuthUserPresent={String(stage1C.session.authUserPresent)}</p>
-        <p>stage1CAuthUserIdVisible=false</p>
-        <p>
-          stage1CAuthEmailMasked=
-          {stage1C.session.maskedEmail ? "true" : "false"}
-        </p>
-        <p>stage1CMasterReadMode={stage1C.masterReadMode}</p>
-        <p>stage1CRegionsReadStatus={stage1C.regionsReadStatusAuth}</p>
-        <p>stage1CRegionCountAuth={stage1C.regionCountAuth}</p>
-        <p>stage1CCategoriesReadStatus={stage1C.categoriesReadStatusAuth}</p>
-        <p>stage1CCategoryCountAuth={stage1C.categoryCountAuth}</p>
-        <p>stage1CProfileSaveStatus={stage1CProfileSaveStatus}</p>
-        <p>
-          stage1CConsumerProfileReadStatus=
-          {stage1C.consumerProfileReadStatus}
-        </p>
-        <p>
-          stage1CConsumerProfileWriteStatus={stage1CConsumerProfileWriteStatus}
-        </p>
-        <p>
-          stage1CConsumerRegionsWriteStatus={stage1CConsumerRegionsWriteStatus}
-        </p>
-        <p>
-          stage1CInterestCategoriesWriteStatus=
-          {stage1CInterestCategoriesWriteStatus}
-        </p>
-        <p>stage1CResidenceMax=1</p>
-        <p>stage1CActivityMax=2</p>
-        <p>stage1CUsesConsumerRegions=true</p>
-        <p>stage1CMutationExecuted={String(stage1CMutationExecuted)}</p>
-        <p>stage1CPointLedgerMutation=false</p>
-        <p>stage1CQuizAnswerAccess=false</p>
-        <p>stage1CServiceRoleUsed=false</p>
-        <p>stage1CLogoutAvailable=true</p>
-        <p>stage1CLogoutStatus={logoutPending ? "signing_out" : "idle"}</p>
-        <p>stage1CDeployCommit={deployCommit}</p>
-      </section>
-
-      <section
-        aria-label="Stage 1-D social auth markers"
-        className="space-y-1 break-all rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
-      >
-        <p>stage1DSocialProviderAuthenticated={stage1DSocialProviderAuthenticated}</p>
-        <p>stage1DSocialProfileSaveStatus={stage1DSocialProfileSaveStatus}</p>
-        <p>stage1DSocialLogoutStatus={stage1DSocialLogoutStatus}</p>
-        <p>stage1DServiceRoleUsed=false</p>
-        <p>stage1DPointLedgerMutation=false</p>
-        <p>stage1DQuizAnswerAccess=false</p>
       </section>
 
       <Link

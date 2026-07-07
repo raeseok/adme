@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getDeployCommit } from "@/lib/deploy-info";
 
 export function ShellCard({
   title,
@@ -21,9 +20,6 @@ export function ShellCard({
         <div className="mt-4 space-y-3 text-base leading-relaxed text-zinc-700">
           {children}
         </div>
-        <p className="mt-6 text-sm text-zinc-500">
-          deploy commit: {getDeployCommit()}
-        </p>
         {showHomeLink && (
           <Link
             href="/"
