@@ -24,6 +24,15 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function waitForSubmitReady(page) {
+  await page.waitForFunction(() => {
+    const btn = document.querySelector('[data-testid="quiz-submit-preview-button"]');
+    if (!btn) return false;
+    const text = btn.textContent ?? "";
+    return !btn.disabled && !text.includes("제출 중");
+  }, { timeout: 30000 });
+}
+
 async function findActiveDbCampaign(supabase) {
   const preferred = await supabase
     .from("campaigns")
@@ -228,23 +237,21 @@ async function main() {
       }
       console.log("PASS: first wrong allows retry messaging");
 
+      await waitForSubmitReady(page);
       await page.locator('[data-testid="quiz-submit-preview-button"]').click();
-      await sleep(2000);
-
-      const afterView2 = await getLatestOwnAdView(authed, userId, campaign.campaignId);
-      if ((afterView2?.attempt_no ?? 0) < 2 && body1.includes("한 번 더 도전")) {
-        await page.locator('[data-testid="quiz-submit-preview-button"]').click();
-        await sleep(2000);
-      }
+      await page.locator('[data-testid="quiz-attempt-result"]').waitFor({ state: "visible" });
+      await sleep(1500);
 
       const finalView = await getLatestOwnAdView(authed, userId, campaign.campaignId);
       const body2 = await page.locator("body").innerText();
       if (
-        finalView?.attempt_no >= 2 ||
+        (finalView?.attempt_no ?? 0) >= 2 ||
         body2.includes("리워드 미리보기는 종료") ||
         body2.includes("attempt_limit")
       ) {
         console.log("PASS: second attempt / limit path observed");
+      } else {
+        throw new Error("expected attempt_no=2 or reward preview ended after second wrong");
       }
     }
 
