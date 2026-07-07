@@ -21,6 +21,8 @@ type RegionHierarchySelectorProps = {
   onChange: (regionId: string) => void;
   disabled?: boolean;
   emptyPlaceholder?: string;
+  /** E2E helper — not a visible debug marker */
+  testId?: string;
 };
 
 export function RegionHierarchySelector({
@@ -31,6 +33,7 @@ export function RegionHierarchySelector({
   onChange,
   disabled = false,
   emptyPlaceholder = "선택 안 함",
+  testId,
 }: RegionHierarchySelectorProps) {
   const index = useMemo(
     () => buildRegionHierarchyIndex(regionRows),
@@ -111,7 +114,7 @@ export function RegionHierarchySelector({
     "w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-zinc-100";
 
   return (
-    <fieldset className="space-y-2" disabled={disabled}>
+    <fieldset className="space-y-2" disabled={disabled} data-testid={testId}>
       <legend className="text-sm font-semibold text-zinc-900">
         {legend}
         {required ? <span className="text-red-600"> *</span> : null}
@@ -133,6 +136,7 @@ export function RegionHierarchySelector({
           onChange={(e) => handleSidoChange(e.target.value)}
           className={selectClass}
           aria-label={`${legend} 시·도`}
+          data-testid={testId ? `${testId}-sido` : undefined}
         >
           <option value="">{emptyPlaceholder}</option>
           {sidoOptions.map((opt) => (
@@ -151,6 +155,7 @@ export function RegionHierarchySelector({
           disabled={!selection.sidoId}
           className={selectClass}
           aria-label={`${legend} 시·군·구`}
+          data-testid={testId ? `${testId}-sigungu` : undefined}
         >
           <option value="">
             {selection.sidoId ? "시·군·구 선택" : "먼저 시·도를 선택해 주세요"}
@@ -174,6 +179,7 @@ export function RegionHierarchySelector({
             disabled={!selection.sigunguId}
             className={selectClass}
             aria-label={`${legend} 읍·면·동`}
+            data-testid={testId ? `${testId}-dong` : undefined}
           >
             <option value="">읍·면·동 선택 (선택 사항 없음 — 상세 필수)</option>
             {dongOptions.map((opt) => (

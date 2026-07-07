@@ -1,5 +1,6 @@
 /**
  * Stage 1-C-R2 Production RLS cross-user isolation verification
+ * @deprecated Use verify:stage1e-rls-ab for hierarchical region selectors (Stage 1-E-R).
  * Optional env: STAGE1C_USER_A_EMAIL, STAGE1C_USER_A_PASSWORD,
  *               STAGE1C_USER_B_EMAIL, STAGE1C_USER_B_PASSWORD
  * Never log passwords.

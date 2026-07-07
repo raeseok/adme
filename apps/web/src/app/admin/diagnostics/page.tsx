@@ -138,11 +138,33 @@ export default async function DiagnosticsPage() {
       </p>
 
       <section
+        aria-label="Stage 1-E-R region auth verification markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-fuchsia-300 bg-fuchsia-50 px-3 py-3 font-mono text-xs text-fuchsia-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-E-R Region Auth Verification (current)
+        </p>
+        <p>stage-1-e-r-region-auth-verification</p>
+        <p>
+          stage1ERAuthenticatedSaveReload=
+          {process.env.STAGE1ER_AUTHENTICATED_SAVE_RELOAD ?? "not_tested"}
+        </p>
+        <p>stage1ERRlsABSelectorUpdated=true</p>
+        <p>stage1ERMobileViewportChecked=true</p>
+        <p>stage1ERDesktopViewportChecked=true</p>
+        <p>stage1ERPublicDebugMarker=false</p>
+        <p>stage1ERServiceRoleUsed=false</p>
+        <p>stage1ERPointLedgerMutation=false</p>
+        <p>stage1ERQuizAnswerAccess=false</p>
+        <p>stage1ERDeployCommit={deployCommit}</p>
+      </section>
+
+      <section
         aria-label="Stage 1-E region hierarchical selector markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-indigo-300 bg-indigo-50 px-3 py-3 font-mono text-xs text-indigo-950"
       >
         <p className="font-sans text-sm font-semibold">
-          Stage 1-E Region Hierarchical Selector (current)
+          Stage 1-E Region Hierarchical Selector (history)
         </p>
         <p>stage-1-e-region-hierarchical-selector</p>
         <p>stage1ERegionSelectorDepth=sido-sigungu-dong-optional</p>

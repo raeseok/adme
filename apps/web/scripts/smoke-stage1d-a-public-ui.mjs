@@ -39,6 +39,9 @@ const forbiddenInProfile = [
   "stage-1-c-authenticated",
   "stage-1-d-",
   "stage1DServiceRoleUsed",
+  "stage1E",
+  "stage1ER",
+  "stage-1-e-",
   "소비 규모 범위",
 ];
 

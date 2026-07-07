@@ -17,7 +17,10 @@
     "smoke:stage1d-a-public-ui": "node scripts/smoke-stage1d-a-public-ui.mjs",
     "verify:stage1d-a-public-ui": "node scripts/verify-stage1d-a-public-ui.mjs",
     "smoke:stage1d-b-profile-intent": "node scripts/smoke-stage1d-b-profile-intent.mjs",
-    "verify:stage1d-b-profile-intent": "node scripts/verify-stage1d-b-profile-intent.mjs"
+    "verify:stage1d-b-profile-intent": "node scripts/verify-stage1d-b-profile-intent.mjs",
+    "smoke:stage1e-regression": "node scripts/smoke-stage1e-regression.mjs",
+    "verify:stage1e-region-auth": "node scripts/verify-stage1e-region-auth.mjs",
+    "verify:stage1e-rls-ab": "node scripts/verify-stage1e-rls-ab.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
