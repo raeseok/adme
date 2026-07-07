@@ -52,7 +52,11 @@ function isNonEmptyName(name: string | null | undefined): boolean {
 }
 
 function isSelectableRegion(row: RegionRow): boolean {
-  return row.is_active !== false && row.is_selectable !== false;
+  return (
+    row.is_active !== false &&
+    row.is_selectable !== false &&
+    row.source_kind === "mois-kikcd-h"
+  );
 }
 
 export function buildRegionHierarchyIndex(rows: RegionRow[]): RegionHierarchyIndex {
