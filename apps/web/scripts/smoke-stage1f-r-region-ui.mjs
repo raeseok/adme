@@ -27,6 +27,9 @@ async function verifyViewport(page, label) {
   const options = await sidoSelect.locator("option").allTextContents();
   const count = options.filter((o) => o && !o.includes("선택")).length;
   if (count < 16) throw new Error(`${label}: expected 16+ canonical sido options`);
+  if (count > 20) {
+    throw new Error(`${label}: too many sido options (${count}) — molit/legal duplicate leak`);
+  }
   if (!options.some((o) => o.includes("전남광주통합특별시"))) {
     throw new Error(`${label}: 전남광주통합특별시 missing from sido options`);
   }
@@ -86,6 +89,7 @@ async function main() {
     });
     console.log(`PASS: ${label} — 안양시 명학동 (2026.7.1)`);
 
+    await gotoProfile(page, BASE);
     await selectRegionHierarchy(page, REGION_SELECTOR_IDS.activity2, {
       sido: "전남광주통합특별시",
       sigungu: "목포시",
