@@ -29,26 +29,47 @@ function loadEnvFile(path) {
 
 let cachedProductionSupabaseEnv = null;
 
+const PRODUCTION_PROJECT_REF = "ogncvdxrrsjnwsuvgoyh";
+const REPO_ROOT = join(WEB_ROOT, "..", "..");
+
+async function loadSupabaseEnvFromCli() {
+  const { execSync } = await import("node:child_process");
+  const out = execSync(
+    `npx supabase projects api-keys --project-ref ${PRODUCTION_PROJECT_REF}`,
+    { cwd: REPO_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+  );
+  const parsed = JSON.parse(out);
+  const anon = parsed.keys?.find(
+    (k) => k.id === "anon" && typeof k.api_key === "string" && k.api_key.startsWith("eyJ"),
+  );
+  if (!anon?.api_key) {
+    throw new Error("anon key not found via supabase CLI");
+  }
+  return {
+    url: `https://${PRODUCTION_PROJECT_REF}.supabase.co`,
+    key: anon.api_key,
+  };
+}
+
 async function loadProductionSupabaseEnv(baseUrl) {
   if (cachedProductionSupabaseEnv) return cachedProductionSupabaseEnv;
 
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/auth/login`);
-  if (!response.ok) {
-    throw new Error(`unable to load production auth page (${response.status})`);
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/auth/login`);
+    if (response.ok) {
+      const html = await response.text();
+      const urlMatch = html.match(/https:\/\/[a-z0-9]+\.supabase\.co/);
+      const keyMatch = html.match(/eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/);
+      if (urlMatch?.[0] && keyMatch?.[0]) {
+        cachedProductionSupabaseEnv = { url: urlMatch[0], key: keyMatch[0] };
+        return cachedProductionSupabaseEnv;
+      }
+    }
+  } catch {
+    // fall through to CLI
   }
 
-  const html = await response.text();
-  const urlMatch = html.match(/https:\/\/[a-z0-9]+\.supabase\.co/);
-  const keyMatch = html.match(/eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/);
-
-  if (!urlMatch?.[0] || !keyMatch?.[0]) {
-    throw new Error("production Supabase env not found in auth page HTML");
-  }
-
-  cachedProductionSupabaseEnv = {
-    url: urlMatch[0],
-    key: keyMatch[0],
-  };
+  cachedProductionSupabaseEnv = await loadSupabaseEnvFromCli();
   return cachedProductionSupabaseEnv;
 }
 
@@ -67,6 +88,8 @@ export async function createAnonSupabaseClient(baseUrl) {
       const production = await loadProductionSupabaseEnv(baseUrl);
       url = production.url;
       key = production.key;
+      process.env.NEXT_PUBLIC_SUPABASE_URL = url;
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = key;
     } catch {
       return null;
     }
@@ -80,7 +103,8 @@ export function getSupabaseProjectRef() {
   loadSupabaseEnv();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
-  return match?.[1] ?? "";
+  if (match?.[1]) return match[1];
+  return PRODUCTION_PROJECT_REF;
 }
 
 export function encodeSupabaseAuthCookie(session) {

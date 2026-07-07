@@ -45,6 +45,8 @@
     "verify:stage2c-no-quiz-answer-exposure": "node scripts/verify-stage2c-no-quiz-answer-exposure.mjs",
     "verify:stage2c-public-marker-guard": "node scripts/verify-stage2c-public-marker-guard.mjs",
     "verify:stage2c-kakao-no-send": "node scripts/verify-stage2c-kakao-no-send.mjs",
+    "verify:stage2c-db-uuid-campaign": "node scripts/verify-stage2c-db-uuid-campaign.mjs",
+    "verify:stage2c-r-ad-views-rls": "node scripts/verify-stage2c-r-ad-views-rls.mjs",
     "regions:fetch-mois": "node scripts/regions/fetch-mois-region-source.mjs",
     "regions:parse-mois": "node scripts/regions/parse-mois-regions.mjs",
     "regions:generate-seed-r": "node scripts/regions/generate-stage1f-r-region-seed-sql.mjs",
