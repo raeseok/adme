@@ -219,7 +219,6 @@ async function main() {
     console.log(`PASS: attempt_no=${attemptNo1} after first submit`);
 
     const body1 = await page.locator("body").innerText();
-    const wrongLabel = pickWrongOption(campaign.options);
 
     if (body1.includes("정답입니다")) {
       console.log("INFO: first submit was correct — skipping wrong-attempt retry path");

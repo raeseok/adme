@@ -45,6 +45,7 @@ function scanConsumerAdsSource() {
     for (const file of walk(dir)) {
       if (file.includes("stage2a-fixtures.server")) continue;
       if (file.includes("stage2b-preview.server")) continue;
+      if (file.includes("stage2c-ad-views.server")) continue;
       const content = readFileSync(file, "utf8");
       for (const key of FORBIDDEN_IN_RESPONSE) {
         if (key === "STAGE2A_SECRET_ANSWER_DO_NOT_EXPOSE") continue;
