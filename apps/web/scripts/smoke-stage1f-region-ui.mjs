@@ -54,6 +54,7 @@ async function main() {
     await authenticateUser(page, BASE, "Stage1F", creds.userA.email, creds.userA.password);
     await verifyViewport(page, label, viewport);
 
+    await gotoProfile(page, BASE);
     await page.getByRole("group", { name: "출생년도" }).locator("select").selectOption("1990");
     await page.getByRole("radio", { name: "응답하지 않음" }).click();
     await selectRegionHierarchy(page, REGION_SELECTOR_IDS.residence, {

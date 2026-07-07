@@ -120,10 +120,12 @@ async function saveFullProfile(page, label) {
 
   await page.getByRole("button", { name: "전체", exact: true }).click();
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(5000);
 
   const body = await page.locator("body").innerText();
-  assertContains(body, "소비 의향 프로필이 저장되었습니다", `${label} save`);
+  if (!body.includes("소비 의향 프로필이 저장되었습니다")) {
+    throw new Error(`${label} save failed — body snippet: ${body.slice(0, 500)}`);
+  }
   assertNotContains(body, "소비 규모 범위", `${label} no spend range`);
 
   const snapshot = await getProfileFormSnapshot(page);

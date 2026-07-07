@@ -250,6 +250,7 @@ export function ConsumerProfileForm({
       </fieldset>
 
       <RegionHierarchySelector
+        key={`residence-${residenceRegionId}-${pageData.regionRows.length}`}
         legend="주거지역 (최대 1개)"
         required
         testId="region-selector-residence"
@@ -272,6 +273,7 @@ export function ConsumerProfileForm({
       ) : null}
 
       <RegionHierarchySelector
+        key={`activity1-${activitySlot1RegionId}-${pageData.regionRows.length}`}
         legend="주활동지역 1 (선택)"
         testId="region-selector-activity-1"
         regionRows={pageData.regionRows}
@@ -282,6 +284,7 @@ export function ConsumerProfileForm({
 
       <div className="space-y-2">
         <RegionHierarchySelector
+          key={`activity2-${activitySlot2RegionId}-${pageData.regionRows.length}`}
           legend="주활동지역 2 (선택)"
           testId="region-selector-activity-2"
           regionRows={pageData.regionRows}

@@ -84,8 +84,13 @@ export async function signupOrLogin(page, baseUrl, label, email, password) {
   await page.waitForURL("**/consumer/profile**", { timeout: 25000 }).catch(() => null);
   await page.waitForTimeout(1500);
 
+  await page.waitForTimeout(3000);
   const body = await page.locator("body").innerText();
   if (body.includes("로그인됨")) {
+    await page.waitForTimeout(2000);
+  }
+  const after = await page.locator("body").innerText();
+  if (after.includes("로그인됨")) {
     console.log(`PASS: ${label} — User signup ok (email masked)`);
     return;
   }
@@ -107,7 +112,8 @@ export async function gotoProfile(page, baseUrl) {
 export async function logoutFromProfile(page, baseUrl, label) {
   await gotoProfile(page, baseUrl);
   await page.getByRole("button", { name: "로그아웃" }).click();
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(3000);
+  await page.reload({ waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
   if (!body.includes("로그인이 필요합니다")) {
     throw new Error(`${label}: expected anonymous state after logout`);

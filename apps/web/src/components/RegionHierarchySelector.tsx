@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { RegionRow } from "@/lib/consumer-profile/regions";
 import {
   buildDongOptions,
@@ -43,10 +43,6 @@ export function RegionHierarchySelector({
   const [selection, setSelection] = useState<RegionSelectionState>(() =>
     parseRegionSelectionFromId(regionRows, value),
   );
-
-  useEffect(() => {
-    setSelection(parseRegionSelectionFromId(regionRows, value));
-  }, [regionRows, value]);
 
   const sidoOptions = useMemo(() => buildSidoOptions(index), [index]);
   const sigunguOptions = useMemo(
