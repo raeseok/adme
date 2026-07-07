@@ -62,12 +62,18 @@ export default async function ConsumerPage() {
         )}
       </section>
 
-      <section className="mt-6 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 text-sm text-zinc-600">
-        <p className="font-medium text-zinc-800">준비 중인 기능</p>
-        <p className="mt-1">
-          광고 카드, 퀴즈, 포인트 적립 기능은 아직 준비 중입니다. Stage 1-D-B에서는
-          소비 의향 프로필 입력과 완성도 안내만 제공합니다.
+      <section className="mt-6 space-y-3">
+        <p className="text-sm font-semibold text-zinc-900">맞춤 소비정보</p>
+        <p className="text-sm text-zinc-600">
+          관심 지역·분야에 맞는 광고 카드와 퀴즈 미리보기를 확인할 수 있습니다.
+          현재는 읽기 전용 미리보기이며 포인트 적립은 Stage 2-B 이후에 제공됩니다.
         </p>
+        <Link
+          href="/consumer/ads"
+          className="inline-block rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+        >
+          광고 카드 · 퀴즈 미리보기 보기
+        </Link>
       </section>
     </ShellCard>
   );

@@ -93,6 +93,28 @@ export default async function DiagnosticsPage() {
         Stage 0.5-R diagnostics verified
       </p>
       <section
+        aria-label="Stage 2-A read-only ad card quiz markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-300 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 2-A Read-Only Ad Card · Quiz · Kakao Feasibility (current)
+        </p>
+        <p>stage2ABuild=stage2a-readonly-ad-card-quiz-kakao-feasibility-production</p>
+        <p>stage2AReadOnlyMode=true</p>
+        <p>stage2APointLedgerMutation=false</p>
+        <p>stage2AQuizAnswerClientExposure=false</p>
+        <p>stage2AServiceRoleUsed=false</p>
+        <p>stage2AAdViewsMutation=false</p>
+        <p>stage2AConsumerAdRoute=/consumer/ads</p>
+        <p>stage2AQuizSubmitEnabled=false</p>
+        <p>stage2ARewardPreviewOnly=true</p>
+        <p>stage2AKakaoNotificationActualSend=false</p>
+        <p>stage2AKakaoApiIntegrated=false</p>
+        <p>stage2AKakaoFeasibilityDocumented=true</p>
+        <p>stage2AKakaoFutureStage=Stage 2-D / Stage 5-K</p>
+        <p>stage2ADeployCommit={deployCommit}</p>
+      </section>
+      <section
         aria-label="Stage 1-F-R MOIS region source alignment markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
       >
