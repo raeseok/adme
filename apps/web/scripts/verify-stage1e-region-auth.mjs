@@ -124,7 +124,8 @@ async function saveFullProfile(page, label) {
 
   const body = await page.locator("body").innerText();
   if (!body.includes("소비 의향 프로필이 저장되었습니다")) {
-    throw new Error(`${label} save failed — body snippet: ${body.slice(0, 500)}`);
+    const errMatch = body.match(/지역|선택|오류|실패|필요/);
+    throw new Error(`${label}: save failed — ${errMatch?.[0] ?? "no success message"}`);
   }
   assertNotContains(body, "소비 규모 범위", `${label} no spend range`);
 

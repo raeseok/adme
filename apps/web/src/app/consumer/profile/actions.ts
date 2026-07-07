@@ -12,8 +12,7 @@ import type {
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
 import { createClient } from "@/lib/supabase/server";
-import { getSavableRegionIds } from "@/lib/regions/region-options";
-import { fetchAllActiveRegions } from "@/lib/regions/fetch-regions";
+import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -107,25 +106,51 @@ async function validateSavableRegionIds(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
   input: SaveConsumerProfileInput,
 ): Promise<string | null> {
-  const { rows, error } = await fetchAllActiveRegions(supabase);
+  const activityIds = [
+    input.activitySlot1RegionId,
+    input.activitySlot2RegionId,
+  ].filter((id) => id.length > 0);
+  const allIds = [input.residenceRegionId, ...activityIds];
+
+  const { data: rows, error } = await supabase
+    .from("regions")
+    .select("id, parent_id, is_active")
+    .in("id", allIds)
+    .eq("is_active", true);
 
   if (error) {
     return "지역 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.";
   }
 
-  const savable = getSavableRegionIds(rows);
+  if (!rows || rows.length !== allIds.length) {
+    return "선택한 지역을 찾을 수 없습니다. 다시 선택해 주세요.";
+  }
 
-  if (!savable.has(input.residenceRegionId)) {
+  const { data: childRows, error: childError } = await supabase
+    .from("regions")
+    .select("parent_id")
+    .in("parent_id", allIds)
+    .eq("is_active", true);
+
+  if (childError) {
+    return "지역 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+  }
+
+  const parentsWithActiveChildren = new Set(
+    (childRows ?? []).map((row) => row.parent_id as string),
+  );
+
+  const residence = rows.find((r) => r.id === input.residenceRegionId);
+  if (
+    !residence?.parent_id ||
+    parentsWithActiveChildren.has(input.residenceRegionId)
+  ) {
     return "주거지역은 시·군·구 또는 읍·면·동 단위까지 선택해 주세요.";
   }
 
-  const activityIds = [
-    input.activitySlot1RegionId,
-    input.activitySlot2RegionId,
-  ].filter((id) => id.length > 0);
-
   for (const id of activityIds) {
-    if (!savable.has(id)) {
+    const row = rows.find((r) => r.id === id);
+    if (!row?.parent_id || parentsWithActiveChildren.has(id)) {
       return "주활동지역은 시·군·구 또는 읍·면·동 단위까지 선택해 주세요.";
     }
   }
