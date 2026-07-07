@@ -51,12 +51,16 @@ function isNonEmptyName(name: string | null | undefined): boolean {
   return typeof name === "string" && name.trim().length > 0;
 }
 
+function isSelectableRegion(row: RegionRow): boolean {
+  return row.is_active !== false && row.is_selectable !== false;
+}
+
 export function buildRegionHierarchyIndex(rows: RegionRow[]): RegionHierarchyIndex {
   const byId = new Map(rows.map((r) => [r.id, r]));
-  const activeRows = rows.filter((r) => r.is_active !== false);
+  const selectableRows = rows.filter(isSelectableRegion);
   const childIds = new Map<string, string[]>();
 
-  for (const row of activeRows) {
+  for (const row of selectableRows) {
     if (!row.parent_id) continue;
     const siblings = childIds.get(row.parent_id) ?? [];
     siblings.push(row.id);
@@ -73,7 +77,7 @@ export function buildRegionHierarchyIndex(rows: RegionRow[]): RegionHierarchyInd
     childIds.set(parentId, ids);
   }
 
-  const sidoRows = activeRows
+  const sidoRows = selectableRows
     .filter((r) => !r.parent_id && isNonEmptyName(r.name))
     .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, "ko"));
 
@@ -145,7 +149,7 @@ export function getSavableRegionIds(rows: RegionRow[]): Set<string> {
 
   for (const row of rows) {
     if (!row.parent_id) continue;
-    if (row.is_active === false) continue;
+    if (!isSelectableRegion(row)) continue;
     const childCount = index.childIds.get(row.id)?.length ?? 0;
     if (childCount > 0) continue;
     if (getRegionPath(row, index).length >= 2) {
@@ -243,11 +247,19 @@ export function parseRegionSelectionFromId(
 
   if (!regionId) return empty;
 
-  const index = buildRegionHierarchyIndex(rows);
-  const row = index.byId.get(regionId);
+  const byId = new Map(rows.filter((r) => r.is_active !== false).map((r) => [r.id, r]));
+  const row = byId.get(regionId);
   if (!row) return empty;
 
-  const path = getRegionPath(row, index);
+  const path: RegionRow[] = [row];
+  let current = row;
+  while (current.parent_id) {
+    const parent = byId.get(current.parent_id);
+    if (!parent) break;
+    path.unshift(parent);
+    current = parent;
+  }
+
   if (path.length < 2) return empty;
 
   const sido = path[0];
@@ -276,32 +288,46 @@ const REPRESENTATIVE_MUNICIPALITY_CODES = [
   "KR-45-JEONGEUP",
 ] as const;
 
-export function countRegionLevels(rows: RegionRow[]) {
+export function countRegionLevels(rows: RegionRow[], canonicalOnly = false) {
   const active = rows.filter((r) => r.is_active !== false);
-  const sido = active.filter((r) => r.region_level === "sido" || !r.parent_id).length;
-  const sigungu = active.filter((r) => r.region_level === "sigungu").length;
-  const dong = active.filter((r) => r.region_level === "dong").length;
-  return { sido, sigungu, dong, total: active.length };
+  const scoped = canonicalOnly
+    ? active.filter((r) => r.source_kind === "mois-kikcd-h" && r.is_selectable !== false)
+    : active;
+  const sido = scoped.filter((r) => r.region_level === "sido" || !r.parent_id).length;
+  const sigungu = scoped.filter((r) => r.region_level === "sigungu").length;
+  const dong = scoped.filter((r) => r.region_level === "dong").length;
+  return { sido, sigungu, dong, total: scoped.length };
 }
 
-export function assessHierarchicalSeedCoverage(
+export function assessCanonicalAdminSeedCoverage(
   rows: RegionRow[],
 ): "partial" | "adequate" | "full" | "unknown" {
   if (rows.length === 0) return "unknown";
-  const counts = countRegionLevels(rows);
+  const counts = countRegionLevels(rows, true);
+  const hasJeonnamGwangju = rows.some(
+    (r) =>
+      r.source_kind === "mois-kikcd-h" &&
+      r.is_selectable !== false &&
+      (r.code === "KR-H-1200000000" || r.path_key === "전남광주통합특별시"),
+  );
   const legacyPresent = REPRESENTATIVE_MUNICIPALITY_CODES.every((code) =>
     rows.some((r) => r.code === code),
   );
   if (
+    hasJeonnamGwangju &&
     legacyPresent &&
-    counts.sido >= 17 &&
+    counts.sido >= 16 &&
     counts.sigungu >= 250 &&
     counts.dong >= 3000
   ) {
     return "full";
   }
-  if (legacyPresent && counts.sigungu >= 30) {
-    return "adequate";
-  }
+  if (counts.sigungu >= 30) return "adequate";
   return "partial";
+}
+
+export function assessHierarchicalSeedCoverage(
+  rows: RegionRow[],
+): "partial" | "adequate" | "full" | "unknown" {
+  return assessCanonicalAdminSeedCoverage(rows);
 }

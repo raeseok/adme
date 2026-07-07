@@ -9,7 +9,7 @@ import {
   isSupabaseUrlConfigured,
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
-import { STAGE1F_SOURCE } from "@/lib/regions/stage1f-source";
+import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -85,6 +85,7 @@ export default async function DiagnosticsPage() {
     process.env.STAGE1DA_KAKAO_OAUTH_E2E ?? "not_tested";
   const stage1FCoverage = pageData.hierarchicalSeedCoverage;
   const stage1FCounts = pageData.regionLevelCounts;
+  const molitBaselinePreserved = pageData.molitLegalDongBaselinePreserved;
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -92,18 +93,22 @@ export default async function DiagnosticsPage() {
         Stage 0.5-R diagnostics verified
       </p>
       <section
-        aria-label="Stage 1-F region seed full coverage markers"
-        className="mt-4 space-y-1 rounded-lg border border-dashed border-cyan-300 bg-cyan-50 px-3 py-3 font-mono text-xs text-cyan-950"
+        aria-label="Stage 1-F-R MOIS region source alignment markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
       >
         <p className="font-sans text-sm font-semibold">
-          Stage 1-F Region Seed Full Coverage (current)
+          Stage 1-F-R MOIS Region Source Alignment (current)
         </p>
-        <p>stage-1-f-region-seed-full-coverage</p>
+        <p>stage-1-f-r-mois-region-source-alignment</p>
         <p>stage1FRegionSeedCoverage={stage1FCoverage}</p>
+        <p>stage1FCanonicalRegionSource={STAGE1F_R_SOURCE.canonicalRegionSource}</p>
         <p>stage1FRegionTreeStructure=parent-id</p>
-        <p>stage1FSourceKind={STAGE1F_SOURCE.sourceKind}</p>
-        <p>stage1FSourceEffectiveDate={STAGE1F_SOURCE.effectiveDate}</p>
-        <p>stage1FSourceSha256={STAGE1F_SOURCE.sha256Short}</p>
+        <p>stage1FSourceKind={STAGE1F_R_SOURCE.sourceKind}</p>
+        <p>stage1FSourceEffectiveDate={STAGE1F_R_SOURCE.effectiveDate}</p>
+        <p>stage1FSourceSha256={STAGE1F_R_SOURCE.zipSha256Short}</p>
+        <p>stage1FAdminDongSourceApplied=true</p>
+        <p>stage1FLegalDongMappingSourceApplied=true</p>
+        <p>stage1FMolitLegalDongBaselinePreserved={String(molitBaselinePreserved)}</p>
         <p>stage1FSidoCount={stage1FCounts.sido}</p>
         <p>stage1FSigunguCount={stage1FCounts.sigungu}</p>
         <p>stage1FDongCount={stage1FCounts.dong}</p>
@@ -117,7 +122,22 @@ export default async function DiagnosticsPage() {
         <p>stage1FQuizAnswerAccess=false</p>
         <p>stage1FDbResetExecuted=false</p>
         <p>stage1FDestructiveReset=false</p>
+        <p>stage1FDevProdSupabaseSeparated=false</p>
+        <p>stage1FRlsReadOnlySelectPolicyAdded=true</p>
+        <p>stage1FAnonWritePolicyAdded=false</p>
         <p>stage1FDeployCommit={deployCommit}</p>
+      </section>
+      <section
+        aria-label="Stage 1-F region seed full coverage markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-cyan-300 bg-cyan-50 px-3 py-3 font-mono text-xs text-cyan-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-F Region Seed Full Coverage (history)
+        </p>
+        <p>stage-1-f-region-seed-full-coverage</p>
+        <p>stage1FMolitBaselineKind={STAGE1F_R_SOURCE.molitBaselineKind}</p>
+        <p>stage1FMolitBaselineDate={STAGE1F_R_SOURCE.molitBaselineDate}</p>
+        <p>stage1FMolitBaselineSha256={STAGE1F_R_SOURCE.molitBaselineSha256Short}</p>
       </section>
       <dl className="space-y-3 text-sm">
         <div className="flex justify-between gap-4 border-b border-zinc-100 pb-2">

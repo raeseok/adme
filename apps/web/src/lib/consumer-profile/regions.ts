@@ -5,8 +5,11 @@ export type RegionRow = {
   parent_id: string | null;
   sort_order: number;
   is_active?: boolean;
+  is_selectable?: boolean;
+  source_kind?: string | null;
   region_level?: string | null;
   path_key?: string | null;
+  legal_code?: string | null;
 };
 
 export type RegionOption = {

@@ -1,4 +1,4 @@
-/** Stage 1-F official source metadata (from source-manifest.json at build time). */
+/** @deprecated Stage 1-F MOLIT baseline metadata — see stage1f-r-source.ts */
 export const STAGE1F_SOURCE = {
   provider: "molit-bjd-csv",
   sourceKind: "molit-legal-dong",

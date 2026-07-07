@@ -29,13 +29,11 @@ export default async function ConsumerProfilePage({
 
   let initialDraft = null;
 
-  const validRegionIds = new Set(pageData.savableRegionIds);
-
   if (isAuthenticated && supabase && user) {
     const loaded = await loadConsumerProfileDraft(
       supabase,
       user.id,
-      validRegionIds,
+      pageData.regionRows,
     );
     consumerProfileReadStatus = loaded.meta.consumerProfileReadStatus;
     initialDraft = loaded.draft;

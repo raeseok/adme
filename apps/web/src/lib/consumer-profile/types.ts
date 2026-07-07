@@ -35,6 +35,7 @@ export type ConsumerProfilePageData = {
     dong: number;
     total: number;
   };
+  molitLegalDongBaselinePreserved: boolean;
 };
 
 export type ConsumerProfileStage1CContext = {

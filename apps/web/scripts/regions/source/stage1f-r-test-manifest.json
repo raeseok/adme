@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-07-07T12:59:57.792Z",
+  "moisEffectiveDate": "2026-07-01",
+  "moisSha256": "0b9f143fb6e43657ff72c863ac1412cc4be43e79dce323aac602fb7754663898",
+  "canonicalSource": "mois-kikcd-h",
+  "counts": {
+    "adminTotal": 3899,
+    "adminActive": 3899,
+    "adminInactive": 0,
+    "adminSido": 16,
+    "adminSigungu": 280,
+    "adminDong": 3603,
+    "legalTotal": 20570,
+    "legalActive": 20570,
+    "mappingCount": 21390,
+    "skippedAdmin": 24,
+    "skippedLegal": 0,
+    "sourceRows": {
+      "kikcdH": 3923,
+      "kikcdB": 20570,
+      "kikmix": 21836
+    }
+  },
+  "changeChecks": {
+    "jeonnamGwangjuUnified": {
+      "applied": true,
+      "code": "1200000000",
+      "name": "전남광주통합특별시",
+      "gwangjuRemoved": true,
+      "jeonnamRemoved": true
+    },
+    "incheonSeoguLegal": {
+      "mappingSamples": [],
+      "legalCodesInB": [
+        {
+          "officialCode": "1150000000",
+          "name": "강서구",
+          "level": "sigungu",
+          "isActive": true,
+          "deletedAt": ""
+        },
+        {
+          "officialCode": "1224000000",
+          "name": "서구",
+          "level": "sigungu",
+          "isActive": true,
+          "deletedAt": ""
+        },
+        {
+          "officialCode": "2614000000",
+          "name": "서구",
+          "level": "sigungu",
+          "isActive": true,
+          "deletedAt": ""
+        }
+      ],
+      "note": "Legal code updates preserved on molit-legal-dong baseline rows"
+    },
+    "anyangAdminDong": {
+      "myeonghakApplied": true,
+      "byeongmokApplied": true,
+      "anyang8Removed": true,
+      "anyang9Removed": true,
+      "myeonghakCode": "4117158200",
+      "byeongmokCode": "4117158300"
+    }
+  },
+  "legacyCodes": [
+    "KR-11",
+    "KR-11-JONGNO",
+    "KR-11-JUNG",
+    "KR-11-YONGSAN",
+    "KR-11-SEONGDONG",
+    "KR-11-GWANGJIN",
+    "KR-11-DONGDAEMUN",
+    "KR-11-JUNGNANG",
+    "KR-11-SEONGBUK",
+    "KR-11-GANGBUK",
+    "KR-11-DOBONG",
+    "KR-11-NOWON",
+    "KR-11-EUNPYEONG",
+    "KR-11-MAPO",
+    "KR-11-YANGCHEON",
+    "KR-11-GANGSEO",
+    "KR-11-GURO",
+    "KR-11-GEUMCHEON",
+    "KR-11-YEONGDEUNGPO",
+    "KR-11-DONGJAK",
+    "KR-11-GWANAK",
+    "KR-11-SECHO",
+    "KR-11-GANGNAM",
+    "KR-11-SONGPA",
+    "KR-11-GANGDONG",
+    "KR-26",
+    "KR-27",
+    "KR-28",
+    "KR-29",
+    "KR-30",
+    "KR-31",
+    "KR-36",
+    "KR-41",
+    "KR-41-GOYANG",
+    "KR-41-GOYANG-DEYANG",
+    "KR-41-GOYANG-ILSANDONG",
+    "KR-42",
+    "KR-43",
+    "KR-44",
+    "KR-45",
+    "KR-46",
+    "KR-47",
+    "KR-48",
+    "KR-50",
+    "KR-44-TAEAN",
+    "KR-47-YEONGCHEON",
+    "KR-45-JEONGEUP"
+  ],
+  "testRegions": {
+    "jeonnamGwangju": {
+      "sido": "전남광주통합특별시",
+      "code": "KR-H-1200000000"
+    },
+    "metro": {
+      "sido": "서울특별시",
+      "sigungu": "강남구",
+      "code": "KR-11-GANGNAM"
+    },
+    "anyang": {
+      "sido": "경기도",
+      "sigungu": "안양시 만안구",
+      "dong": "명학동"
+    },
+    "gun": {
+      "sido": "충청남도",
+      "sigungu": "태안군",
+      "code": "KR-44-TAEAN"
+    }
+  }
+}

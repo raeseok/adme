@@ -1,4 +1,9 @@
-# Official source artifacts — download via fetch-official-region-source.mjs
+# Official source artifacts — download via fetch scripts
 *.csv
 *.zip
 parsed-regions.json
+parsed-mois-regions.json
+mois-source-manifest.json
+mois-article-debug.html
+jscode20260701/
+jscode20260701.zip

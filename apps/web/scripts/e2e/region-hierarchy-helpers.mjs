@@ -216,6 +216,7 @@ export async function assertNoStageMarkers(page, label) {
   const body = await page.locator("body").innerText();
   const forbidden = [
     "stage-1-f-region-seed-full-coverage",
+    "stage-1-f-r-mois-region-source-alignment",
     "stage-1-e-region-hierarchical-selector",
     "stage-1-e-r-region-auth-verification",
     "stage1FRegionSeedCoverage=",

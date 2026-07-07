@@ -12,7 +12,6 @@ import type {
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
 import { createClient } from "@/lib/supabase/server";
-import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -114,7 +113,7 @@ async function validateSavableRegionIds(
 
   const { data: rows, error } = await supabase
     .from("regions")
-    .select("id, parent_id, is_active")
+    .select("id, parent_id, is_active, is_selectable")
     .in("id", allIds)
     .eq("is_active", true);
 
@@ -126,11 +125,16 @@ async function validateSavableRegionIds(
     return "선택한 지역을 찾을 수 없습니다. 다시 선택해 주세요.";
   }
 
+  if (rows.some((r) => r.is_selectable === false)) {
+    return "선택할 수 없는 지역이 포함되어 있습니다. 목록에서 다시 선택해 주세요.";
+  }
+
   const { data: childRows, error: childError } = await supabase
     .from("regions")
     .select("parent_id")
     .in("parent_id", allIds)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .eq("is_selectable", true);
 
   if (childError) {
     return "지역 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.";

@@ -23,6 +23,11 @@
     "verify:stage1e-rls-ab": "node scripts/verify-stage1e-rls-ab.mjs",
     "verify:stage1f-region-seed-coverage": "node scripts/verify-stage1f-region-seed-coverage.mjs",
     "smoke:stage1f-region-ui": "node scripts/smoke-stage1f-region-ui.mjs",
+    "verify:stage1f-r-mois-source": "node scripts/verify-stage1f-r-mois-source.mjs",
+    "smoke:stage1f-r-region-ui": "node scripts/smoke-stage1f-r-region-ui.mjs",
+    "regions:fetch-mois": "node scripts/regions/fetch-mois-region-source.mjs",
+    "regions:parse-mois": "node scripts/regions/parse-mois-regions.mjs",
+    "regions:generate-seed-r": "node scripts/regions/generate-stage1f-r-region-seed-sql.mjs",
     "regions:fetch-source": "node scripts/regions/fetch-official-region-source.mjs",
     "regions:parse": "node scripts/regions/parse-official-regions.mjs",
     "regions:generate-seed": "node scripts/regions/generate-stage1f-region-seed-sql.mjs"
@@ -41,6 +46,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "iconv-lite": "^0.7.3",
     "playwright": "^1.51.1",
     "tailwindcss": "^4",
     "typescript": "^5"

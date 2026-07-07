@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 const REGION_SELECT =
-  "id, code, name, parent_id, sort_order, is_active, region_level, path_key";
+  "id, code, name, parent_id, sort_order, is_active, is_selectable, source_kind, region_level, path_key, legal_code";
 const PAGE_SIZE = 1000;
 
 export type RegionLevelCounts = {
@@ -12,7 +12,7 @@ export type RegionLevelCounts = {
   total: number;
 };
 
-async function countByLevel(
+async function countCanonicalByLevel(
   supabase: SupabaseClient,
   level: "sido" | "sigungu" | "dong",
 ) {
@@ -20,18 +20,20 @@ async function countByLevel(
     .from("regions")
     .select("*", { count: "exact", head: true })
     .eq("is_active", true)
+    .eq("is_selectable", true)
+    .eq("source_kind", "mois-kikcd-h")
     .eq("region_level", level);
   return result.error ? 0 : (result.count ?? 0);
 }
 
-/** Count-only query — works without loading full tree (diagnostics-friendly). */
-export async function fetchRegionLevelCounts(
+/** Count-only query — canonical MOIS admin-dong tree (diagnostics-friendly). */
+export async function fetchCanonicalRegionLevelCounts(
   supabase: SupabaseClient,
 ): Promise<{ counts: RegionLevelCounts; error: boolean }> {
   const [sido, sigungu, dong] = await Promise.all([
-    countByLevel(supabase, "sido"),
-    countByLevel(supabase, "sigungu"),
-    countByLevel(supabase, "dong"),
+    countCanonicalByLevel(supabase, "sido"),
+    countCanonicalByLevel(supabase, "sigungu"),
+    countCanonicalByLevel(supabase, "dong"),
   ]);
   if (sido === 0 && sigungu === 0 && dong === 0) {
     return { counts: { sido: 0, sigungu: 0, dong: 0, total: 0 }, error: true };

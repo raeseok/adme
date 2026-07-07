@@ -11,33 +11,33 @@ import {
   buildRegionOptions,
   type RegionRow,
 } from "./regions";
-import { getSavableRegionIds, countRegionLevels } from "@/lib/regions/region-options";
+import { getSavableRegionIds, countRegionLevels, assessCanonicalAdminSeedCoverage } from "@/lib/regions/region-options";
 import {
   fetchAllActiveRegions,
-  fetchRegionLevelCounts,
+  fetchCanonicalRegionLevelCounts,
   type RegionLevelCounts,
 } from "@/lib/regions/fetch-regions";
-import { STAGE1F_LEGACY_CODES } from "@/lib/regions/stage1f-source";
+import { STAGE1F_R_LEGACY_CODES } from "@/lib/regions/stage1f-r-source";
 
 function assessHierarchicalSeedCoverageFromCounts(
   counts: RegionLevelCounts,
   rows: RegionRow[],
 ): "partial" | "adequate" | "full" | "unknown" {
-  if (counts.total === 0) return "unknown";
-  const legacyPresent = STAGE1F_LEGACY_CODES.every((code) =>
+  if (counts.total === 0) return assessCanonicalAdminSeedCoverage(rows);
+  const coverage = assessCanonicalAdminSeedCoverage(rows);
+  if (coverage !== "unknown") return coverage;
+  const legacyPresent = STAGE1F_R_LEGACY_CODES.every((code) =>
     rows.some((r) => r.code === code),
   );
   if (
     legacyPresent &&
-    counts.sido >= 17 &&
+    counts.sido >= 16 &&
     counts.sigungu >= 250 &&
     counts.dong >= 3000
   ) {
     return "full";
   }
-  if (legacyPresent && counts.sigungu >= 30) {
-    return "adequate";
-  }
+  if (legacyPresent && counts.sigungu >= 30) return "adequate";
   return "partial";
 }
 
@@ -60,12 +60,13 @@ export async function getConsumerProfilePageData(
       basicMunicipalitySeedCoverage: "unknown",
       hierarchicalSeedCoverage: "unknown",
       regionLevelCounts: { sido: 0, sigungu: 0, dong: 0, total: 0 },
+      molitLegalDongBaselinePreserved: false,
     };
   }
 
   const [regionsFetch, levelCountsFetch, categoriesResult] = await Promise.all([
     fetchAllActiveRegions(supabase),
-    fetchRegionLevelCounts(supabase),
+    fetchCanonicalRegionLevelCounts(supabase),
     supabase
       .from("interest_categories")
       .select("id, code, name, sort_order")
@@ -87,7 +88,7 @@ export async function getConsumerProfilePageData(
   const regionLevelCounts =
     !levelCountsFetch.error && levelCountsFetch.counts.total > 0
       ? levelCountsFetch.counts
-      : countRegionLevels(regionRows);
+      : countRegionLevels(regionRows, true);
   const hierarchicalSeedCoverage =
     regionLevelCounts.total > 0
       ? assessHierarchicalSeedCoverageFromCounts(regionLevelCounts, regionRows)
@@ -114,6 +115,11 @@ export async function getConsumerProfilePageData(
         }))
       : [];
 
+  const molitLegalDongBaselinePreserved =
+    regionRows.filter(
+      (r) => r.source_kind === "molit-legal-dong" || r.code.startsWith("KR-L-"),
+    ).length >= 5000;
+
   return {
     regions,
     regionRows,
@@ -129,6 +135,7 @@ export async function getConsumerProfilePageData(
     basicMunicipalitySeedCoverage,
     hierarchicalSeedCoverage,
     regionLevelCounts,
+    molitLegalDongBaselinePreserved,
   };
 }
 
@@ -162,7 +169,7 @@ function normalizeInterestScope(raw: string | null | undefined): InterestScopeVa
 export async function loadConsumerProfileDraft(
   supabase: SupabaseClient,
   userId: string,
-  validRegionIds?: ReadonlySet<string>,
+  knownRegionRows?: RegionRow[],
 ): Promise<{ draft: ConsumerProfileDraft | null; meta: ConsumerProfileReadMeta }> {
   const { data: profile, error: profileError } = await supabase
     .from("consumer_profiles")
@@ -202,6 +209,8 @@ export async function loadConsumerProfileDraft(
   let activitySlot2RegionId = "";
   let legacyResidenceRegionId: string | null = null;
 
+  const knownRegionIds = new Set(knownRegionRows?.map((r) => r.id) ?? []);
+
   for (const row of regionsResult.data ?? []) {
     if (row.region_type === "residence") {
       residenceRegionId = row.region_id as string;
@@ -216,16 +225,20 @@ export async function loadConsumerProfileDraft(
     residenceRegionId = profile.region_id as string;
   }
 
-  if (validRegionIds && residenceRegionId && !validRegionIds.has(residenceRegionId)) {
+  if (
+    knownRegionRows &&
+    residenceRegionId &&
+    !knownRegionIds.has(residenceRegionId)
+  ) {
     legacyResidenceRegionId = residenceRegionId;
     residenceRegionId = "";
   }
 
-  if (validRegionIds) {
-    if (activitySlot1RegionId && !validRegionIds.has(activitySlot1RegionId)) {
+  if (knownRegionRows) {
+    if (activitySlot1RegionId && !knownRegionIds.has(activitySlot1RegionId)) {
       activitySlot1RegionId = "";
     }
-    if (activitySlot2RegionId && !validRegionIds.has(activitySlot2RegionId)) {
+    if (activitySlot2RegionId && !knownRegionIds.has(activitySlot2RegionId)) {
       activitySlot2RegionId = "";
     }
   }
@@ -262,7 +275,6 @@ export async function loadConsumerProfileSummary(
   pageData: ConsumerProfilePageData;
 }> {
   const pageData = await getConsumerProfilePageData(supabase);
-  const validRegionIds = new Set(pageData.savableRegionIds);
-  const loaded = await loadConsumerProfileDraft(supabase, userId, validRegionIds);
+  const loaded = await loadConsumerProfileDraft(supabase, userId, pageData.regionRows);
   return { ...loaded, pageData };
 }
