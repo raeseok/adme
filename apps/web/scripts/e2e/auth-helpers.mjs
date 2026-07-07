@@ -1,6 +1,7 @@
 /**
  * Auth helpers for Production E2E — never log passwords or full emails.
  */
+import { randomBytes } from "node:crypto";
 
 export function maskEmail(email) {
   const [local, domain] = email.split("@");
@@ -20,21 +21,36 @@ export function loadTestCredentials() {
   return { userA, userB };
 }
 
-export function requireUserACredentials(userA) {
-  if (!userA.email || !userA.password) {
-    console.error("FAIL: credentials_missing — set ADME_TEST_EMAIL_A and ADME_TEST_PASSWORD_A");
-    return false;
-  }
-  return true;
-}
+/**
+ * Prefer ADME_TEST_* env vars. When unset, create ephemeral test-only accounts.
+ */
+export function resolveTestCredentials() {
+  const loaded = loadTestCredentials();
+  const hasA = Boolean(loaded.userA.email && loaded.userA.password);
+  const hasB = Boolean(loaded.userB.email && loaded.userB.password);
 
-export function requireBothCredentials(userA, userB) {
-  if (!requireUserACredentials(userA)) return false;
-  if (!userB.email || !userB.password) {
-    console.error("FAIL: credentials_missing — set ADME_TEST_EMAIL_B and ADME_TEST_PASSWORD_B");
-    return false;
+  if (hasA && hasB) {
+    console.log("INFO: Using configured User A / User B test credentials");
+    return { ...loaded, source: "env" };
   }
-  return true;
+
+  const ts = Date.now();
+  const ephemeral = {
+    userA: {
+      email: `stage1e-a-${ts}@example.com`,
+      password: randomBytes(16).toString("base64url"),
+    },
+    userB: {
+      email: `stage1e-b-${ts}@example.com`,
+      password: randomBytes(16).toString("base64url"),
+    },
+    source: "ephemeral",
+  };
+
+  console.log(
+    `INFO: ADME_TEST_* unset — ephemeral User A/B signup (${maskEmail(ephemeral.userA.email)}, ${maskEmail(ephemeral.userB.email)})`,
+  );
+  return ephemeral;
 }
 
 export async function loginWithEmail(page, baseUrl, label, email, password) {
@@ -51,12 +67,37 @@ export async function loginWithEmail(page, baseUrl, label, email, password) {
 
   const body = await page.locator("body").innerText();
   if (!body.includes("로그인됨")) {
-    throw new Error(`${label}: login failed for User ${label.includes("B") ? "B" : "A"}`);
+    throw new Error(`${label}: login failed`);
   }
   if (!body.includes("***@")) {
     throw new Error(`${label}: masked email not shown`);
   }
   console.log(`PASS: ${label} — User login ok (email masked)`);
+}
+
+export async function signupOrLogin(page, baseUrl, label, email, password) {
+  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "계정이 없으신가요? 회원가입" }).click();
+  await page.locator('input[type="email"]').fill(email);
+  await page.locator('input[type="password"]').fill(password);
+  await page.getByRole("button", { name: "회원가입" }).click();
+  await page.waitForURL("**/consumer/profile**", { timeout: 25000 }).catch(() => null);
+  await page.waitForTimeout(1500);
+
+  const body = await page.locator("body").innerText();
+  if (body.includes("로그인됨")) {
+    console.log(`PASS: ${label} — User signup ok (email masked)`);
+    return;
+  }
+
+  if (!page.url().includes("/auth/login")) {
+    await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
+  }
+  await loginWithEmail(page, baseUrl, label, email, password);
+}
+
+export async function authenticateUser(page, baseUrl, label, email, password) {
+  await signupOrLogin(page, baseUrl, label, email, password);
 }
 
 export async function gotoProfile(page, baseUrl) {

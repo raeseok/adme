@@ -59,7 +59,7 @@ check("diagnostics", files.diagnostics, [
 
 check("region-auth verify", files.regionAuth, [
   "ADME_TEST_EMAIL_A",
-  "credentials_missing",
+  "resolveTestCredentials",
   "REGION_SELECTOR_IDS",
   "selectRegionHierarchy",
 ]);
@@ -67,7 +67,7 @@ check("region-auth verify", files.regionAuth, [
 check("rls-ab verify", files.rlsAb, [
   "ADME_TEST_EMAIL_A",
   "ADME_TEST_EMAIL_B",
-  "credentials_missing",
+  "resolveTestCredentials",
   "selectRegionHierarchy",
 ]);
 

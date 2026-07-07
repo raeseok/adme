@@ -16,10 +16,9 @@ import {
 } from "./e2e/region-hierarchy-helpers.mjs";
 import {
   gotoProfile,
-  loadTestCredentials,
-  loginWithEmail,
+  resolveTestCredentials,
+  authenticateUser,
   logoutFromProfile,
-  requireBothCredentials,
   verifyAnonymousSaveBlocked,
 } from "./e2e/auth-helpers.mjs";
 
@@ -108,11 +107,11 @@ async function runAbFlow(page, viewportLabel) {
     useAllInterests: true,
   };
 
-  const { userA, userB } = loadTestCredentials();
+  const { userA, userB } = resolveTestCredentials();
 
   console.log(`\n=== ${viewportLabel} A/B RLS flow ===`);
 
-  await loginWithEmail(page, BASE, `${viewportLabel} User A login`, userA.email, userA.password);
+  await authenticateUser(page, BASE, `${viewportLabel} User A login`, userA.email, userA.password);
   const snapshotA = await saveUserProfile(page, `${viewportLabel} User A save`, profileA);
 
   await page.reload({ waitUntil: "networkidle" });
@@ -123,7 +122,7 @@ async function runAbFlow(page, viewportLabel) {
   await logoutFromProfile(page, BASE, `${viewportLabel} User A logout`);
   await verifyAnonymousSaveBlocked(page, `${viewportLabel} anon block`);
 
-  await loginWithEmail(page, BASE, `${viewportLabel} User B login`, userB.email, userB.password);
+  await authenticateUser(page, BASE, `${viewportLabel} User B login`, userB.email, userB.password);
   await verifyUserBNoLeak(page, `${viewportLabel} User B no leak`, snapshotA);
   const snapshotB = await saveUserProfile(page, `${viewportLabel} User B save`, profileB);
 
@@ -133,17 +132,11 @@ async function runAbFlow(page, viewportLabel) {
 
   await logoutFromProfile(page, BASE, `${viewportLabel} User B logout`);
 
-  await loginWithEmail(page, BASE, `${viewportLabel} User A relogin`, userA.email, userA.password);
+  await authenticateUser(page, BASE, `${viewportLabel} User A relogin`, userA.email, userA.password);
   const snapshotA2 = await getProfileFormSnapshot(page);
   assertRegionSnapshotEquals(snapshotA2.residence, snapshotA.residence, `${viewportLabel} User A re-login`);
   assertRegionSnapshotDiffers(snapshotA2.residence, snapshotB.residence, `${viewportLabel} User A no B leak`);
   console.log(`PASS: ${viewportLabel} — full A/B RLS isolation`);
-}
-
-const { userA, userB } = loadTestCredentials();
-if (!requireBothCredentials(userA, userB)) {
-  console.error("FAIL: credentials_missing — set ADME_TEST_EMAIL_A/B and passwords");
-  process.exit(2);
 }
 
 const browser = await chromium.launch();

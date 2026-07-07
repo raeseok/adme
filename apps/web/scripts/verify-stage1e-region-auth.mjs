@@ -18,10 +18,9 @@ import {
 } from "./e2e/region-hierarchy-helpers.mjs";
 import {
   gotoProfile,
-  loadTestCredentials,
-  loginWithEmail,
+  resolveTestCredentials,
+  authenticateUser,
   logoutFromProfile,
-  requireUserACredentials,
   verifyAnonymousSaveBlocked,
 } from "./e2e/auth-helpers.mjs";
 
@@ -152,8 +151,7 @@ async function verifyViewportProfile(page, viewportLabel, width, height) {
   console.log(`PASS: ${viewportLabel} — viewport ${width}x${height}`);
 }
 
-const { userA } = loadTestCredentials();
-const hasCredentials = requireUserACredentials(userA);
+const { userA } = resolveTestCredentials();
 
 const browser = await chromium.launch();
 let authPassed = false;
@@ -173,40 +171,35 @@ try {
 
   await verifyDiagnosticsStage1E(page, "desktop");
 
-  if (!hasCredentials) {
-    console.log("\nSKIP: authenticated save/reload — credentials_missing");
-    process.exitCode = 2;
-  } else {
-    await loginWithEmail(page, BASE, "User A login", userA.email, userA.password);
+  await authenticateUser(page, BASE, "User A login", userA.email, userA.password);
 
-    await verifySidoOnlyIncomplete(page, "User A sido-only");
-    const saved = await saveFullProfile(page, "User A save");
+  await verifySidoOnlyIncomplete(page, "User A sido-only");
+  const saved = await saveFullProfile(page, "User A save");
 
-    await page.reload({ waitUntil: "networkidle" });
-    const reloaded = await getProfileFormSnapshot(page);
-    assertRegionSnapshotEquals(reloaded.residence, saved.residence, "User A residence reload");
-    assertRegionSnapshotEquals(reloaded.activity1, saved.activity1, "User A activity1 reload");
-    assertRegionSnapshotEquals(reloaded.activity2, saved.activity2, "User A activity2 reload");
+  await page.reload({ waitUntil: "networkidle" });
+  const reloaded = await getProfileFormSnapshot(page);
+  assertRegionSnapshotEquals(reloaded.residence, saved.residence, "User A residence reload");
+  assertRegionSnapshotEquals(reloaded.activity1, saved.activity1, "User A activity1 reload");
+  assertRegionSnapshotEquals(reloaded.activity2, saved.activity2, "User A activity2 reload");
 
-    if (reloaded.birthYear !== saved.birthYear || reloaded.gender !== saved.gender) {
-      throw new Error("User A reload: birth year or gender mismatch");
-    }
-    if (reloaded.completionPercent !== 100) {
-      throw new Error(`User A reload: completion ${reloaded.completionPercent}%`);
-    }
-    console.log("PASS: User A — full profile reload persistence");
-
-    await logoutFromProfile(page, BASE, "User A logout");
-    await verifyAnonymousSaveBlocked(page, "anonymous save");
-
-    authPassed = true;
-    console.log("\nStage 1-E-R region auth verification PASSED");
+  if (reloaded.birthYear !== saved.birthYear || reloaded.gender !== saved.gender) {
+    throw new Error("User A reload: birth year or gender mismatch");
   }
+  if (reloaded.completionPercent !== 100) {
+    throw new Error(`User A reload: completion ${reloaded.completionPercent}%`);
+  }
+  console.log("PASS: User A — full profile reload persistence");
+
+  await logoutFromProfile(page, BASE, "User A logout");
+  await verifyAnonymousSaveBlocked(page, "anonymous save");
+
+  authPassed = true;
+  console.log("\nStage 1-E-R2 region auth verification PASSED");
 } finally {
   await browser.close();
 }
 
-if (hasCredentials && !authPassed) {
+if (!authPassed) {
   process.exit(1);
 }
 
