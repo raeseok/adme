@@ -3,22 +3,22 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/auth/logout/actions";
-import { SPEND_RANGE_OPTIONS } from "@/lib/consumer-profile/constants";
+import {
+  buildBirthYearOptions,
+  GENDER_OPTIONS,
+  INTEREST_SCOPE_ALL,
+  INTEREST_SCOPE_SELECTED,
+} from "@/lib/consumer-profile/constants";
+import { computeProfileCompletion } from "@/lib/consumer-profile/completion";
 import type { ConsumerProfileDraft } from "@/lib/consumer-profile/page-data";
 import type {
   ConsumerProfilePageData,
   ConsumerProfileStage1CContext,
-  RegionOption,
   SaveConsumerProfileResult,
 } from "@/lib/consumer-profile/types";
 import { saveConsumerProfileAction } from "./actions";
 
 type SaveStatus = "idle" | "auth_required" | "saved" | "error";
-
-function regionLabel(regions: RegionOption[], id: string): string {
-  if (!id) return "(미선택)";
-  return regions.find((r) => r.id === id)?.label ?? id;
-}
 
 function mapSaveStatus(result: SaveConsumerProfileResult | null): SaveStatus {
   if (!result) return "idle";
@@ -45,6 +45,12 @@ export function ConsumerProfileForm({
   initialDraft: ConsumerProfileDraft | null;
   socialLogoutStatus?: "signed_out" | "not_tested" | "error";
 }) {
+  const [birthYear, setBirthYear] = useState<number | null>(
+    initialDraft?.birthYear ?? null,
+  );
+  const [gender, setGender] = useState<string | null>(
+    initialDraft?.gender ?? null,
+  );
   const [residenceRegionId, setResidenceRegionId] = useState(
     initialDraft?.residenceRegionId ?? "",
   );
@@ -54,10 +60,12 @@ export function ConsumerProfileForm({
   const [activitySlot2RegionId, setActivitySlot2RegionId] = useState(
     initialDraft?.activitySlot2RegionId ?? "",
   );
+  const [interestScope, setInterestScope] = useState(
+    initialDraft?.interestScope ?? INTEREST_SCOPE_SELECTED,
+  );
   const [categoryIds, setCategoryIds] = useState<string[]>(
     initialDraft?.categoryIds ?? [],
   );
-  const [spendRange, setSpendRange] = useState(initialDraft?.spendRange ?? "");
   const [saveResult, setSaveResult] = useState<SaveConsumerProfileResult | null>(
     null,
   );
@@ -65,9 +73,25 @@ export function ConsumerProfileForm({
   const [logoutPending, startLogout] = useTransition();
 
   const saveStatus = mapSaveStatus(saveResult);
-  const saveBlockedByAuth = saveStatus === "auth_required";
-  const mutationExecuted = saveResult?.mutationExecuted ?? false;
   const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
+  const birthYearOptions = useMemo(() => buildBirthYearOptions(), []);
+  const validRegionIds = useMemo(
+    () => new Set(pageData.regions.map((r) => r.id)),
+    [pageData.regions],
+  );
+
+  const completion = useMemo(
+    () =>
+      computeProfileCompletion({
+        birthYear,
+        gender,
+        residenceRegionId,
+        validRegionIds,
+        interestScope,
+        categoryIds,
+      }),
+    [birthYear, gender, residenceRegionId, validRegionIds, interestScope, categoryIds],
+  );
 
   const duplicateActivityWarning = useMemo(() => {
     const slots = [activitySlot1RegionId, activitySlot2RegionId].filter(Boolean);
@@ -77,21 +101,34 @@ export function ConsumerProfileForm({
     return null;
   }, [activitySlot1RegionId, activitySlot2RegionId]);
 
+  const legacyRegionWarning =
+    initialDraft?.legacyResidenceRegionId && !residenceRegionId
+      ? "기존 지역 정보가 새 지역 선택 기준(시·군·구)과 달라 다시 선택이 필요합니다."
+      : null;
+
   function toggleCategory(id: string) {
+    setInterestScope(INTEREST_SCOPE_SELECTED);
     setCategoryIds((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
     );
+  }
+
+  function selectAllInterests() {
+    setInterestScope(INTEREST_SCOPE_ALL);
+    setCategoryIds([]);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     startTransition(async () => {
       const result = await saveConsumerProfileAction({
+        birthYear,
+        gender,
         residenceRegionId,
         activitySlot1RegionId,
         activitySlot2RegionId,
+        interestScope,
         categoryIds,
-        spendRange,
       });
       setSaveResult(result);
     });
@@ -103,10 +140,6 @@ export function ConsumerProfileForm({
     });
   }
 
-  const pointLedgerMutation = saveResult?.pointLedgerMutation ?? false;
-  const quizAnswerAccess = saveResult?.quizAnswerAccess ?? false;
-  const serviceRoleUsed = saveResult?.serviceRoleUsed ?? false;
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -116,9 +149,25 @@ export function ConsumerProfileForm({
       <section className="space-y-2 rounded-lg bg-blue-50 px-3 py-3 text-sm text-blue-900">
         <p className="font-semibold">AdMe 소비 의향 프로필</p>
         <p className="text-blue-800">
-          이 정보는 개인 신원이 아닌 <strong>소비 의향</strong>입니다. 주거지역과
-          주활동지역은 광고 매칭에 사용되며, 주활동지역은 최대 2개까지 설정할 수
-          있습니다.
+          이 정보는 개인 신원이 아닌 <strong>소비 의향</strong>입니다. 출생년도·성별·
+          지역·관심정보는 광고 매칭에만 사용되며 광고주에게 개인 식별 정보로 제공되지
+          않습니다.
+        </p>
+      </section>
+
+      <section className="space-y-2 rounded-lg border border-zinc-200 bg-white px-3 py-3 text-sm">
+        <p className="font-semibold text-zinc-900">
+          소비 의향 프로필 완성도 {completion.percent}%
+        </p>
+        {completion.remainingLabels.length > 0 ? (
+          <p className="text-zinc-600">
+            남은 항목: {completion.remainingLabels.join(", ")}
+          </p>
+        ) : (
+          <p className="text-emerald-700">프로필 기본 항목이 모두 입력되었습니다.</p>
+        )}
+        <p className="text-xs text-zinc-500">
+          프로필을 완성하면 더 적합한 지역 소비 정보를 받을 수 있습니다.
         </p>
       </section>
 
@@ -154,9 +203,58 @@ export function ConsumerProfileForm({
       </section>
 
       <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">출생년도</legend>
+        <p className="text-xs text-zinc-500">
+          연령대 매칭에만 사용되며 광고주에게 개인 정보로 제공되지 않습니다.
+        </p>
+        <select
+          value={birthYear ?? ""}
+          onChange={(e) =>
+            setBirthYear(e.target.value ? Number(e.target.value) : null)
+          }
+          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+        >
+          <option value="">예: 1985</option>
+          {birthYearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">성별</legend>
+        <p className="text-xs text-zinc-500">
+          광고 매칭 정교도 향상에 사용되며 광고주에게 개인 식별 정보로 제공되지
+          않습니다.
+        </p>
+        <div className="space-y-2">
+          {GENDER_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
+            >
+              <input
+                type="radio"
+                name="gender"
+                value={opt.value}
+                checked={gender === opt.value}
+                onChange={() => setGender(opt.value)}
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">
-          주거지역 <span className="text-red-600">*</span> (최대 1개)
+          주거지역 (시·군·구, 최대 1개) <span className="text-red-600">*</span>
         </legend>
+        {legacyRegionWarning ? (
+          <p className="text-sm text-amber-700">{legacyRegionWarning}</p>
+        ) : null}
         {pageData.regionsEmpty ? (
           <p className="text-sm text-amber-700">
             지역 목록이 비어 있습니다.
@@ -181,7 +279,7 @@ export function ConsumerProfileForm({
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">
-          주활동지역 1 <span className="text-zinc-500">(선택)</span>
+          주활동지역 1 (시·군·구, 선택)
         </legend>
         <select
           value={activitySlot1RegionId}
@@ -199,7 +297,7 @@ export function ConsumerProfileForm({
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">
-          주활동지역 2 <span className="text-zinc-500">(선택)</span>
+          주활동지역 2 (시·군·구, 선택)
         </legend>
         <select
           value={activitySlot2RegionId}
@@ -220,7 +318,7 @@ export function ConsumerProfileForm({
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">
-          관심 분야 <span className="text-red-600">*</span> (다중 선택)
+          관심정보 <span className="text-red-600">*</span>
         </legend>
         {pageData.categoriesEmpty ? (
           <p className="text-sm text-amber-700">
@@ -231,8 +329,21 @@ export function ConsumerProfileForm({
           </p>
         ) : null}
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={selectAllInterests}
+            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+              interestScope === INTEREST_SCOPE_ALL
+                ? "border-blue-600 bg-blue-600 text-white"
+                : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
+            }`}
+          >
+            전체
+          </button>
           {pageData.categories.map((c) => {
-            const selected = categoryIds.includes(c.id);
+            const selected =
+              interestScope === INTEREST_SCOPE_SELECTED &&
+              categoryIds.includes(c.id);
             return (
               <button
                 key={c.id}
@@ -250,52 +361,6 @@ export function ConsumerProfileForm({
           })}
         </div>
       </fieldset>
-
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          소비 규모 범위 <span className="text-red-600">*</span>
-        </legend>
-        <div className="space-y-2">
-          {SPEND_RANGE_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
-            >
-              <input
-                type="radio"
-                name="spendRange"
-                value={opt.value}
-                checked={spendRange === opt.value}
-                onChange={() => setSpendRange(opt.value)}
-              />
-              {opt.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <section className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-800">
-        <p className="font-semibold">선택 항목 요약</p>
-        <ul className="mt-2 space-y-1 font-mono text-xs">
-          <li>residenceSelected={regionLabel(pageData.regions, residenceRegionId)}</li>
-          <li>
-            activitySlot1Selected=
-            {regionLabel(pageData.regions, activitySlot1RegionId)}
-          </li>
-          <li>
-            activitySlot2Selected=
-            {regionLabel(pageData.regions, activitySlot2RegionId)}
-          </li>
-          <li>selectedCategoryCount={categoryIds.length}</li>
-          <li>
-            spendRangeSelected=
-            {spendRange
-              ? (SPEND_RANGE_OPTIONS.find((o) => o.value === spendRange)?.label ??
-                spendRange)
-              : "(미선택)"}
-          </li>
-        </ul>
-      </section>
 
       <button
         type="submit"
@@ -321,39 +386,11 @@ export function ConsumerProfileForm({
         </p>
       ) : null}
 
-      <section
-        aria-label="Stage 1-B visible markers"
-        className="space-y-1 break-all rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700"
-      >
-        <p>stage1BRoute=/consumer/profile</p>
-        <p>stage1BAuthIncluded=false</p>
-        <p>stage1BAuthSeparatedTo=Stage 1-C</p>
-        <p>stage1BWriteContract=auth-gated-server-action</p>
-        <p>stage1BSaveStatus={saveStatus}</p>
-        {saveResult?.code === "AUTH_REQUIRED" ? (
-          <p>stage1BSaveCode=AUTH_REQUIRED</p>
-        ) : null}
-        <p>stage1BSaveBlockedByAuth={String(saveBlockedByAuth)}</p>
-        <p>stage1BMutationExecuted={String(mutationExecuted)}</p>
-        <p>stage1BRegionsReadStatus={pageData.regionsReadStatus}</p>
-        <p>stage1BCategoriesReadStatus={pageData.categoriesReadStatus}</p>
-        <p>stage1BRegionCount={pageData.regionCount}</p>
-        <p>stage1BCategoryCount={pageData.categoryCount}</p>
-        <p>stage1BRegionsEmpty={String(pageData.regionsEmpty)}</p>
-        <p>stage1BCategoriesEmpty={String(pageData.categoriesEmpty)}</p>
-        <p>stage1BResidenceMax=1</p>
-        <p>stage1BActivityMax=2</p>
-        <p>stage1BUsesConsumerRegions=true</p>
-        <p>stage1BPointLedgerMutation={String(pointLedgerMutation)}</p>
-        <p>stage1BQuizAnswerAccess={String(quizAnswerAccess)}</p>
-        <p>stage1BServiceRoleUsed={String(serviceRoleUsed)}</p>
-      </section>
-
       <Link
         href="/consumer"
         className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
       >
-        ← 소비자 화면으로
+        ← 소비자 홈으로
       </Link>
     </form>
   );

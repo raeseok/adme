@@ -49,7 +49,6 @@ async function verifyAnonymous(page, label) {
   await page.waitForTimeout(2500);
   const after = await page.locator("body").innerText();
   assertContains(after, "로그인이 필요합니다", `${label} auth required message`);
-  assertContains(after, "stage1BSaveStatus=auth_required", `${label} save status`);
   await checkNoHorizontalScroll(page, label);
 }
 
@@ -63,7 +62,7 @@ async function verifyLoginPage(page, label) {
   await checkNoHorizontalScroll(page, label);
 }
 
-async function isAuthenticatedOnProfile(body) {
+function isAuthenticatedOnProfile(body) {
   return body.includes("로그인됨") && !body.includes("로그인이 필요합니다. 로그인하기");
 }
 
@@ -142,8 +141,10 @@ async function verifyAuthenticatedSave(page, label, authResult) {
   assertContains(body, "로그인됨", `${label} authenticated`);
   assertContains(body, "***@", `${label} email masked`);
   assertNotContains(body, "stage1CSessionStatus", `${label} no stage1C markers`);
+  assertNotContains(body, "소비 규모 범위", `${label} no spend range UI`);
 
-  const regionOptions = await page.locator("select").first().locator("option").count();
+  const residenceSelect = page.locator("select").nth(1);
+  const regionOptions = await residenceSelect.locator("option").count();
   if (regionOptions <= 1) {
     throw new Error(`${label}: region options must be > 1 (got ${regionOptions})`);
   }
@@ -151,26 +152,25 @@ async function verifyAuthenticatedSave(page, label, authResult) {
 
   const categoryButtons = page
     .locator("fieldset")
-    .filter({ hasText: "관심 분야" })
+    .filter({ hasText: "관심정보" })
     .locator("button[type='button']");
   if ((await categoryButtons.count()) === 0) {
     throw new Error(`${label}: no category buttons found`);
   }
 
-  await page.locator("select").first().selectOption({ index: 1 });
+  await page.locator("select").first().selectOption("1985");
+  await page.getByRole("radio", { name: "남성" }).click();
+  await residenceSelect.selectOption({ index: 1 });
+
   const activitySelects = page.locator("select");
-  if ((await activitySelects.count()) >= 2) {
-    await activitySelects.nth(1).selectOption({ index: 1 });
-  }
   if ((await activitySelects.count()) >= 3) {
-    await activitySelects.nth(2).selectOption({ index: 2 });
+    await activitySelects.nth(2).selectOption({ index: 1 });
   }
-  if ((await activitySelects.count()) > 3) {
-    throw new Error(`${label}: unexpected activity slot 3+ UI`);
+  if ((await activitySelects.count()) >= 4) {
+    await activitySelects.nth(3).selectOption({ index: 2 });
   }
 
-  await categoryButtons.first().click();
-  await page.getByRole("radio", { name: "1만 원대" }).click();
+  await categoryButtons.nth(1).click();
 
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(4000);
@@ -181,10 +181,13 @@ async function verifyAuthenticatedSave(page, label, authResult) {
   await page.reload({ waitUntil: "networkidle" });
   const reloaded = await page.locator("body").innerText();
   assertContains(reloaded, "로그인됨", `${label} reload auth`);
-  if (reloaded.includes("residenceSelected=(미선택)")) {
+  assertContains(reloaded, "1985", `${label} birth year persisted`);
+
+  const residenceValue = await page.locator("select").nth(1).inputValue();
+  if (!residenceValue) {
     throw new Error(`${label}: residence not persisted after reload`);
   }
-  console.log(`PASS: ${label} — residence persisted after reload`);
+  console.log(`PASS: ${label} — profile persisted after reload`);
 
   await page.getByRole("button", { name: "로그아웃" }).click();
   await page.waitForTimeout(3000);

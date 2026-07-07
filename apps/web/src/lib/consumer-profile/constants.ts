@@ -29,3 +29,57 @@ export function intentToSpendRange(
   );
   return match?.value ?? "";
 }
+
+export const BIRTH_YEAR_MIN = 1900;
+
+export function getBirthYearMax(): number {
+  return new Date().getFullYear();
+}
+
+export function isValidBirthYear(value: number | null | undefined): boolean {
+  if (value == null) return false;
+  if (!Number.isInteger(value)) return false;
+  return value >= BIRTH_YEAR_MIN && value <= getBirthYearMax();
+}
+
+export function parseBirthYearInput(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isInteger(parsed)) return null;
+  return parsed;
+}
+
+export const GENDER_OPTIONS = [
+  { value: "male", label: "남성" },
+  { value: "female", label: "여성" },
+  { value: "undisclosed", label: "응답하지 않음" },
+] as const;
+
+export type GenderValue = (typeof GENDER_OPTIONS)[number]["value"];
+
+export function isGenderValue(value: string): value is GenderValue {
+  return GENDER_OPTIONS.some((o) => o.value === value);
+}
+
+export const INTEREST_SCOPE_ALL = "all" as const;
+export const INTEREST_SCOPE_SELECTED = "selected" as const;
+
+export type InterestScopeValue =
+  | typeof INTEREST_SCOPE_ALL
+  | typeof INTEREST_SCOPE_SELECTED;
+
+export function isInterestScopeValue(
+  value: string,
+): value is InterestScopeValue {
+  return value === INTEREST_SCOPE_ALL || value === INTEREST_SCOPE_SELECTED;
+}
+
+export function buildBirthYearOptions(): number[] {
+  const max = getBirthYearMax();
+  const years: number[] = [];
+  for (let y = max; y >= BIRTH_YEAR_MIN; y -= 1) {
+    years.push(y);
+  }
+  return years;
+}

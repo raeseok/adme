@@ -158,6 +158,35 @@ export default async function DiagnosticsPage() {
         <p>stage1DADeployCommit={deployCommit}</p>
       </section>
 
+      <section
+        aria-label="Stage 1-D-B consumer profile intent UX markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-sky-300 bg-sky-50 px-3 py-3 font-mono text-xs text-sky-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-D-B Consumer Profile Intent UX
+        </p>
+        <p>stage-1-d-b-consumer-profile-intent-ux</p>
+        <p>stage1DBProfileAxes=age,gender,region,interest</p>
+        <p>stage1DBBirthYearEnabled=true</p>
+        <p>stage1DBGenderEnabled=true</p>
+        <p>stage1DBRegionGranularity=basic_municipality</p>
+        <p>stage1DBProvinceOnlyOptionsVisible=false</p>
+        <p>stage1DBBasicMunicipalitySeedCoverage={pageData.basicMunicipalitySeedCoverage}</p>
+        <p>stage1DBSpendRangePublicUI=false</p>
+        <p>stage1DBSpendRangeLegacyPreserved=true</p>
+        <p>stage1DBInterestAllEnabled=true</p>
+        <p>stage1DBInterestScopeSupported=true</p>
+        <p>stage1DBInterestAllSaveSupported=true</p>
+        <p>stage1DBProfileCompletionEnabled=true</p>
+        <p>stage1DBConsumerHomeSkeleton=true</p>
+        <p>stage1DBResidenceMax=1</p>
+        <p>stage1DBActivityMax=2</p>
+        <p>stage1DBServiceRoleUsed=false</p>
+        <p>stage1DBPointLedgerMutation=false</p>
+        <p>stage1DBQuizAnswerAccess=false</p>
+        <p>stage1DBDeployCommit={deployCommit}</p>
+      </section>
+
       <section className="mt-4 space-y-1 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 font-mono text-xs text-zinc-700">
         <p>stage1CDiagnosticsAuthReady=true</p>
         <p>stage1CDiagnosticsServiceRoleUsed=false</p>

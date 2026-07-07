@@ -31,6 +31,7 @@ const forbiddenInLogin = [
 ];
 
 const forbiddenInProfile = [
+  "stage1B",
   "stage1CProfileRoute",
   "stage1CSessionStatus",
   "stage1DSocialProvider",
@@ -38,6 +39,7 @@ const forbiddenInProfile = [
   "stage-1-c-authenticated",
   "stage-1-d-",
   "stage1DServiceRoleUsed",
+  "소비 규모 범위",
 ];
 
 const requiredInDiagnostics = [

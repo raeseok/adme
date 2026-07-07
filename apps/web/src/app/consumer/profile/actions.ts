@@ -1,8 +1,11 @@
 "use server";
 
 import {
-  isSpendRangeValue,
-  spendRangeToIntent,
+  getBirthYearMax,
+  BIRTH_YEAR_MIN,
+  isGenderValue,
+  isInterestScopeValue,
+  INTEREST_SCOPE_ALL,
 } from "@/lib/consumer-profile/constants";
 import type {
   SaveConsumerProfileInput,
@@ -48,8 +51,24 @@ function errorResult(message: string): SaveConsumerProfileResult {
 }
 
 function validateInput(input: SaveConsumerProfileInput): string | null {
+  if (input.birthYear != null) {
+    if (!Number.isInteger(input.birthYear)) {
+      return "출생년도는 숫자로 입력해 주세요.";
+    }
+    if (input.birthYear < BIRTH_YEAR_MIN) {
+      return `출생년도는 ${BIRTH_YEAR_MIN}년 이상이어야 합니다.`;
+    }
+    if (input.birthYear > getBirthYearMax()) {
+      return `출생년도는 ${getBirthYearMax()}년 이하여야 합니다.`;
+    }
+  }
+
+  if (input.gender != null && input.gender !== "" && !isGenderValue(input.gender)) {
+    return "성별 선택값이 올바르지 않습니다.";
+  }
+
   if (!input.residenceRegionId || !UUID_RE.test(input.residenceRegionId)) {
-    return "주거지역을 선택해 주세요.";
+    return "주거지역(시·군·구)을 선택해 주세요.";
   }
 
   const activityIds = [
@@ -63,18 +82,20 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
     }
   }
 
-  if (!input.categoryIds.length) {
-    return "관심 분야를 1개 이상 선택해 주세요.";
+  if (!isInterestScopeValue(input.interestScope)) {
+    return "관심정보 선택 방식이 올바르지 않습니다.";
   }
 
-  for (const id of input.categoryIds) {
-    if (!UUID_RE.test(id)) {
-      return "관심 분야 형식이 올바르지 않습니다.";
+  if (input.interestScope === "selected" && !input.categoryIds.length) {
+    return "관심 분야를 1개 이상 선택하거나 '전체'를 선택해 주세요.";
+  }
+
+  if (input.interestScope === "selected") {
+    for (const id of input.categoryIds) {
+      if (!UUID_RE.test(id)) {
+        return "관심 분야 형식이 올바르지 않습니다.";
+      }
     }
-  }
-
-  if (!isSpendRangeValue(input.spendRange)) {
-    return "소비 규모 범위를 선택해 주세요.";
   }
 
   return null;
@@ -123,9 +144,10 @@ export async function saveConsumerProfileAction(
     };
   }
 
-  const intent = spendRangeToIntent(
-    input.spendRange as Parameters<typeof spendRangeToIntent>[0],
-  );
+  const birthYear = input.birthYear;
+  const gender =
+    input.gender && input.gender.length > 0 ? input.gender : null;
+  const interestScope = input.interestScope;
 
   const { data: existingProfile, error: profileLookupError } = await supabase
     .from("consumer_profiles")
@@ -139,14 +161,19 @@ export async function saveConsumerProfileAction(
 
   let profileId = existingProfile?.id as string | undefined;
 
+  const profilePayload = {
+    region_id: input.residenceRegionId,
+    birth_year: birthYear,
+    gender,
+    interest_scope: interestScope,
+  };
+
   if (!profileId) {
     const { data: created, error: createError } = await supabase
       .from("consumer_profiles")
       .insert({
         user_id: user.id,
-        region_id: input.residenceRegionId,
-        monthly_intent_min: intent.monthly_intent_min,
-        monthly_intent_max: intent.monthly_intent_max,
+        ...profilePayload,
       })
       .select("id")
       .single();
@@ -158,11 +185,7 @@ export async function saveConsumerProfileAction(
   } else {
     const { error: updateError } = await supabase
       .from("consumer_profiles")
-      .update({
-        region_id: input.residenceRegionId,
-        monthly_intent_min: intent.monthly_intent_min,
-        monthly_intent_max: intent.monthly_intent_max,
-      })
+      .update(profilePayload)
       .eq("id", profileId);
 
     if (updateError) {
@@ -228,17 +251,19 @@ export async function saveConsumerProfileAction(
     return errorResult(deleteCategoriesError.message);
   }
 
-  const categoryRows = input.categoryIds.map((categoryId) => ({
-    consumer_profile_id: profileId,
-    category_id: categoryId,
-  }));
+  if (interestScope !== INTEREST_SCOPE_ALL && input.categoryIds.length > 0) {
+    const categoryRows = input.categoryIds.map((categoryId) => ({
+      consumer_profile_id: profileId,
+      category_id: categoryId,
+    }));
 
-  const { error: insertCategoriesError } = await supabase
-    .from("consumer_category_interests")
-    .insert(categoryRows);
+    const { error: insertCategoriesError } = await supabase
+      .from("consumer_category_interests")
+      .insert(categoryRows);
 
-  if (insertCategoriesError) {
-    return errorResult(insertCategoriesError.message);
+    if (insertCategoriesError) {
+      return errorResult(insertCategoriesError.message);
+    }
   }
 
   return {

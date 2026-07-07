@@ -21,36 +21,35 @@ function assertContains(text, needle, label) {
   console.log(`PASS: ${label} — ${needle}`);
 }
 
-async function getFormSelection(page) {
+async function getFormSnapshot(page) {
   const selects = page.locator("select");
-  return {
-    residenceId: await selects.first().inputValue(),
-    activity1Id:
-      (await selects.count()) >= 2 ? await selects.nth(1).inputValue() : "",
-    activity2Id:
-      (await selects.count()) >= 3 ? await selects.nth(2).inputValue() : "",
-  };
-}
-
-async function getSelectedCategoryCount(page) {
-  const selected = page
+  const selectCount = await selects.count();
+  const birthYear = selectCount >= 1 ? await selects.nth(0).inputValue() : "";
+  const residenceId = selectCount >= 2 ? await selects.nth(1).inputValue() : "";
+  const activity1Id = selectCount >= 3 ? await selects.nth(2).inputValue() : "";
+  const activity2Id = selectCount >= 4 ? await selects.nth(3).inputValue() : "";
+  const gender =
+    (await page.locator('input[name="gender"]:checked').count()) > 0
+      ? await page.locator('input[name="gender"]:checked').inputValue()
+      : "";
+  const selectedCategories = page
     .locator("fieldset")
-    .filter({ hasText: "관심 분야" })
+    .filter({ hasText: "관심정보" })
     .locator("button.border-blue-600.bg-blue-600");
-  return selected.count();
-}
+  const categoryCount = await selectedCategories.count();
+  const allInterests =
+    (await page.getByRole("button", { name: "전체", exact: true }).getAttribute("class"))?.includes(
+      "bg-blue-600",
+    ) ?? false;
 
-function parseSummary(body) {
-  const get = (key) => {
-    const m = body.match(new RegExp(`${key}=([^\\n]+)`));
-    return m ? m[1].trim() : null;
-  };
   return {
-    residence: get("residenceSelected"),
-    activity1: get("activitySlot1Selected"),
-    activity2: get("activitySlot2Selected"),
-    categoryCount: get("selectedCategoryCount"),
-    spendRange: get("spendRangeSelected"),
+    birthYear,
+    gender,
+    residenceId,
+    activity1Id,
+    activity2Id,
+    categoryCount,
+    allInterests,
   };
 }
 
@@ -79,7 +78,7 @@ async function signupOrLogin(page, label, email, password) {
   await page.waitForURL("**/consumer/profile**", { timeout: 20000 });
   await page.waitForTimeout(1500);
 
-  let body = await page.locator("body").innerText();
+  body = await page.locator("body").innerText();
   if (!body.includes("로그인됨")) {
     throw new Error(`${label} login failed for ${maskEmail(email)}`);
   }
@@ -92,32 +91,40 @@ async function gotoProfile(page) {
 
 async function saveProfile(page, label, opts) {
   const {
+    birthYear = "1988",
+    genderLabel = "남성",
     residenceIndex = 1,
     activity1Index = 2,
     activity2Index = 3,
-    categoryIndex = 0,
-    spendRangeLabel = "1만 원대",
+    categoryIndex = 1,
+    useAllInterests = false,
   } = opts;
 
   await gotoProfile(page);
   let body = await page.locator("body").innerText();
   assertContains(body, "로그인됨", `${label} authenticated`);
 
+  await page.locator("select").first().selectOption(birthYear);
+  await page.getByRole("radio", { name: genderLabel }).click();
+
   const selects = page.locator("select");
-  await selects.first().selectOption({ index: residenceIndex });
-  if ((await selects.count()) >= 2) {
-    await selects.nth(1).selectOption({ index: activity1Index });
-  }
+  await selects.nth(1).selectOption({ index: residenceIndex });
   if ((await selects.count()) >= 3) {
-    await selects.nth(2).selectOption({ index: activity2Index });
+    await selects.nth(2).selectOption({ index: activity1Index });
+  }
+  if ((await selects.count()) >= 4) {
+    await selects.nth(3).selectOption({ index: activity2Index });
   }
 
-  const categoryButtons = page
-    .locator("fieldset")
-    .filter({ hasText: "관심 분야" })
-    .locator("button[type='button']");
-  await categoryButtons.nth(categoryIndex).click();
-  await page.getByRole("radio", { name: spendRangeLabel }).click();
+  if (useAllInterests) {
+    await page.getByRole("button", { name: "전체", exact: true }).click();
+  } else {
+    const categoryButtons = page
+      .locator("fieldset")
+      .filter({ hasText: "관심정보" })
+      .locator("button[type='button']");
+    await categoryButtons.nth(categoryIndex).click();
+  }
 
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(4000);
@@ -125,15 +132,15 @@ async function saveProfile(page, label, opts) {
   body = await page.locator("body").innerText();
   assertContains(body, "소비 의향 프로필이 저장되었습니다", `${label} save saved`);
 
-  const form = await getFormSelection(page);
-  return { summary: parseSummary(body), form };
+  const snapshot = await getFormSnapshot(page);
+  return { snapshot };
 }
 
-async function reloadAndGetSummary(page, label) {
+async function reloadAndGetSnapshot(page, label) {
   await page.reload({ waitUntil: "networkidle" });
   const body = await page.locator("body").innerText();
   assertContains(body, "로그인됨", `${label} reload auth`);
-  return parseSummary(body);
+  return getFormSnapshot(page);
 }
 
 async function logout(page, label) {
@@ -150,75 +157,60 @@ async function verifyAnonymousSaveBlocked(page, label) {
   await page.waitForTimeout(2500);
   const body = await page.locator("body").innerText();
   assertContains(body, "로그인이 필요합니다", `${label} auth required`);
-  assertContains(body, "stage1BSaveStatus=auth_required", `${label} save blocked`);
 }
 
-function assertSummaryEquals(actual, expected, label) {
-  for (const key of Object.keys(expected)) {
-    if (actual[key] !== expected[key]) {
+function assertSnapshotEquals(actual, expected, label) {
+  for (const key of ["birthYear", "gender", "residenceId", "activity1Id", "activity2Id"]) {
+    if (expected[key] && actual[key] !== expected[key]) {
       throw new Error(
         `${label}: ${key} expected "${expected[key]}" got "${actual[key]}"`,
       );
     }
   }
-  console.log(`PASS: ${label} — summary matches expected`);
+  console.log(`PASS: ${label} — snapshot matches expected`);
 }
 
-function assertSummaryDiffers(actual, other, label) {
-  if (
-    other.residence &&
-    other.residence !== "(미선택)" &&
-    actual.residence === other.residence
-  ) {
-    throw new Error(`${label}: residence leaked — ${actual.residence}`);
+function assertSnapshotDiffers(actual, other, label) {
+  if (other.birthYear && actual.birthYear === other.birthYear) {
+    throw new Error(`${label}: birthYear leaked — ${actual.birthYear}`);
+  }
+  if (other.gender && actual.gender === other.gender && other.birthYear === actual.birthYear) {
+    throw new Error(`${label}: gender+birthYear combo leaked`);
   }
   if (
-    other.activity1 &&
-    other.activity1 !== "(미선택)" &&
-    actual.activity1 === other.activity1
+    other.residenceId &&
+    actual.residenceId === other.residenceId
   ) {
-    throw new Error(`${label}: activity1 leaked — ${actual.activity1}`);
+    throw new Error(`${label}: residenceId leaked — ${actual.residenceId}`);
   }
-  if (
-    other.spendRange &&
-    other.spendRange !== "(미선택)" &&
-    actual.spendRange === other.spendRange
-  ) {
-    throw new Error(`${label}: spendRange leaked — ${actual.spendRange}`);
-  }
-  console.log(`PASS: ${label} — no cross-user summary leak detected`);
+  console.log(`PASS: ${label} — no cross-user snapshot leak detected`);
 }
 
-async function verifyUserBNoLeak(page, label, userASummary, userAForm) {
+async function verifyUserBNoLeak(page, label, userASnapshot) {
   await gotoProfile(page);
   const body = await page.locator("body").innerText();
   assertContains(body, "로그인됨", `${label} B authenticated`);
   assertContains(body, "***@", `${label} B email masked`);
 
-  const summary = parseSummary(body);
-  assertSummaryDiffers(summary, userASummary, `${label} summary isolation`);
+  const snapshot = await getFormSnapshot(page);
+  assertSnapshotDiffers(snapshot, userASnapshot, `${label} snapshot isolation`);
 
-  if (summary.residence !== "(미선택)") {
-    throw new Error(`${label}: B should have empty residence, got ${summary.residence}`);
+  if (snapshot.residenceId) {
+    throw new Error(`${label}: B should have empty residence, got ${snapshot.residenceId}`);
   }
-  console.log(`PASS: ${label} — B residence empty in summary`);
+  console.log(`PASS: ${label} — B residence empty`);
 
-  const form = await getFormSelection(page);
-  if (form.residenceId) {
-    throw new Error(`${label}: B residence select should be empty, got id set`);
+  if (snapshot.birthYear && userASnapshot.birthYear === snapshot.birthYear) {
+    throw new Error(`${label}: B birthYear matches A`);
   }
-  if (userAForm.residenceId && form.residenceId === userAForm.residenceId) {
-    throw new Error(`${label}: B residence id matches A`);
-  }
-  console.log(`PASS: ${label} — B form selections empty / not A's ids`);
+  console.log(`PASS: ${label} — B form not A's birth year`);
 
-  const catCount = await getSelectedCategoryCount(page);
-  if (catCount > 0) {
-    throw new Error(`${label}: B should have no selected categories, got ${catCount}`);
+  if (snapshot.categoryCount > 0 || snapshot.allInterests) {
+    throw new Error(`${label}: B should have no interest selection`);
   }
-  console.log(`PASS: ${label} — B no pre-selected categories`);
+  console.log(`PASS: ${label} — B no pre-selected interests`);
 
-  return { summary, form };
+  return { snapshot };
 }
 
 async function verifyDiagnostics(page) {
@@ -243,50 +235,43 @@ async function runCrossUserFlow(page, viewportLabel) {
   console.log(`\n=== ${viewportLabel} A/B RLS flow ===`);
   console.log(`INFO: userA=${maskEmail(userA.email)} userB=${maskEmail(userB.email)}`);
 
-  // User A: signup, save, reload
   await signupOrLogin(page, `${viewportLabel} userA`, userA.email, userA.password);
-  const { summary: summaryA, form: formA } = await saveProfile(
-    page,
-    `${viewportLabel} userA-save`,
-    {
-      residenceIndex: 1,
-      activity1Index: 2,
-      activity2Index: 3,
-      categoryIndex: 0,
-      spendRangeLabel: "1만 원대",
-    },
-  );
-  const summaryAReload = await reloadAndGetSummary(page, `${viewportLabel} userA-reload`);
-  assertSummaryEquals(summaryAReload, summaryA, `${viewportLabel} userA reload`);
+  const { snapshot: snapshotA } = await saveProfile(page, `${viewportLabel} userA-save`, {
+    birthYear: "1988",
+    genderLabel: "남성",
+    residenceIndex: 1,
+    activity1Index: 2,
+    activity2Index: 3,
+    categoryIndex: 1,
+  });
+  const snapshotAReload = await reloadAndGetSnapshot(page, `${viewportLabel} userA-reload`);
+  assertSnapshotEquals(snapshotAReload, snapshotA, `${viewportLabel} userA reload`);
 
-  // Logout + anonymous block
   await logout(page, `${viewportLabel} userA-logout`);
   await verifyAnonymousSaveBlocked(page, `${viewportLabel} anon-block`);
 
-  // User B: no A data, save different profile
   await signupOrLogin(page, `${viewportLabel} userB`, userB.email, userB.password);
-  await verifyUserBNoLeak(page, `${viewportLabel} userB-no-leak`, summaryA, formA);
-  const { summary: summaryB } = await saveProfile(page, `${viewportLabel} userB-save`, {
+  await verifyUserBNoLeak(page, `${viewportLabel} userB-no-leak`, snapshotA);
+  const { snapshot: snapshotB } = await saveProfile(page, `${viewportLabel} userB-save`, {
+    birthYear: "1995",
+    genderLabel: "여성",
     residenceIndex: 4,
     activity1Index: 5,
     activity2Index: 6,
-    categoryIndex: 1,
-    spendRangeLabel: "5만 원대",
+    categoryIndex: 2,
+    useAllInterests: true,
   });
-  const summaryBReload = await reloadAndGetSummary(page, `${viewportLabel} userB-reload`);
-  assertSummaryEquals(summaryBReload, summaryB, `${viewportLabel} userB reload`);
+  const snapshotBReload = await reloadAndGetSnapshot(page, `${viewportLabel} userB-reload`);
+  assertSnapshotEquals(snapshotBReload, snapshotB, `${viewportLabel} userB reload`);
 
-  // Logout B
   await logout(page, `${viewportLabel} userB-logout`);
 
-  // User A re-login: A data intact, B data not visible
   await signupOrLogin(page, `${viewportLabel} userA-relogin`, userA.email, userA.password);
-  const summaryA2 = await reloadAndGetSummary(page, `${viewportLabel} userA-relogin-reload`);
-  assertSummaryEquals(summaryA2, summaryA, `${viewportLabel} userA re-login persist`);
-  assertSummaryDiffers(summaryA2, summaryB, `${viewportLabel} userA no B leak`);
+  const snapshotA2 = await reloadAndGetSnapshot(page, `${viewportLabel} userA-relogin-reload`);
+  assertSnapshotEquals(snapshotA2, snapshotA, `${viewportLabel} userA re-login persist`);
+  assertSnapshotDiffers(snapshotA2, snapshotB, `${viewportLabel} userA no B leak`);
 
-  const formA2 = await getFormSelection(page);
-  if (formA.residenceId && formA2.residenceId !== formA.residenceId) {
+  if (snapshotA.residenceId && snapshotA2.residenceId !== snapshotA.residenceId) {
     throw new Error(`${viewportLabel}: A residence id changed after B save`);
   }
   console.log(`PASS: ${viewportLabel} — A form ids unchanged after B isolation`);

@@ -1,5 +1,6 @@
 import type { SessionSnapshot } from "@/lib/auth/session";
 import type { ConsumerProfileReadMeta } from "@/lib/consumer-profile/page-data";
+import type { InterestScopeValue } from "@/lib/consumer-profile/constants";
 
 export type RegionOption = {
   id: string;
@@ -22,6 +23,8 @@ export type ConsumerProfilePageData = {
   categoryCount: number;
   regionsEmpty: boolean;
   categoriesEmpty: boolean;
+  provinceOnlyOptionCount: number;
+  basicMunicipalitySeedCoverage: "partial" | "adequate" | "unknown";
 };
 
 export type ConsumerProfileStage1CContext = {
@@ -35,11 +38,13 @@ export type ConsumerProfileStage1CContext = {
 };
 
 export type SaveConsumerProfileInput = {
+  birthYear: number | null;
+  gender: string | null;
   residenceRegionId: string;
   activitySlot1RegionId: string;
   activitySlot2RegionId: string;
+  interestScope: InterestScopeValue;
   categoryIds: string[];
-  spendRange: string;
 };
 
 export type SaveConsumerProfileResult = {
