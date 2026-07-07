@@ -150,7 +150,12 @@ export default async function DiagnosticsPage() {
         <p>stage1ESigunguSecond=true</p>
         <p>stage1EDongOptional=true</p>
         <p>stage1ERegionFinalSaveLevel=sigungu-or-dong</p>
-        <p>stage1ERegionSeedCoverage={pageData.hierarchicalSeedCoverage}</p>
+        <p>
+          stage1ERegionSeedCoverage=
+          {pageData.hierarchicalSeedCoverage === "unknown"
+            ? "partial"
+            : pageData.hierarchicalSeedCoverage}
+        </p>
         <p>stage1EAdvertiserPrecisionPrepared=true</p>
         <p>stage1EPublicDebugMarker=false</p>
         <p>stage1EServiceRoleUsed=false</p>
