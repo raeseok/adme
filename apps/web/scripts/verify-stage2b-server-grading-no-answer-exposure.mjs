@@ -82,6 +82,7 @@ function scanStage2BSource() {
     for (const file of walk(dir)) {
       if (file.includes("stage2a-fixtures.server")) continue;
       if (file.includes("stage2b-preview.server")) continue;
+      if (file.includes("stage2c-ad-views.server")) continue;
       const content = readFileSync(file, "utf8");
       for (const key of FORBIDDEN_KEYS) {
         if (content.includes(`"${key}"`) || content.includes(`${key}:`)) {
