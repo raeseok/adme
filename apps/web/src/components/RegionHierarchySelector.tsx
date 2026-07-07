@@ -16,7 +16,10 @@ import {
 type RegionHierarchySelectorProps = {
   legend: string;
   required?: boolean;
+  /** Full region rows for saved-value path resolution (includes historical molit rows). */
   regionRows: RegionRow[];
+  /** Selectable canonical rows for dropdown options; defaults to regionRows. */
+  selectorRows?: RegionRow[];
   value: string;
   onChange: (regionId: string) => void;
   disabled?: boolean;
@@ -29,15 +32,17 @@ export function RegionHierarchySelector({
   legend,
   required = false,
   regionRows,
+  selectorRows,
   value,
   onChange,
   disabled = false,
   emptyPlaceholder = "선택 안 함",
   testId,
 }: RegionHierarchySelectorProps) {
+  const optionRows = selectorRows ?? regionRows;
   const index = useMemo(
-    () => buildRegionHierarchyIndex(regionRows),
-    [regionRows],
+    () => buildRegionHierarchyIndex(optionRows),
+    [optionRows],
   );
 
   const [selection, setSelection] = useState<RegionSelectionState>(() =>

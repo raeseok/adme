@@ -18,6 +18,7 @@ export type CategoryOption = {
 export type ConsumerProfilePageData = {
   regions: RegionOption[];
   regionRows: RegionRow[];
+  selectorRegionRows: RegionRow[];
   savableRegionIds: string[];
   categories: CategoryOption[];
   regionsReadStatus: "ok" | "error";

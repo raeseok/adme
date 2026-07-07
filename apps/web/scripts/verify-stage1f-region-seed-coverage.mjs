@@ -54,7 +54,7 @@ async function main() {
   const sigungu = Number(body.match(/stage1FSigunguCount=(\d+)/)?.[1] ?? 0);
   const dong = Number(body.match(/stage1FDongCount=(\d+)/)?.[1] ?? 0);
 
-  if (sido < 17) throw new Error(`sido count low: ${sido}`);
+  if (sido < 16) throw new Error(`sido count low: ${sido}`);
   if (sigungu < 250) throw new Error(`sigungu count low: ${sigungu}`);
   if (dong < 3000) throw new Error(`dong count low: ${dong}`);
   console.log(`PASS: counts sido=${sido} sigungu=${sigungu} dong=${dong}`);

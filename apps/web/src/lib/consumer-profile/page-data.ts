@@ -14,6 +14,7 @@ import {
 import { getSavableRegionIds, countRegionLevels, assessCanonicalAdminSeedCoverage } from "@/lib/regions/region-options";
 import {
   fetchAllActiveRegions,
+  fetchSelectableAdminRegions,
   fetchCanonicalRegionLevelCounts,
   type RegionLevelCounts,
 } from "@/lib/regions/fetch-regions";
@@ -48,6 +49,7 @@ export async function getConsumerProfilePageData(
     return {
       regions: [],
       regionRows: [],
+      selectorRegionRows: [],
       savableRegionIds: [],
       categories: [],
       regionsReadStatus: "error",
@@ -64,8 +66,9 @@ export async function getConsumerProfilePageData(
     };
   }
 
-  const [regionsFetch, levelCountsFetch, categoriesResult] = await Promise.all([
+  const [regionsFetch, selectorFetch, levelCountsFetch, categoriesResult] = await Promise.all([
     fetchAllActiveRegions(supabase),
+    fetchSelectableAdminRegions(supabase),
     fetchCanonicalRegionLevelCounts(supabase),
     supabase
       .from("interest_categories")
@@ -78,12 +81,18 @@ export async function getConsumerProfilePageData(
   const categoriesReadStatus = categoriesResult.error ? "error" : "ok";
 
   const regionRows = regionsReadStatus === "ok" ? regionsFetch.rows : [];
+  const selectorRegionRows =
+    !selectorFetch.error && selectorFetch.rows.length > 0
+      ? selectorFetch.rows
+      : regionRows.filter(
+          (r) => r.source_kind === "mois-kikcd-h" && r.is_selectable !== false,
+        );
   const allRegionOptions =
     regionsReadStatus === "ok" ? buildRegionOptions(regionRows) : [];
   const regions =
-    regionsReadStatus === "ok" ? buildBasicMunicipalityOptions(regionRows) : [];
+    regionsReadStatus === "ok" ? buildBasicMunicipalityOptions(selectorRegionRows) : [];
   const savableRegionIdSet =
-    regionsReadStatus === "ok" ? getSavableRegionIds(regionRows) : new Set<string>();
+    regionsReadStatus === "ok" ? getSavableRegionIds(selectorRegionRows) : new Set<string>();
   const savableRegionIds = [...savableRegionIdSet];
   const regionLevelCounts =
     !levelCountsFetch.error && levelCountsFetch.counts.total > 0
@@ -123,6 +132,7 @@ export async function getConsumerProfilePageData(
   return {
     regions,
     regionRows,
+    selectorRegionRows,
     savableRegionIds,
     categories,
     regionsReadStatus,

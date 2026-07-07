@@ -68,3 +68,33 @@ export async function fetchAllActiveRegions(
 
   return { rows, error: false };
 }
+
+/** Canonical MOIS admin-dong rows for consumer selector (smaller payload). */
+export async function fetchSelectableAdminRegions(
+  supabase: SupabaseClient,
+): Promise<{ rows: RegionRow[]; error: boolean }> {
+  const rows: RegionRow[] = [];
+  let from = 0;
+
+  while (true) {
+    const result = await supabase
+      .from("regions")
+      .select(REGION_SELECT)
+      .eq("is_active", true)
+      .eq("is_selectable", true)
+      .eq("source_kind", "mois-kikcd-h")
+      .order("code")
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (result.error) {
+      return { rows: [], error: true };
+    }
+
+    const batch = (result.data ?? []) as RegionRow[];
+    rows.push(...batch);
+    if (batch.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return { rows, error: false };
+}

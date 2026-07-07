@@ -255,6 +255,7 @@ export function ConsumerProfileForm({
         required
         testId="region-selector-residence"
         regionRows={pageData.regionRows}
+        selectorRows={pageData.selectorRegionRows}
         value={residenceRegionId}
         onChange={setResidenceRegionId}
         disabled={pageData.regionsEmpty}
@@ -277,6 +278,7 @@ export function ConsumerProfileForm({
         legend="주활동지역 1 (선택)"
         testId="region-selector-activity-1"
         regionRows={pageData.regionRows}
+        selectorRows={pageData.selectorRegionRows}
         value={activitySlot1RegionId}
         onChange={setActivitySlot1RegionId}
         disabled={pageData.regionsEmpty}
@@ -288,6 +290,7 @@ export function ConsumerProfileForm({
           legend="주활동지역 2 (선택)"
           testId="region-selector-activity-2"
           regionRows={pageData.regionRows}
+          selectorRows={pageData.selectorRegionRows}
           value={activitySlot2RegionId}
           onChange={setActivitySlot2RegionId}
           disabled={pageData.regionsEmpty}
