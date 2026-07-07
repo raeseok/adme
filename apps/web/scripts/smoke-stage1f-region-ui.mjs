@@ -54,12 +54,19 @@ async function main() {
     await authenticateUser(page, BASE, "Stage1F", creds.userA.email, creds.userA.password);
     await verifyViewport(page, label, viewport);
 
+    await page.getByRole("group", { name: "출생년도" }).locator("select").selectOption("1990");
+    await page.getByRole("radio", { name: "응답하지 않음" }).click();
     await selectRegionHierarchy(page, REGION_SELECTOR_IDS.residence, {
       sido: "서울특별시",
       sigungu: "강남구",
     });
+    await page.getByRole("button", { name: "전체", exact: true }).click();
     await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(4000);
+    const saveBody = await page.locator("body").innerText();
+    if (!saveBody.includes("소비 의향 프로필이 저장되었습니다")) {
+      throw new Error(`${label}: save failed`);
+    }
     await page.reload({ waitUntil: "networkidle" });
     const snap = await getProfileFormSnapshot(page);
     if (!snap.residence.sigunguLabel.includes("강남구")) {
@@ -70,7 +77,6 @@ async function main() {
     await selectRegionHierarchy(page, REGION_SELECTOR_IDS.activity1, {
       sido: "경기도",
       sigungu: "고양시",
-      dong: "일산동구",
     });
     console.log(`PASS: ${label} — 고양시 일산동구 dong optional`);
 

@@ -111,7 +111,6 @@ async function saveFullProfile(page, label) {
   await selectRegionHierarchy(page, REGION_SELECTOR_IDS.activity1, {
     sido: "경기도",
     sigungu: "고양시",
-    dong: "일산동구",
   });
 
   await selectRegionHierarchy(page, REGION_SELECTOR_IDS.activity2, {

@@ -19,18 +19,23 @@ export async function selectRegionHierarchy(page, testId, { sido, sigungu, dong 
   await root.getByTestId(`${testId}-sigungu`).selectOption({ label: sigungu });
   await page.waitForTimeout(400);
   const dongSelect = root.getByTestId(`${testId}-dong`);
-  if (dong && (await dongSelect.count()) > 0) {
-    await dongSelect.selectOption({ label: dong });
-    return;
-  }
-  if ((await dongSelect.count()) > 0) {
-    const labels = await dongSelect.locator("option").allTextContents();
-    const pick = labels
-      .map((s) => s.trim())
-      .find((s) => s && s !== "선택 안 함" && !s.startsWith("선택"));
-    if (pick) {
-      await dongSelect.selectOption({ label: pick });
+  if ((await dongSelect.count()) === 0) return;
+
+  if (dong) {
+    const match = dongSelect.locator("option").filter({ hasText: dong });
+    const value = await match.first().getAttribute("value");
+    if (value) {
+      await dongSelect.selectOption(value);
+      return;
     }
+  }
+
+  const labels = await dongSelect.locator("option").allTextContents();
+  const pick = labels
+    .map((s) => s.trim())
+    .find((s) => s && s !== "선택 안 함" && !s.startsWith("선택"));
+  if (pick) {
+    await dongSelect.selectOption({ label: pick });
   }
 }
 
