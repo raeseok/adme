@@ -29,6 +29,14 @@ export type QuizSubmitPreviewInput = {
 
 export type QuizPreviewResultKind = "correct" | "incorrect" | "not_allowed" | "invalid";
 
+export type QuizAttemptResultKind =
+  | "correct"
+  | "incorrect"
+  | "not_allowed"
+  | "already_completed"
+  | "attempt_limit_reached"
+  | "invalid";
+
 export type RewardPreview = {
   rewardPreviewOnly: true;
   rewardPointsPreview: number | null;
@@ -45,6 +53,37 @@ export type QuizSubmitPreviewResult = {
   minViewRequiredSeconds: number;
   minViewClientSatisfied: boolean;
   serverAuthoritativeMinView: false;
+  nextAllowedAction: string;
+};
+
+export type QuizSubmitAttemptInput = {
+  campaignId: string;
+  quizId: string;
+  selectedOption: string;
+};
+
+export type BeginAdViewActionResult = {
+  started: boolean;
+  serverAuthoritativeMinView: true;
+  adViewsMutation: boolean;
+  viewStartedAtMs: number | null;
+  attemptsRemaining: number;
+};
+
+export type QuizSubmitAttemptResult = {
+  accepted: boolean;
+  result: QuizAttemptResultKind;
+  rewardPreviewOnly: true;
+  rewardPreviewAvailable: boolean;
+  rewardPointsPreview: number | null;
+  pointLedgerMutation: false;
+  adViewsMutation: boolean;
+  quizAnswerExposed: false;
+  minViewRequiredSeconds: number;
+  serverAuthoritativeMinView: true;
+  serverElapsedSeconds: number | null;
+  attemptNo: number | null;
+  attemptsRemaining: number;
   nextAllowedAction: string;
 };
 

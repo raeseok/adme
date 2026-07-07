@@ -93,11 +93,30 @@ export default async function DiagnosticsPage() {
         Stage 0.5-R diagnostics verified
       </p>
       <section
-        aria-label="Stage 2-B min-view timer and server grading preview markers"
+        aria-label="Stage 2-C ad views and server authoritative min view markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 2-C Ad Views · Server Authoritative Min View (current)
+        </p>
+        <p>stage2CBuild=stage2c-ad-views-server-min-view-production</p>
+        <p>stage2CAdViewsMutation=true</p>
+        <p>stage2CPointLedgerMutation=false</p>
+        <p>stage2CServerAuthoritativeMinView=true</p>
+        <p>stage2CQuizAnswerClientExposure=false</p>
+        <p>stage2CRewardPreviewOnly=true</p>
+        <p>stage2CAttemptLimit=2</p>
+        <p>stage2CBudgetMutation=false</p>
+        <p>stage2CKakaoActualSend=false</p>
+        <p>stage2CPublicMarkerExposed=false</p>
+        <p>stage2CDeployCommit={deployCommit}</p>
+      </section>
+      <section
+        aria-label="Stage 2-B min-view timer and server grading preview markers (historical)"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-orange-300 bg-orange-50 px-3 py-3 font-mono text-xs text-orange-950"
       >
         <p className="font-sans text-sm font-semibold">
-          Stage 2-B Min-View Timer · Server Grading Preview (current)
+          Stage 2-B Min-View Timer · Server Grading Preview (historical)
         </p>
         <p>stage2BBuild=stage2b-min-view-server-grading-preview-production</p>
         <p>stage2BMinViewTimer=true</p>

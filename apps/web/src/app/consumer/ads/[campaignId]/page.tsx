@@ -39,6 +39,7 @@ export default async function ConsumerAdDetailPage({ params }: PageProps) {
         <p>광고 본문을 확인한 뒤 퀴즈에 참여할 수 있습니다.</p>
         <p>퀴즈 정답은 화면과 네트워크 응답에 포함하지 않습니다.</p>
         <p>리워드는 미리보기(preview)만 표시하며, 포인트 적립은 다음 단계에서 처리됩니다.</p>
+        <p>광고 열람 시작 시점은 서버에 기록되며, 최소 열람 시간은 서버 기록 기준으로 검증합니다.</p>
         <p>카카오톡 광고 도착 알림은 향후 선택 동의 기반 기능으로 검토 중입니다.</p>
       </section>
 

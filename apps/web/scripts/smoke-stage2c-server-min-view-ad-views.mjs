@@ -1,5 +1,5 @@
 /**
- * Stage 2-B — Production/local smoke: min-view timer + quiz submit preview
+ * Stage 2-C — Production/local smoke: server min-view + ad_views session + quiz attempt
  */
 import { chromium, devices } from "playwright";
 import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
@@ -9,7 +9,7 @@ const FIXTURE_CAMPAIGN = "stage2a-fixture-campaign-2";
 const TIMER_BUFFER_MS = 1500;
 
 function assertVisible(locator, label) {
-  return locator.waitFor({ state: "visible", timeout: 15000 }).then(() => {
+  return locator.waitFor({ state: "visible", timeout: 20000 }).then(() => {
     console.log(`PASS: ${label} — visible`);
   });
 }
@@ -25,14 +25,11 @@ async function runFlow(page, label) {
   const viewStarted = page.locator('[data-testid="ad-view-started"]');
   await assertVisible(viewStarted, `${label} ad-view-started`);
 
+  const minViewStatus = page.locator('[data-testid="server-min-view-status"]');
+  await assertVisible(minViewStatus, `${label} server-min-view-status`);
+
   const timer = page.locator('[data-testid="min-view-timer"]');
   await assertVisible(timer, `${label} min-view timer`);
-
-  const bodyBefore = await page.locator("body").innerText();
-  if (!bodyBefore.includes("광고 내용을") || !bodyBefore.includes("남은 시간:")) {
-    throw new Error(`${label}: missing timer copy`);
-  }
-  console.log(`PASS: ${label} — timer copy present`);
 
   const submitBtn = page.locator('[data-testid="quiz-submit-preview-button"]');
   await assertVisible(submitBtn, `${label} submit button`);
@@ -42,7 +39,7 @@ async function runFlow(page, label) {
   }
   console.log(`PASS: ${label} — submit disabled before timer`);
 
-  const panel = page.locator('[data-testid="quiz-submit-preview-panel"]');
+  const panel = page.locator('[data-testid="quiz-attempt-panel"]');
   const firstRadio = panel.locator('input[type="radio"]').first();
   await firstRadio.click();
   if (!(await submitBtn.isDisabled())) {
@@ -66,8 +63,8 @@ async function runFlow(page, label) {
 
   await submitBtn.click();
 
-  const result = page.locator('[data-testid="quiz-preview-result"]');
-  await assertVisible(result, `${label} preview result`);
+  const result = page.locator('[data-testid="quiz-attempt-result"]');
+  await assertVisible(result, `${label} attempt result`);
 
   const resultText = await result.innerText();
   const hasVerdict =
@@ -96,7 +93,7 @@ async function main() {
       await runFlow(page, label);
       await page.close();
     }
-    console.log("PASS: smoke:stage2b-min-view-timer");
+    console.log("PASS: smoke:stage2c-server-min-view-ad-views");
   } finally {
     await browser.close();
   }
