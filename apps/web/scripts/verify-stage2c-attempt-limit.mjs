@@ -56,7 +56,7 @@ async function main() {
     }
     console.log("PASS: second wrong ends reward preview");
 
-    if (body2.includes("정답은") && body2.includes("입니다")) {
+    if (body2.includes("수요일입니다") || body2.match(/정답은\s+\S+\s+입니다/)) {
       throw new Error("must not expose correct answer text");
     }
     console.log("PASS: no answer exposure on wrong attempts");

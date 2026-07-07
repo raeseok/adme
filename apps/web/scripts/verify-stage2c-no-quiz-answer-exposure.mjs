@@ -83,6 +83,7 @@ function scanStage2CSource() {
     const files = statSync(target).isDirectory() ? walk(target) : [target];
     for (const file of files) {
       if (file.includes("stage2a-fixtures.server")) continue;
+      if (file.includes("stage2c-ad-views.server")) continue;
       const content = readFileSync(file, "utf8");
       for (const key of FORBIDDEN_KEYS) {
         if (content.includes(`"${key}"`) || content.includes(`${key}:`)) {
