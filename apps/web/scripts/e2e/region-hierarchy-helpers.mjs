@@ -16,6 +16,14 @@ export function getRegionSelector(page, testId) {
 export async function selectRegionHierarchy(page, testId, { sido, sigungu, dong }) {
   const root = getRegionSelector(page, testId);
   await root.getByTestId(`${testId}-sido`).selectOption({ label: sido });
+  await page.waitForFunction(
+    (tid) => {
+      const el = document.querySelector(`[data-testid="${tid}-sigungu"]`);
+      return el instanceof HTMLSelectElement && !el.disabled;
+    },
+    testId,
+    { timeout: 15000 },
+  );
   await root.getByTestId(`${testId}-sigungu`).selectOption({ label: sigungu });
   await page.waitForTimeout(400);
   const dongSelect = root.getByTestId(`${testId}-dong`);

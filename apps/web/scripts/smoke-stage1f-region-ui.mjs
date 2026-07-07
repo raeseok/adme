@@ -55,6 +55,10 @@ async function main() {
     await verifyViewport(page, label, viewport);
 
     await gotoProfile(page, BASE);
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="region-selector-residence-sido"]');
+      return el instanceof HTMLSelectElement && el.options.length > 17;
+    }, { timeout: 20000 });
     await page.getByRole("group", { name: "출생년도" }).locator("select").selectOption("1990");
     await page.getByRole("radio", { name: "응답하지 않음" }).click();
     await selectRegionHierarchy(page, REGION_SELECTOR_IDS.residence, {

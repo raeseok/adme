@@ -95,7 +95,7 @@ async function runAbFlow(page, viewportLabel) {
     residence: { sido: "서울특별시", sigungu: "강남구" },
     activity1: { sido: "서울특별시", sigungu: "송파구" },
     activity2: { sido: "서울특별시", sigungu: "마포구" },
-    categoryIndex: 1,
+    useAllInterests: true,
   };
 
   const profileB = {
