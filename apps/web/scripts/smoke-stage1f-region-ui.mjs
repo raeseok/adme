@@ -17,9 +17,10 @@ import {
   authenticateUser,
   gotoProfile,
 } from "./e2e/auth-helpers.mjs";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 async function verifyViewport(page, label, viewport) {
   await page.setViewportSize(viewport);
@@ -28,10 +29,14 @@ async function verifyViewport(page, label, viewport) {
   if (!body.includes("주거지역")) throw new Error(`${label}: profile not visible`);
   const sidoSelect = page.getByTestId(`${REGION_SELECTOR_IDS.residence}-sido`);
   const options = await sidoSelect.locator("option").allTextContents();
-  if (options.filter((o) => o && !o.includes("선택")).length < 17) {
-    throw new Error(`${label}: expected 17+ sido options`);
+  const count = options.filter((o) => o && !o.includes("선택")).length;
+  if (count < 16) {
+    throw new Error(`${label}: expected 16+ sido options (canonical MOIS), got ${count}`);
   }
-  console.log(`PASS: ${label} — national sido options visible`);
+  if (count > 20) {
+    throw new Error(`${label}: too many sido options (${count}) — duplicate region leak`);
+  }
+  console.log(`PASS: ${label} — national sido options visible (${count})`);
 }
 
 async function main() {
@@ -58,7 +63,7 @@ async function main() {
     await gotoProfile(page, BASE);
     await page.waitForFunction(() => {
       const el = document.querySelector('[data-testid="region-selector-residence-sido"]');
-      return el instanceof HTMLSelectElement && el.options.length > 17;
+      return el instanceof HTMLSelectElement && el.options.length > 16;
     }, { timeout: 20000 });
     await page.getByRole("group", { name: "출생년도" }).locator("select").selectOption("1990");
     await page.getByRole("radio", { name: "응답하지 않음" }).click();
@@ -68,8 +73,14 @@ async function main() {
     });
     await page.getByRole("button", { name: "전체", exact: true }).click();
     await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
-    await page.waitForTimeout(4000);
-    const saveBody = await page.locator("body").innerText();
+
+    const deadline = Date.now() + 30000;
+    let saveBody = "";
+    while (Date.now() < deadline) {
+      saveBody = await page.locator("body").innerText();
+      if (saveBody.includes("소비 의향 프로필이 저장되었습니다")) break;
+      await page.waitForTimeout(1500);
+    }
     if (!saveBody.includes("소비 의향 프로필이 저장되었습니다")) {
       throw new Error(`${label}: save failed`);
     }

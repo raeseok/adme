@@ -6,14 +6,15 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertNoStageMarkers } from "./e2e/region-hierarchy-helpers.mjs";
+import {
+  assertMarkerList,
+  extractMarkerValue,
+  loadDiagnosticsFromHttp,
+} from "./e2e/diagnostics-helpers.mjs";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
-
-function assertContains(text, needle, label) {
-  if (!text.includes(needle)) throw new Error(`${label}: missing "${needle}"`);
-  console.log(`PASS: ${label} — ${needle}`);
-}
+const BASE = resolveProductionE2eBaseUrl();
 
 async function main() {
   const moisManifest = JSON.parse(
@@ -25,8 +26,7 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.goto(`${BASE}/admin/diagnostics`, { waitUntil: "networkidle" });
-  const body = await page.locator("body").innerText();
+  const { combined } = await loadDiagnosticsFromHttp(BASE);
 
   const markers = [
     "Stage 1-F-R MOIS Region Source Alignment",
@@ -53,17 +53,25 @@ async function main() {
     "stage1FDestructiveReset=false",
   ];
 
-  for (const m of markers) assertContains(body, m, "diagnostics");
+  assertMarkerList(combined, markers, "diagnostics");
 
-  const coverage = body.match(/stage1FRegionSeedCoverage=(\w+)/)?.[1] ?? "";
+  const coverage = extractMarkerValue(combined, "stage1FRegionSeedCoverage");
   if (coverage !== "full") {
-    throw new Error(`stage1FRegionSeedCoverage expected full, got ${coverage}`);
+    throw new Error(`stage1FRegionSeedCoverage expected full, got ${coverage || "missing"}`);
   }
   console.log("PASS: stage1FRegionSeedCoverage=full");
 
-  const sido = Number(body.match(/stage1FSidoCount=(\d+)/)?.[1] ?? 0);
-  const sigungu = Number(body.match(/stage1FSigunguCount=(\d+)/)?.[1] ?? 0);
-  const dong = Number(body.match(/stage1FDongCount=(\d+)/)?.[1] ?? 0);
+  const molitBaseline = extractMarkerValue(combined, "stage1FMolitLegalDongBaselinePreserved");
+  if (molitBaseline !== "true") {
+    throw new Error(
+      `stage1FMolitLegalDongBaselinePreserved expected true, got ${molitBaseline || "missing"}`,
+    );
+  }
+  console.log("PASS: stage1FMolitLegalDongBaselinePreserved=true");
+
+  const sido = Number(extractMarkerValue(combined, "stage1FSidoCount") || 0);
+  const sigungu = Number(extractMarkerValue(combined, "stage1FSigunguCount") || 0);
+  const dong = Number(extractMarkerValue(combined, "stage1FDongCount") || 0);
   if (sido < 16) throw new Error(`canonical sido low: ${sido}`);
   if (sigungu < 250) throw new Error(`canonical sigungu low: ${sigungu}`);
   if (dong < 3000) throw new Error(`canonical dong low: ${dong}`);
@@ -75,7 +83,7 @@ async function main() {
   console.log("PASS: change check — 전남광주통합특별시");
 
   for (const route of ["/", "/consumer", "/consumer/profile", "/auth/login"]) {
-    await page.goto(`${BASE}${route}`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
     await assertNoStageMarkers(page, `public ${route}`);
     const pub = await page.locator("body").innerText();
     if (pub.includes("stage-1-f-r-mois-region-source-alignment")) {

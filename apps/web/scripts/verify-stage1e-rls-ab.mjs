@@ -21,8 +21,9 @@ import {
   logoutFromProfile,
   verifyAnonymousSaveBlocked,
 } from "./e2e/auth-helpers.mjs";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 function assertContains(text, needle, label) {
   if (!text.includes(needle)) {
@@ -58,12 +59,20 @@ async function saveUserProfile(page, label, profile) {
   }
 
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
-  await page.waitForTimeout(4000);
+
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    const after = await page.locator("body").innerText();
+    if (after.includes("소비 의향 프로필이 저장되었습니다")) {
+      console.log(`PASS: ${label} save — 소비 의향 프로필이 저장되었습니다`);
+      return getProfileFormSnapshot(page);
+    }
+    await page.waitForTimeout(1500);
+  }
 
   const after = await page.locator("body").innerText();
-  assertContains(after, "소비 의향 프로필이 저장되었습니다", `${label} save`);
-
-  return getProfileFormSnapshot(page);
+  const errMatch = after.match(/지역|선택|오류|실패|필요|로그인/);
+  throw new Error(`${label} save: missing success message — ${errMatch?.[0] ?? "timeout"}`);
 }
 
 async function verifyUserBNoLeak(page, label, snapshotA) {

@@ -17,9 +17,10 @@ import {
   authenticateUser,
   gotoProfile,
 } from "./e2e/auth-helpers.mjs";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 async function verifyViewport(page, label) {
   await gotoProfile(page, BASE);

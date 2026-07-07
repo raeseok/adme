@@ -5,10 +5,11 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 const FORBIDDEN_IN_RESPONSE = [
   "STAGE2A_SECRET_ANSWER_DO_NOT_EXPOSE",

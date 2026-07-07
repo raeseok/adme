@@ -7,6 +7,11 @@
  */
 import { chromium } from "playwright";
 import {
+  assertMarkerList,
+  extractMarkerValue,
+  loadDiagnosticsFromHttp,
+} from "./e2e/diagnostics-helpers.mjs";
+import {
   getProfileFormSnapshot,
   REGION_SELECTOR_IDS,
   selectRegionHierarchy,
@@ -23,8 +28,9 @@ import {
   logoutFromProfile,
   verifyAnonymousSaveBlocked,
 } from "./e2e/auth-helpers.mjs";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 function assertContains(text, needle, label) {
   if (!text.includes(needle)) {
@@ -48,8 +54,7 @@ async function verifyPublicRoutes(page, label) {
 }
 
 async function verifyDiagnosticsStage1E(page, label) {
-  await page.goto(`${BASE}/admin/diagnostics`, { waitUntil: "networkidle" });
-  const body = await page.locator("body").innerText();
+  const { combined } = await loadDiagnosticsFromHttp(BASE);
   const markers = [
     "Stage 1-E-R Region Auth Verification",
     "stage-1-e-r-region-auth-verification",
@@ -63,16 +68,21 @@ async function verifyDiagnosticsStage1E(page, label) {
     "stage1ESigunguSecond=true",
     "stage1EDongOptional=true",
     "stage1ERegionFinalSaveLevel=sigungu-or-dong",
-    "stage1ERegionSeedCoverage=full",
     "stage1EAdvertiserPrecisionPrepared=true",
     "stage1EPublicDebugMarker=false",
     "stage1EServiceRoleUsed=false",
     "stage1EPointLedgerMutation=false",
     "stage1EQuizAnswerAccess=false",
   ];
-  for (const m of markers) {
-    assertContains(body, m, `${label} diagnostics`);
+  assertMarkerList(combined, markers, `${label} diagnostics`);
+
+  const coverage = extractMarkerValue(combined, "stage1ERegionSeedCoverage");
+  if (coverage !== "full") {
+    throw new Error(
+      `${label} diagnostics: stage1ERegionSeedCoverage expected full, got ${coverage || "missing"}`,
+    );
   }
+  console.log(`PASS: ${label} diagnostics — stage1ERegionSeedCoverage=full`);
 }
 
 async function verifySidoOnlyIncomplete(page, label) {
@@ -120,22 +130,25 @@ async function saveFullProfile(page, label) {
 
   await page.getByRole("button", { name: "전체", exact: true }).click();
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
-  await page.waitForTimeout(5000);
+
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    const body = await page.locator("body").innerText();
+    if (body.includes("소비 의향 프로필이 저장되었습니다")) {
+      assertNotContains(body, "소비 규모 범위", `${label} no spend range`);
+      const snapshot = await getProfileFormSnapshot(page);
+      if (snapshot.completionPercent !== 100) {
+        throw new Error(`${label}: expected 100% completion, got ${snapshot.completionPercent}%`);
+      }
+      console.log(`PASS: ${label} — completion 100%`);
+      return snapshot;
+    }
+    await page.waitForTimeout(1500);
+  }
 
   const body = await page.locator("body").innerText();
-  if (!body.includes("소비 의향 프로필이 저장되었습니다")) {
-    const errMatch = body.match(/지역|선택|오류|실패|필요/);
-    throw new Error(`${label}: save failed — ${errMatch?.[0] ?? "no success message"}`);
-  }
-  assertNotContains(body, "소비 규모 범위", `${label} no spend range`);
-
-  const snapshot = await getProfileFormSnapshot(page);
-  if (snapshot.completionPercent !== 100) {
-    throw new Error(`${label}: expected 100% completion, got ${snapshot.completionPercent}%`);
-  }
-  console.log(`PASS: ${label} — completion 100%`);
-
-  return snapshot;
+  const errMatch = body.match(/지역|선택|오류|실패|필요|로그인/);
+  throw new Error(`${label}: save failed — ${errMatch?.[0] ?? "no success message"}`);
 }
 
 async function verifyViewportProfile(page, viewportLabel, width, height) {
@@ -147,6 +160,8 @@ async function verifyViewportProfile(page, viewportLabel, width, height) {
 }
 
 const { userA } = resolveTestCredentials();
+
+await verifyDiagnosticsStage1E(null, "desktop");
 
 const browser = await chromium.launch();
 let authPassed = false;
@@ -163,8 +178,6 @@ try {
 
   await verifyViewportProfile(page, "desktop", 1440, 900);
   desktopViewportPassed = true;
-
-  await verifyDiagnosticsStage1E(page, "desktop");
 
   await authenticateUser(page, BASE, "User A login", userA.email, userA.password);
 

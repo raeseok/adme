@@ -2,8 +2,9 @@
  * Stage 2-A — Production/local smoke: /consumer/ads read-only UI
  */
 import { chromium, devices } from "playwright";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 const REQUIRED_MARKERS = [
   "Stage 2-A: 광고 카드·퀴즈 안전 골격",

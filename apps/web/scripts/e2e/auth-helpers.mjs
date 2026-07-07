@@ -3,6 +3,8 @@
  */
 import { randomBytes } from "node:crypto";
 
+const AUTH_WAIT_MS = 60000;
+
 export function maskEmail(email) {
   const [local, domain] = email.split("@");
   if (!domain) return "***";
@@ -35,13 +37,14 @@ export function resolveTestCredentials() {
   }
 
   const ts = Date.now();
+  const nonce = randomBytes(4).toString("hex");
   const ephemeral = {
     userA: {
-      email: `stage1e-a-${ts}@example.com`,
+      email: `stage1e-a-${ts}-${nonce}@example.com`,
       password: randomBytes(16).toString("base64url"),
     },
     userB: {
-      email: `stage1e-b-${ts}@example.com`,
+      email: `stage1e-b-${ts}-${nonce}@example.com`,
       password: randomBytes(16).toString("base64url"),
     },
     source: "ephemeral",
@@ -53,52 +56,112 @@ export function resolveTestCredentials() {
   return ephemeral;
 }
 
-export async function loginWithEmail(page, baseUrl, label, email, password) {
-  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
-  const loginToggle = page.getByRole("button", { name: "이미 계정이 있으신가요? 로그인" });
+async function readBodyText(page) {
+  return page.locator("body").innerText();
+}
+
+async function waitForAuthenticatedProfile(page, baseUrl, label) {
+  const deadline = Date.now() + AUTH_WAIT_MS;
+
+  while (Date.now() < deadline) {
+    if (!page.url().includes("/consumer/profile")) {
+      await page.goto(`${baseUrl}/consumer/profile`, {
+        waitUntil: "domcontentloaded",
+      });
+    }
+
+    const body = await readBodyText(page);
+    if (body.includes("로그인됨") && body.includes("***@")) {
+      console.log(`PASS: ${label} — authenticated on profile (email masked)`);
+      return;
+    }
+
+    await page.waitForTimeout(1500);
+  }
+
+  const body = await readBodyText(page);
+  let hint = "unknown";
+  if (body.includes("이메일 확인") || body.includes("가입이 완료")) {
+    hint = "email_confirm_or_signup_pending";
+  } else if (body.includes("로그인이 필요합니다")) {
+    hint = "still_anonymous";
+  } else if (body.includes("Invalid login")) {
+    hint = "invalid_login";
+  }
+
+  throw new Error(`${label}: auth wait timeout (${hint})`);
+}
+
+async function submitAuthAndReachProfile(page, baseUrl, buttonName) {
+  await Promise.all([
+    page.waitForURL("**/consumer/profile**", { timeout: AUTH_WAIT_MS }).catch(() => null),
+    page.getByRole("button", { name: buttonName, exact: buttonName === "로그인" }).click(),
+  ]);
+
+  if (!page.url().includes("/consumer/profile")) {
+    await page.goto(`${baseUrl}/consumer/profile`, { waitUntil: "domcontentloaded" });
+  }
+}
+
+async function ensureLoginMode(page) {
+  const loginToggle = page.getByRole("button", {
+    name: "이미 계정이 있으신가요? 로그인",
+  });
   if (await loginToggle.isVisible()) {
     await loginToggle.click();
   }
+}
+
+async function ensureSignupMode(page) {
+  const signupToggle = page.getByRole("button", {
+    name: "계정이 없으신가요? 회원가입",
+  });
+  if (await signupToggle.isVisible()) {
+    await signupToggle.click();
+  }
+}
+
+export async function loginWithEmail(page, baseUrl, label, email, password) {
+  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "domcontentloaded" });
+  await ensureLoginMode(page);
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[type="password"]').fill(password);
-  await page.getByRole("button", { name: "로그인", exact: true }).click();
-  await page.waitForURL("**/consumer/profile**", { timeout: 25000 });
-  await page.waitForTimeout(1500);
-
-  const body = await page.locator("body").innerText();
-  if (!body.includes("로그인됨")) {
-    throw new Error(`${label}: login failed`);
-  }
-  if (!body.includes("***@")) {
-    throw new Error(`${label}: masked email not shown`);
-  }
-  console.log(`PASS: ${label} — User login ok (email masked)`);
+  await submitAuthAndReachProfile(page, baseUrl, "로그인");
+  await waitForAuthenticatedProfile(page, baseUrl, label);
 }
 
 export async function signupOrLogin(page, baseUrl, label, email, password) {
-  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "계정이 없으신가요? 회원가입" }).click();
+  const supabaseModule = await import("./supabase-auth-session.mjs");
+  const supabase = await supabaseModule.createAnonSupabaseClient(baseUrl);
+  if (supabase) {
+    try {
+      const session = await supabaseModule.createEphemeralSupabaseSession(
+        email,
+        password,
+        baseUrl,
+      );
+      await supabaseModule.injectSupabaseSession(page.context(), baseUrl, session);
+      await waitForAuthenticatedProfile(page, baseUrl, label);
+      console.log(`PASS: ${label} — ephemeral API auth ok (email masked)`);
+      return;
+    } catch {
+      console.log(`INFO: ${label} — API auth unavailable, using UI signup`);
+    }
+  }
+
+  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "domcontentloaded" });
+  await ensureSignupMode(page);
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[type="password"]').fill(password);
-  await page.getByRole("button", { name: "회원가입" }).click();
-  await page.waitForURL("**/consumer/profile**", { timeout: 25000 }).catch(() => null);
-  await page.waitForTimeout(1500);
+  await submitAuthAndReachProfile(page, baseUrl, "회원가입");
 
-  await page.waitForTimeout(3000);
-  const body = await page.locator("body").innerText();
-  if (body.includes("로그인됨")) {
-    await page.waitForTimeout(2000);
-  }
-  const after = await page.locator("body").innerText();
-  if (after.includes("로그인됨")) {
+  try {
+    await waitForAuthenticatedProfile(page, baseUrl, label);
     console.log(`PASS: ${label} — User signup ok (email masked)`);
     return;
+  } catch {
+    await loginWithEmail(page, baseUrl, `${label} login-after-signup`, email, password);
   }
-
-  if (!page.url().includes("/auth/login")) {
-    await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
-  }
-  await loginWithEmail(page, baseUrl, label, email, password);
 }
 
 export async function authenticateUser(page, baseUrl, label, email, password) {
@@ -106,17 +169,17 @@ export async function authenticateUser(page, baseUrl, label, email, password) {
 }
 
 export async function gotoProfile(page, baseUrl) {
-  await page.goto(`${baseUrl}/consumer/profile`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/consumer/profile`, { waitUntil: "domcontentloaded" });
 }
 
 export async function logoutFromProfile(page, baseUrl, label) {
   await gotoProfile(page, baseUrl);
   await page.getByRole("button", { name: "로그아웃" }).click();
   await page.waitForFunction(
-    () => document.body.innerText.includes("로그인이 필요합니다"),
-    { timeout: 15000 },
+    () => document.body.textContent?.includes("로그인이 필요합니다") ?? false,
+    { timeout: AUTH_WAIT_MS },
   );
-  const body = await page.locator("body").innerText();
+  const body = await readBodyText(page);
   if (!body.includes("로그인이 필요합니다")) {
     throw new Error(`${label}: expected anonymous state after logout`);
   }
@@ -126,7 +189,7 @@ export async function logoutFromProfile(page, baseUrl, label) {
 export async function verifyAnonymousSaveBlocked(page, label) {
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
   await page.waitForTimeout(2500);
-  const body = await page.locator("body").innerText();
+  const body = await readBodyText(page);
   if (!body.includes("로그인이 필요합니다")) {
     throw new Error(`${label}: anonymous save should be blocked`);
   }

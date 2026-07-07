@@ -34,6 +34,7 @@
     "regions:fetch-mois": "node scripts/regions/fetch-mois-region-source.mjs",
     "regions:parse-mois": "node scripts/regions/parse-mois-regions.mjs",
     "regions:generate-seed-r": "node scripts/regions/generate-stage1f-r-region-seed-sql.mjs",
+    "regions:review-sgis": "node scripts/regions/review-sgis-region-source.mjs",
     "regions:fetch-source": "node scripts/regions/fetch-official-region-source.mjs",
     "regions:parse": "node scripts/regions/parse-official-regions.mjs",
     "regions:generate-seed": "node scripts/regions/generate-stage1f-region-seed-sql.mjs"

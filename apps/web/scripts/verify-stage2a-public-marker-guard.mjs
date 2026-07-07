@@ -2,8 +2,9 @@
  * Stage 2-A — stage2A machine markers only on /admin/diagnostics, not public routes
  */
 import { chromium } from "playwright";
+import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
 
-const BASE = process.env.ADME_E2E_BASE_URL ?? "https://web-ashen-xi-52.vercel.app";
+const BASE = resolveProductionE2eBaseUrl();
 
 const PUBLIC_FORBIDDEN = [
   "stage2ABuild=",
