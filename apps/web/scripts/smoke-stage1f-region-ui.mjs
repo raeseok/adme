@@ -45,13 +45,14 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const creds = resolveTestCredentials();
 
-  for (const [label, viewport] of [
-    ["mobile-390", devices["Pixel 5"].viewport],
-    ["desktop-1440", { width: 1440, height: 900 }],
+  for (const [label, viewport, userKey] of [
+    ["mobile-390", devices["Pixel 5"].viewport, "userA"],
+    ["desktop-1440", { width: 1440, height: 900 }, "userB"],
   ]) {
     const context = await browser.newContext({ viewport });
     const page = await context.newPage();
-    await authenticateUser(page, BASE, "Stage1F", creds.userA.email, creds.userA.password);
+    const user = creds[userKey];
+    await authenticateUser(page, BASE, "Stage1F", user.email, user.password);
     await verifyViewport(page, label, viewport);
 
     await gotoProfile(page, BASE);

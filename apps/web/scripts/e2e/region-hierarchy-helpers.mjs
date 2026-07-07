@@ -15,16 +15,43 @@ export function getRegionSelector(page, testId) {
 
 export async function selectRegionHierarchy(page, testId, { sido, sigungu, dong }) {
   const root = getRegionSelector(page, testId);
-  await root.getByTestId(`${testId}-sido`).selectOption({ label: sido });
+  await page.waitForFunction(
+    (tid) => {
+      const fieldset = document.querySelector(`[data-testid="${tid}"]`);
+      return fieldset instanceof HTMLFieldSetElement && !fieldset.disabled;
+    },
+    testId,
+    { timeout: 30000 },
+  );
+
+  const sidoSelect = root.getByTestId(`${testId}-sido`);
+  const sidoValue = await sidoSelect
+    .locator("option")
+    .filter({ hasText: sido })
+    .first()
+    .getAttribute("value");
+  if (!sidoValue) {
+    throw new Error(`sido option not found: ${sido}`);
+  }
+  await sidoSelect.selectOption(sidoValue);
   await page.waitForFunction(
     (tid) => {
       const el = document.querySelector(`[data-testid="${tid}-sigungu"]`);
       return el instanceof HTMLSelectElement && !el.disabled;
     },
     testId,
-    { timeout: 15000 },
+    { timeout: 30000 },
   );
-  await root.getByTestId(`${testId}-sigungu`).selectOption({ label: sigungu });
+  const sigunguSelect = root.getByTestId(`${testId}-sigungu`);
+  const sigunguValue = await sigunguSelect
+    .locator("option")
+    .filter({ hasText: sigungu })
+    .first()
+    .getAttribute("value");
+  if (!sigunguValue) {
+    throw new Error(`sigungu option not found: ${sigungu}`);
+  }
+  await sigunguSelect.selectOption(sigunguValue);
   await page.waitForTimeout(400);
   const dongSelect = root.getByTestId(`${testId}-dong`);
   if ((await dongSelect.count()) === 0) return;
