@@ -93,6 +93,25 @@ export default async function DiagnosticsPage() {
         Stage 0.5-R diagnostics verified
       </p>
       <section
+        aria-label="Stage 2-B min-view timer and server grading preview markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-orange-300 bg-orange-50 px-3 py-3 font-mono text-xs text-orange-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 2-B Min-View Timer · Server Grading Preview (current)
+        </p>
+        <p>stage2BBuild=stage2b-min-view-server-grading-preview-production</p>
+        <p>stage2BMinViewTimer=true</p>
+        <p>stage2BServerGradingPreview=true</p>
+        <p>stage2BQuizAnswerClientExposure=false</p>
+        <p>stage2BPointLedgerMutation=false</p>
+        <p>stage2BAdViewsMutation=false</p>
+        <p>stage2BRewardPreviewOnly=true</p>
+        <p>stage2BKakaoActualSend=false</p>
+        <p>stage2BServerAuthoritativeMinView=false</p>
+        <p>stage2BPublicMarkerExposed=false</p>
+        <p>stage2BDeployCommit={deployCommit}</p>
+      </section>
+      <section
         aria-label="Stage 2-A read-only ad card quiz markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-300 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
       >

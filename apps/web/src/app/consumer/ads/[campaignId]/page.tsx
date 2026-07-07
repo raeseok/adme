@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdCardPreview } from "@/components/consumer-ads/AdCardPreview";
+import { QuizSubmitPreviewPanel } from "@/components/campaigns/QuizSubmitPreviewPanel";
 import { ShellCard } from "@/components/ShellCard";
 import { fetchConsumerAdCards } from "@/lib/consumer-ads/fetch-consumer-ads.server";
 import { createClient } from "@/lib/supabase/server";
@@ -35,16 +36,17 @@ export default async function ConsumerAdDetailPage({ params }: PageProps) {
   return (
     <ShellCard title={card.title} wide>
       <section className="space-y-2 text-sm text-zinc-800">
-        <p className="font-medium text-violet-900">Stage 2-A: 광고 카드·퀴즈 안전 골격</p>
-        <p>읽기 전용 광고 카드 미리보기</p>
-        <p>포인트 원장 변경 없음</p>
-        <p>퀴즈 정답은 화면과 네트워크 응답에 포함하지 않습니다</p>
-        <p>카카오톡 광고 도착 알림은 향후 선택 동의 기반 기능으로 검토 중입니다</p>
+        <p>광고 본문을 확인한 뒤 퀴즈에 참여할 수 있습니다.</p>
+        <p>퀴즈 정답은 화면과 네트워크 응답에 포함하지 않습니다.</p>
+        <p>리워드는 미리보기(preview)만 표시하며, 포인트 적립은 다음 단계에서 처리됩니다.</p>
+        <p>카카오톡 광고 도착 알림은 향후 선택 동의 기반 기능으로 검토 중입니다.</p>
       </section>
 
       <div className="mt-6">
-        <AdCardPreview card={card} showQuizInline />
+        <AdCardPreview card={card} showQuizInline={false} />
       </div>
+
+      <QuizSubmitPreviewPanel card={card} />
 
       <Link
         href="/consumer/ads"

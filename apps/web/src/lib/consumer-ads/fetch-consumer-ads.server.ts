@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ConsumerAdCardDto, ConsumerAdsPageData, QuizOptionDto } from "./types";
+import { resolveMinViewSeconds } from "./min-view";
 import { getStage2AFixtureAdCards } from "./stage2a-fixtures.server";
 
 const CAMPAIGN_SELECT =
@@ -108,6 +109,7 @@ function mapCampaignToCard(
 
   return {
     campaignId: campaign.id,
+    quizId: quiz.id,
     title: campaign.title,
     advertiserDisplayName:
       labels.advertiserMap.get(campaign.advertiser_id) ?? "광고주",
@@ -115,7 +117,8 @@ function mapCampaignToCard(
     regionLabel: labels.regionMap.get(campaign.region_id) ?? "지역",
     bodyExcerpt: excerpt(campaign.ad_content_text ?? campaign.description),
     pointPreviewLabel: formatPointPreview(campaign.reward_per_view),
-    minViewSecondsPreview: 15,
+    rewardPointsPreview: campaign.reward_per_view,
+    minViewSecondsPreview: resolveMinViewSeconds(null),
     quizQuestion: quiz.question_text,
     quizOptions: parseQuizOptions(quiz.options),
     readOnlyMode: true,
