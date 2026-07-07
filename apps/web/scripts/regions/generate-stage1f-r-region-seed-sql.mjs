@@ -102,7 +102,7 @@ WHERE code IN ('KR-29', 'KR-46');
 `;
 
   const batches = [];
-  const BATCH = 120;
+  const BATCH = 1;
   for (let i = 0; i < ordered.length; i += BATCH) {
     batches.push(renderAdminBatch(ordered.slice(i, i + BATCH), moisManifest.effectiveDate));
   }
