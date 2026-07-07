@@ -49,6 +49,7 @@ let failed = 0;
 for (const dir of CODE_SCAN_ROOTS) {
   for (const file of walk(dir)) {
     if (file.includes("verify-stage2a-kakao-no-send")) continue;
+    if (file.includes("verify-stage2b-kakao-no-send")) continue;
     const content = readFileSync(file, "utf8");
 
     for (const { pattern, label } of FORBIDDEN_CODE_PATTERNS) {
