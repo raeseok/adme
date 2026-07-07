@@ -4,6 +4,9 @@ export type RegionRow = {
   name: string;
   parent_id: string | null;
   sort_order: number;
+  is_active?: boolean;
+  region_level?: string | null;
+  path_key?: string | null;
 };
 
 export type RegionOption = {

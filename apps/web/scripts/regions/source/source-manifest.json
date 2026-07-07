@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-07-07T11:03:55.591Z",
+  "provider": "molit-bjd-csv",
+  "sourceKind": "molit-legal-dong",
+  "effectiveDate": "2026-06-09",
+  "file": "C:\\Adme\\apps\\web\\scripts\\regions\\source\\molit_bjd_20260609.csv",
+  "sha256": "6b26e8929df44e55a091ffb4331ba1a68d1aa09a1377a94287be858f482b3dc5",
+  "size": 3681403,
+  "name": "molit_bjd_20260609.csv"
+}

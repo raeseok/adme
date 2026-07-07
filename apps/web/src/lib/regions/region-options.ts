@@ -53,9 +53,10 @@ function isNonEmptyName(name: string | null | undefined): boolean {
 
 export function buildRegionHierarchyIndex(rows: RegionRow[]): RegionHierarchyIndex {
   const byId = new Map(rows.map((r) => [r.id, r]));
+  const activeRows = rows.filter((r) => r.is_active !== false);
   const childIds = new Map<string, string[]>();
 
-  for (const row of rows) {
+  for (const row of activeRows) {
     if (!row.parent_id) continue;
     const siblings = childIds.get(row.parent_id) ?? [];
     siblings.push(row.id);
@@ -72,7 +73,7 @@ export function buildRegionHierarchyIndex(rows: RegionRow[]): RegionHierarchyInd
     childIds.set(parentId, ids);
   }
 
-  const sidoRows = rows
+  const sidoRows = activeRows
     .filter((r) => !r.parent_id && isNonEmptyName(r.name))
     .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, "ko"));
 
@@ -144,6 +145,7 @@ export function getSavableRegionIds(rows: RegionRow[]): Set<string> {
 
   for (const row of rows) {
     if (!row.parent_id) continue;
+    if (row.is_active === false) continue;
     const childCount = index.childIds.get(row.id)?.length ?? 0;
     if (childCount > 0) continue;
     if (getRegionPath(row, index).length >= 2) {
@@ -262,4 +264,44 @@ export function parseRegionSelectionFromId(
     sigunguId: path[path.length - 2].id,
     dongId: path[path.length - 1].id,
   };
+}
+
+const REPRESENTATIVE_MUNICIPALITY_CODES = [
+  "KR-11-JONGNO",
+  "KR-11-GANGNAM",
+  "KR-41-GOYANG-ILSANDONG",
+  "KR-41-GOYANG-DEYANG",
+  "KR-44-TAEAN",
+  "KR-47-YEONGCHEON",
+  "KR-45-JEONGEUP",
+] as const;
+
+export function countRegionLevels(rows: RegionRow[]) {
+  const active = rows.filter((r) => r.is_active !== false);
+  const sido = active.filter((r) => r.region_level === "sido" || !r.parent_id).length;
+  const sigungu = active.filter((r) => r.region_level === "sigungu").length;
+  const dong = active.filter((r) => r.region_level === "dong").length;
+  return { sido, sigungu, dong, total: active.length };
+}
+
+export function assessHierarchicalSeedCoverage(
+  rows: RegionRow[],
+): "partial" | "adequate" | "full" | "unknown" {
+  if (rows.length === 0) return "unknown";
+  const counts = countRegionLevels(rows);
+  const legacyPresent = REPRESENTATIVE_MUNICIPALITY_CODES.every((code) =>
+    rows.some((r) => r.code === code),
+  );
+  if (
+    legacyPresent &&
+    counts.sido >= 17 &&
+    counts.sigungu >= 250 &&
+    counts.dong >= 3000
+  ) {
+    return "full";
+  }
+  if (legacyPresent && counts.sigungu >= 30) {
+    return "adequate";
+  }
+  return "partial";
 }

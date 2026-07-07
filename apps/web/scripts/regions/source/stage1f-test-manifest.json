@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-07-07T00:00:00.000Z",
+  "sourceEffectiveDate": "2026-06-09",
+  "sourceSha256": "6b26e8929df44e55a091ffb4331ba1a68d1aa09a1377a94287be858f482b3dc5",
+  "counts": { "sido": 17, "sigungu": 268, "dong": 5067, "total": 5352 },
+  "testManifest": {
+    "metro": { "label": "수도권 시·군·구", "sido": "서울특별시", "sigungu": "강남구", "code": "KR-11-GANGNAM" },
+    "metropolitan": { "label": "광역시", "sido": "부산광역시", "sigungu": "해운대구" },
+    "provinceCity": { "label": "도 단위 시", "path": "경기도 > 고양시" },
+    "gun": { "label": "군 단위", "path": "충청남도 > 태안군" },
+    "dongSample": { "label": "읍·면·동", "path": "경기도 > 고양시 > 일산동구" },
+    "goyangHierarchy": { "label": "고양시 하위 구", "sigungu": "고양시", "dong": "일산동구", "code": "KR-41-GOYANG-ILSANDONG" }
+  }
+}

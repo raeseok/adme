@@ -63,7 +63,7 @@ async function verifyDiagnosticsStage1E(page, label) {
     "stage1ESigunguSecond=true",
     "stage1EDongOptional=true",
     "stage1ERegionFinalSaveLevel=sigungu-or-dong",
-    "stage1ERegionSeedCoverage=partial",
+    "stage1ERegionSeedCoverage=full",
     "stage1EAdvertiserPrecisionPrepared=true",
     "stage1EPublicDebugMarker=false",
     "stage1EServiceRoleUsed=false",

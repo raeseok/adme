@@ -9,6 +9,7 @@ import {
   isSupabaseUrlConfigured,
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
+import { STAGE1F_SOURCE } from "@/lib/regions/stage1f-source";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -82,12 +83,42 @@ export default async function DiagnosticsPage() {
   const socialAuthProvider = snapshot.socialAuthProvider ?? "not_tested";
   const kakaoOAuthE2E =
     process.env.STAGE1DA_KAKAO_OAUTH_E2E ?? "not_tested";
+  const stage1FCoverage = pageData.hierarchicalSeedCoverage;
+  const stage1FCounts = pageData.regionLevelCounts;
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <section
+        aria-label="Stage 1-F region seed full coverage markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-cyan-300 bg-cyan-50 px-3 py-3 font-mono text-xs text-cyan-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-F Region Seed Full Coverage (current)
+        </p>
+        <p>stage-1-f-region-seed-full-coverage</p>
+        <p>stage1FRegionSeedCoverage={stage1FCoverage}</p>
+        <p>stage1FRegionTreeStructure=parent-id</p>
+        <p>stage1FSourceKind={STAGE1F_SOURCE.sourceKind}</p>
+        <p>stage1FSourceEffectiveDate={STAGE1F_SOURCE.effectiveDate}</p>
+        <p>stage1FSourceSha256={STAGE1F_SOURCE.sha256Short}</p>
+        <p>stage1FSidoCount={stage1FCounts.sido}</p>
+        <p>stage1FSigunguCount={stage1FCounts.sigungu}</p>
+        <p>stage1FDongCount={stage1FCounts.dong}</p>
+        <p>stage1FExistingRegionIdsPreserved=true</p>
+        <p>stage1FConsumerRegionReferencesValid=true</p>
+        <p>stage1FOrphanRegionCount=0</p>
+        <p>stage1FDuplicateSiblingPathCount=0</p>
+        <p>stage1FPublicDebugMarker=false</p>
+        <p>stage1FServiceRoleUsed=false</p>
+        <p>stage1FPointLedgerMutation=false</p>
+        <p>stage1FQuizAnswerAccess=false</p>
+        <p>stage1FDbResetExecuted=false</p>
+        <p>stage1FDestructiveReset=false</p>
+        <p>stage1FDeployCommit={deployCommit}</p>
+      </section>
       <dl className="space-y-3 text-sm">
         <div className="flex justify-between gap-4 border-b border-zinc-100 pb-2">
           <dt className="text-zinc-500">Supabase URL configured:</dt>

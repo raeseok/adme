@@ -11,31 +11,7 @@ import {
   buildRegionOptions,
   type RegionRow,
 } from "./regions";
-import { getSavableRegionIds } from "@/lib/regions/region-options";
-
-const REPRESENTATIVE_MUNICIPALITY_CODES = [
-  "KR-11-JONGNO",
-  "KR-11-GANGNAM",
-  "KR-41-GOYANG-ILSANDONG",
-  "KR-41-GOYANG-DEYANG",
-  "KR-44-TAEAN",
-  "KR-47-YEONGCHEON",
-  "KR-45-JEONGEUP",
-] as const;
-
-function assessBasicMunicipalitySeedCoverage(
-  municipalityOptions: { code: string }[],
-): ConsumerProfilePageData["basicMunicipalitySeedCoverage"] {
-  if (municipalityOptions.length === 0) return "unknown";
-  const codes = new Set(municipalityOptions.map((o) => o.code));
-  const hasRepresentative = REPRESENTATIVE_MUNICIPALITY_CODES.every((code) =>
-    codes.has(code),
-  );
-  if (hasRepresentative && municipalityOptions.length >= 30) {
-    return "adequate";
-  }
-  return "partial";
-}
+import { getSavableRegionIds, assessHierarchicalSeedCoverage, countRegionLevels } from "@/lib/regions/region-options";
 
 export async function getConsumerProfilePageData(
   supabase: SupabaseClient | null,
@@ -55,13 +31,14 @@ export async function getConsumerProfilePageData(
       provinceOnlyOptionCount: 0,
       basicMunicipalitySeedCoverage: "unknown",
       hierarchicalSeedCoverage: "unknown",
+      regionLevelCounts: { sido: 0, sigungu: 0, dong: 0, total: 0 },
     };
   }
 
   const [regionsResult, categoriesResult] = await Promise.all([
     supabase
       .from("regions")
-      .select("id, code, name, parent_id, sort_order")
+      .select("id, code, name, parent_id, sort_order, is_active, region_level, path_key")
       .eq("is_active", true)
       .order("sort_order"),
     supabase
@@ -82,7 +59,14 @@ export async function getConsumerProfilePageData(
   const savableRegionIdSet =
     regionsReadStatus === "ok" ? getSavableRegionIds(regionRows) : new Set<string>();
   const savableRegionIds = [...savableRegionIdSet];
-  const hierarchicalSeedCoverage = assessBasicMunicipalitySeedCoverage(regions);
+  const hierarchicalSeedCoverage = assessHierarchicalSeedCoverage(regionRows);
+  const regionLevelCounts = countRegionLevels(regionRows);
+  const basicMunicipalitySeedCoverage =
+    hierarchicalSeedCoverage === "unknown"
+      ? "unknown"
+      : hierarchicalSeedCoverage === "partial"
+        ? "partial"
+        : "adequate";
 
   const provinceOnlyOptionCount =
     regionsReadStatus === "ok"
@@ -111,8 +95,9 @@ export async function getConsumerProfilePageData(
     regionsEmpty: regionRows.length === 0,
     categoriesEmpty: categories.length === 0,
     provinceOnlyOptionCount,
-    basicMunicipalitySeedCoverage: hierarchicalSeedCoverage,
+    basicMunicipalitySeedCoverage,
     hierarchicalSeedCoverage,
+    regionLevelCounts,
   };
 }
 

@@ -1,0 +1,4 @@
+# Official source artifacts — download via fetch-official-region-source.mjs
+*.csv
+*.zip
+parsed-regions.json

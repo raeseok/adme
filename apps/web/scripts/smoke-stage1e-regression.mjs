@@ -50,6 +50,9 @@ check("ConsumerProfileForm", files.profileForm, [
 ]);
 
 check("diagnostics", files.diagnostics, [
+  "Stage 1-F Region Seed Full Coverage",
+  "stage-1-f-region-seed-full-coverage",
+  "stage1FRegionSeedCoverage=",
   "Stage 1-E-R Region Auth Verification",
   "stage-1-e-r-region-auth-verification",
   "stage1ERRlsABSelectorUpdated=true",
@@ -88,6 +91,8 @@ check("package.json", files.packageJson, [
   "verify:stage1e-region-auth",
   "verify:stage1e-rls-ab",
   "smoke:stage1e-regression",
+  "verify:stage1f-region-seed-coverage",
+  "smoke:stage1f-region-ui",
 ]);
 
 if (failed > 0) process.exit(1);

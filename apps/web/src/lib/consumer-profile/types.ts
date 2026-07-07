@@ -28,7 +28,13 @@ export type ConsumerProfilePageData = {
   categoriesEmpty: boolean;
   provinceOnlyOptionCount: number;
   basicMunicipalitySeedCoverage: "partial" | "adequate" | "unknown";
-  hierarchicalSeedCoverage: "partial" | "adequate" | "unknown";
+  hierarchicalSeedCoverage: "partial" | "adequate" | "full" | "unknown";
+  regionLevelCounts: {
+    sido: number;
+    sigungu: number;
+    dong: number;
+    total: number;
+  };
 };
 
 export type ConsumerProfileStage1CContext = {

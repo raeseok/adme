@@ -20,7 +20,12 @@
     "verify:stage1d-b-profile-intent": "node scripts/verify-stage1d-b-profile-intent.mjs",
     "smoke:stage1e-regression": "node scripts/smoke-stage1e-regression.mjs",
     "verify:stage1e-region-auth": "node scripts/verify-stage1e-region-auth.mjs",
-    "verify:stage1e-rls-ab": "node scripts/verify-stage1e-rls-ab.mjs"
+    "verify:stage1e-rls-ab": "node scripts/verify-stage1e-rls-ab.mjs",
+    "verify:stage1f-region-seed-coverage": "node scripts/verify-stage1f-region-seed-coverage.mjs",
+    "smoke:stage1f-region-ui": "node scripts/smoke-stage1f-region-ui.mjs",
+    "regions:fetch-source": "node scripts/regions/fetch-official-region-source.mjs",
+    "regions:parse": "node scripts/regions/parse-official-regions.mjs",
+    "regions:generate-seed": "node scripts/regions/generate-stage1f-region-seed-sql.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

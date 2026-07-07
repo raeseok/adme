@@ -162,8 +162,10 @@ export async function verifyHierarchicalProfileVisible(page, label) {
 export async function assertNoStageMarkers(page, label) {
   const body = await page.locator("body").innerText();
   const forbidden = [
+    "stage-1-f-region-seed-full-coverage",
     "stage-1-e-region-hierarchical-selector",
     "stage-1-e-r-region-auth-verification",
+    "stage1FRegionSeedCoverage=",
     "stage1ERegionSelectorDepth=",
     "stage1ERAuthenticatedSaveReload=",
     "stage1ERRlsABSelectorUpdated=",
@@ -173,5 +175,5 @@ export async function assertNoStageMarkers(page, label) {
       throw new Error(`${label}: public page exposes "${needle}"`);
     }
   }
-  console.log(`PASS: ${label} — no stage1E/stage1ER visible markers`);
+  console.log(`PASS: ${label} — no stage1E/stage1ER/stage1F visible markers`);
 }
