@@ -121,10 +121,10 @@ UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참
 
 | 원칙 | 현재 상태 |
 |---|---|
-| point_ledger = 단일 진실 원천 (append-only) | 설계 확정, actual mutation **금지** |
-| quiz_reward actual 적립 | Stage 3-A 이후, dev-only dry-run 선행 |
+| point_ledger = 단일 진실 원천 (append-only) | Stage 3-A: **dev-only** INSERT dry-run 허용; Production **금지** |
+| quiz_reward actual 적립 | Stage 3-A dry-run 완료; 제품 경로·Production enable는 Stage 3-B+ |
 | dev/prod Supabase 분리 | **완료** (Stage 3-1) |
-| actual mutation enable | 별도 승인·gate 전까지 **false** |
+| Production actual mutation enable | 별도 승인·gate 전까지 **false** |
 
 상세: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)
 
@@ -147,7 +147,8 @@ UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참
 | Stage 3-1 / 3-1-R | 완료 (dev/prod 분리, DB UUID E2E 회복) |
 | Stage 1-G | 완료 (자녀 생년·반려동물 조건·능동형 UX) |
 | Stage 1-G-R | 완료 (기본/선택 정보 섹션, Production commit 정합화) |
-| Stage 3-A | planned (ledger actual mutation dev dry-run) |
+| Stage 3-A | 완료 (point_ledger dev-only dry-run; Production mutation=false) |
+| Stage 3-B | planned (quiz_reward full transaction dev-only) |
 | DOC-0 | 완료 (living document + decision log) |
 
 상세 roadmap: [stage-roadmap-current.md](./stage-roadmap-current.md)

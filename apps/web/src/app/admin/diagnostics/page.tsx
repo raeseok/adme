@@ -11,6 +11,7 @@ import {
 import { ShellCard } from "@/components/ShellCard";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
+import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -88,12 +89,77 @@ export default async function DiagnosticsPage() {
   const stage1FCounts = pageData.regionLevelCounts;
   const molitBaselinePreserved = pageData.molitLegalDongBaselinePreserved;
   const stage30 = getStage30ReadinessState();
+  const stage3A = getStage3ADiagnosticsState();
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <section
+        aria-label="Stage 3-A point ledger dev-only dry-run markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-400 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-A Point Ledger Dev-Only Dry-Run (current)
+        </p>
+        <p>stage3ABuild={stage3A.stage3ABuild}</p>
+        <p>stage3AEnabled={String(stage3A.stage3AEnabled)}</p>
+        <p>stage3ADevOnlyMutation={String(stage3A.stage3ADevOnlyMutation)}</p>
+        <p>
+          stage3AProductionMutationBlocked=
+          {String(stage3A.stage3AProductionMutationBlocked)}
+        </p>
+        <p>
+          stage3APointLedgerAppendOnly=
+          {String(stage3A.stage3APointLedgerAppendOnly)}
+        </p>
+        <p>
+          stage3AIdempotencyUnique={String(stage3A.stage3AIdempotencyUnique)}
+        </p>
+        <p>
+          stage3AServiceRoleClientExposure=
+          {String(stage3A.stage3AServiceRoleClientExposure)}
+        </p>
+        <p>
+          stage3AQuizAnswerExposure=
+          {String(stage3A.stage3AQuizAnswerExposure)}
+        </p>
+        <p>
+          stage3AProdPointLedgerMutation=
+          {String(stage3A.stage3AProdPointLedgerMutation)}
+        </p>
+        <p>
+          stage3AProdQuizRewardMutation=
+          {String(stage3A.stage3AProdQuizRewardMutation)}
+        </p>
+        <p>
+          stage3AProdCampaignBudgetMutation=
+          {String(stage3A.stage3AProdCampaignBudgetMutation)}
+        </p>
+        <p>
+          stage3AProdUsersBalanceMutation=
+          {String(stage3A.stage3AProdUsersBalanceMutation)}
+        </p>
+        <p>
+          stage3AProdPartnerSettlementsMutation=
+          {String(stage3A.stage3AProdPartnerSettlementsMutation)}
+        </p>
+        <p>
+          stage3AProdCashOutMutation=
+          {String(stage3A.stage3AProdCashOutMutation)}
+        </p>
+        <p>stage3ARpcName={stage3A.stage3ARpcName}</p>
+        <p>
+          stage3ACurrentSupabaseProjectRef=
+          {stage3A.stage3ACurrentSupabaseProjectRef}
+        </p>
+        <p>
+          stage3APublicMarkerExposed=
+          {String(stage3A.stage3APublicMarkerExposed)}
+        </p>
+        <p>stage3ADeployCommit={stage3A.stage3ADeployCommit}</p>
+      </section>
       <section
         aria-label="Stage 3-0 Supabase env separation and point ledger safety readiness markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-400 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"

@@ -169,3 +169,33 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | consumer profile UX, optional profile section copy, smoke verification |
 | **Implementation Stage** | Stage 1-G-R |
 | **Related files** | apps/web/src/app/consumer/profile/ConsumerProfileForm.tsx, apps/web/scripts/smoke-stage1g-r-profile-basic-optional-ux.mjs |
+
+---
+
+## ADME-DECISION-20260708-012
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-08 |
+| **Title** | Stage 3-A point_ledger actual mutation은 dev-only dry-run RPC로만 허용 |
+| **Status** | implemented |
+| **Decision** | 첫 point_ledger actual INSERT는 `rpc_stage3a_dev_record_quiz_reward_dry_run`으로만 수행한다. JWT iss에 prod project-ref가 있으면 DB에서 거부한다. Production campaign budget·cash_out·partner_settlements mutation은 금지. |
+| **Reason** | Stage 3-0 safety preflight 이후 금전성 mutation의 최소 안전 진입 |
+| **Impact** | point_ledger schema (idempotency_key), diagnostics, verify scripts, Stage 3 roadmap |
+| **Implementation Stage** | Stage 3-A |
+| **Related files** | supabase/migrations/20260708180000_stage_3_a_point_ledger_dev_dry_run.sql, docs/adme/stage-3-a-point-ledger-dev-dry-run-result.md |
+
+---
+
+## ADME-DECISION-20260708-013
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-08 |
+| **Title** | point_ledger 오류 정정은 UPDATE/DELETE가 아니라 adjust append만 |
+| **Status** | accepted |
+| **Decision** | commit된 ledger row는 불변이다. 오류 정정은 admin_adjustment(또는 동등 adjust) APPEND만 허용하며, Stage 3-A에서는 adjust 실제 mutation을 구현하지 않는다. |
+| **Reason** | append-only SSOT·감사 추적성 |
+| **Impact** | future Stage 3-B+, admin adjust 설계 |
+| **Implementation Stage** | Stage 3-A (정책), 실행은 후속 Stage |
+| **Related files** | docs/adme/stage-3-a-point-ledger-dev-dry-run-result.md, docs/adme/stage-3-0-point-ledger-safety-preflight.md |

@@ -85,6 +85,8 @@ Stage 3-0에서는 대사 job/RPC를 만들지 않는다.
 | RPC / migration | **없음** (`supabase/migrations`에 quiz_reward RPC 미추가) |
 | readiness marker | `/admin/diagnostics`에 visible |
 | transaction contract | 문서 + `quiz-reward-contract.ts` 상수만 |
-| 다음 단계 | Stage 3-1 dev/prod 실분리 또는 Stage 3-A RPC dry-run |
+| 다음 단계 | Stage 3-A 완료 → Stage 3-B (full quiz_reward transaction, still prod-gated) |
 
 **핵심:** Stage 3-0은 “돈이 움직이는 코드”가 아니라 “돈이 움직이기 전 안전판”이다.
+
+Stage 3-A 이후: [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md) — **dev-only** ledger INSERT dry-run. Production actual mutation은 계속 false.

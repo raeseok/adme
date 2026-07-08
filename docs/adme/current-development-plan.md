@@ -91,6 +91,7 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 | Stage 3-1 / 3-1-R | 완료 | dev/prod split, DB UUID E2E 회복 |
 | Stage 1-G | 완료 | child/pet profile fields, active UX copy, diagnostics |
 | Stage 1-G-R | 완료 | basic/optional profile sections, completion copy, stage1GR markers |
+| Stage 3-A | 완료 | point_ledger dev-only dry-run RPC, Production mutation blocked |
 
 ---
 
@@ -140,15 +141,23 @@ Preflight: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger
 
 ---
 
-## Stage 3-A 후보 (planned)
+## Stage 3-A 완료 (2026-07-08)
 
-point_ledger **actual mutation** dev-only dry-run:
+- RPC: `rpc_stage3a_dev_record_quiz_reward_dry_run` (SECURITY DEFINER, search_path=public)
+- migration: `20260708180000_stage_3_a_point_ledger_dev_dry_run.sql`
+- `point_ledger.idempotency_key` + unique index
+- Production JWT / prod ref **DB·앱 이중 차단**
+- campaign budget / partner_settlements / cash_out mutation: **없음**
+- verify: `verify:stage3a-dev-dry-run`, `verify:stage3a-production-blocked`, `verify:stage3a-public-marker-guard`
+
+상세: [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md)
+
+## Stage 3-B 후보 (planned)
+
+quiz_reward **full transaction** (ad_views lock + budget + ledger) **dev-only**:
 
 - transaction contract: [stage-3-0-quiz-reward-transaction-contract.md](./stage-3-0-quiz-reward-transaction-contract.md)
-- idempotency key (user + campaign + quiz / ad_view_id)
-- budget row lock → ledger insert → budget 차감 (단일 transaction)
-- rollback/adjust 정책: ledger append-only, 보정은 reverse entry
-- **prod 적용 전** dev 검증 + 별도 승인
+- **prod actual mutation enable 전** 별도 승인
 
 ---
 
@@ -170,6 +179,9 @@ point_ledger **actual mutation** dev-only dry-run:
 - `smoke:stage1g-r-profile-basic-optional-ux`
 - `verify:stage1g-r-production-commit`
 - `verify:stage1g-r-public-marker-guard`
+- `verify:stage3a-dev-dry-run`
+- `verify:stage3a-production-blocked`
+- `verify:stage3a-public-marker-guard`
 - `verify:doc-0-current-docs`
 
 ---
