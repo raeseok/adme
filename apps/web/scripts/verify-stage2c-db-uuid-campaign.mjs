@@ -291,8 +291,23 @@ async function main() {
       await page.locator('[data-testid="quiz-attempt-result"]').waitFor({ state: "visible" });
       await sleep(1500);
 
-      const finalView = await getLatestOwnAdView(authed, userId, campaign.campaignId);
-      const body2 = await page.locator("body").innerText();
+      let finalView = await getLatestOwnAdView(authed, userId, campaign.campaignId);
+      let body2 = await page.locator("body").innerText();
+      for (let poll = 0; poll < 5; poll += 1) {
+        if (
+          (finalView?.attempt_no ?? 0) >= 2 ||
+          finalView?.status === "failed" ||
+          body2.includes("리워드 미리보기는 종료") ||
+          body2.includes("종료되었습니다") ||
+          body2.includes("attempt_limit")
+        ) {
+          break;
+        }
+        await sleep(1000);
+        finalView = await getLatestOwnAdView(authed, userId, campaign.campaignId);
+        body2 = await page.locator("body").innerText();
+      }
+
       if (
         (finalView?.attempt_no ?? 0) >= 2 ||
         finalView?.status === "failed" ||
