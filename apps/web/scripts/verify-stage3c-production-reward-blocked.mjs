@@ -49,7 +49,7 @@ async function verifyProductionUiBlocked() {
     }
 
     await page.goto(
-      `${BASE}/consumer/ads/e2e00002-0000-4000-8000-000000000002`,
+      `${BASE}/consumer/ads/stage2a-fixture-campaign-2`,
       { waitUntil: "networkidle" },
     );
     const detailBody = await page.locator("body").innerText();
