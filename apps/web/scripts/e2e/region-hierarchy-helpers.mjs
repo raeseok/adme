@@ -139,6 +139,7 @@ export async function getProfileFormSnapshot(page) {
     .locator("fieldset")
     .filter({ hasText: "관심정보" })
     .locator("button.border-blue-600.bg-blue-600")
+    .filter({ hasNotText: /^전체$/ })
     .count();
 
   return {
