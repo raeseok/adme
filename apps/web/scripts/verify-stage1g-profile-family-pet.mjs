@@ -86,12 +86,26 @@ async function getCheckedPetLabels(page) {
   return labels;
 }
 
+async function ensureMinimalProfileReady(page) {
+  const residence = page.getByTestId("region-selector-residence");
+  const sigungu = residence.getByTestId("region-selector-residence-sigungu");
+  const sigunguValue = await sigungu.inputValue();
+  if (!sigunguValue) {
+    await selectRegionHierarchy(page, REGION_SELECTOR_IDS.residence, {
+      sido: "서울특별시",
+      sigungu: "강남구",
+    });
+  }
+
+  const allBtn = page.getByRole("button", { name: "전체", exact: true });
+  const className = await allBtn.getAttribute("class");
+  if (!className?.includes("bg-blue-600")) {
+    await allBtn.click();
+  }
+}
+
 async function saveMinimalProfile(page, label) {
-  await selectRegionHierarchy(page, REGION_SELECTOR_IDS.residence, {
-    sido: "서울특별시",
-    sigungu: "강남구",
-  });
-  await page.getByRole("button", { name: "전체", exact: true }).click();
+  await ensureMinimalProfileReady(page);
   await page.getByRole("button", { name: "소비 의향 프로필 저장" }).click();
 
   const deadline = Date.now() + 30000;
@@ -103,7 +117,7 @@ async function saveMinimalProfile(page, label) {
     }
     if (body.includes("가장 큰 자녀 생년은 막내 자녀 생년보다 늦을 수 없습니다")) {
       console.log(`PASS: ${label} — invalid child order blocked`);
-      return;
+      return "invalid_blocked";
     }
     await page.waitForTimeout(1000);
   }
