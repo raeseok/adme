@@ -89,10 +89,11 @@ async function verifyUserBNoLeak(page, label, snapshotA) {
   }
   console.log(`PASS: ${label} — B residence empty before save`);
 
-  if (snapshotB.categoryCount > 0 || snapshotB.interestAll) {
-    throw new Error(`${label}: B should have no interest selection before save`);
+  // Stage 1-G-R: new users default to interest scope ALL; RLS checks individual categories only
+  if (snapshotB.categoryCount > 0) {
+    throw new Error(`${label}: B should have no individual interest categories before save`);
   }
-  console.log(`PASS: ${label} — B no pre-selected interests`);
+  console.log(`PASS: ${label} — B no pre-saved interest categories`);
 
   return snapshotB;
 }
