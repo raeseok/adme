@@ -229,3 +229,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | consumer ad detail UI, diagnostics stage3C markers, verify:stage3c-* scripts |
 | **Implementation Stage** | Stage 3-C |
 | **Related files** | docs/adme/stage-3-c-consumer-quiz-submit-ui-controlled-integration.md, apps/web/src/lib/quiz-rewards/, apps/web/src/components/campaigns/QuizSubmitControlledPanel.tsx |
+
+---
+
+## ADME-DECISION-20260709-003
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-C-K Production Kakao OAuth provider backend sync |
+| **Status** | implemented |
+| **Decision** | Production Supabase(`vupsalteyltjqumppltc`) Kakao OAuth는 dev와 동일 provider credentials를 Management API로 backend에 반영해야 한다. Dashboard Enabled 표시만으로 authorize endpoint 활성화를 가정하지 않는다. 앱 OAuth 코드 변경 없이 provider config sync로 해소. |
+| **Reason** | Stage 3-1 env split 후 prod OAuth provider 미복제 잔여 |
+| **Impact** | verify:prod-kakao-oauth-authorize, stage-3-c-k-prod-kakao-oauth-fix-result.md |
+| **Implementation Stage** | Stage 3-C-K |
+| **Related files** | docs/adme/stage-3-c-k-prod-kakao-oauth-fix-result.md, apps/web/scripts/verify-prod-kakao-oauth-authorize.mjs |

@@ -69,6 +69,7 @@
     "verify:stage3c-dev-ui-controlled-submit": "node scripts/verify-stage3c-dev-ui-controlled-submit.mjs",
     "verify:stage3c-production-reward-blocked": "node scripts/verify-stage3c-production-reward-blocked.mjs",
     "verify:stage3c-public-marker-guard": "node scripts/verify-stage3c-public-marker-guard.mjs",
+    "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",
     "verify:doc-0-current-docs": "node scripts/verify-doc-0-current-docs.mjs",
     "verify:stage1g-profile-family-pet": "node scripts/verify-stage1g-profile-family-pet.mjs",
     "smoke:stage1g-profile-ux": "node scripts/smoke-stage1g-profile-ux.mjs",
