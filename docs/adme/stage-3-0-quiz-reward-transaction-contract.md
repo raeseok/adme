@@ -41,13 +41,15 @@ TypeScript mirror: `apps/web/src/lib/stage3/quiz-reward-contract.ts`
 6. **정답 원문은 어떤 응답에도 포함하지 않음**
 7. campaign budget 또는 reward budget row **lock**
 8. campaign remaining budget >= `point_per_pass` 확인
-9. `point_ledger` `quiz_reward` **insert**
+9. `point_ledger` `quiz_reward` **insert** (canonical `entry_type='quiz_reward'` — Stage 3-B부터)
 10. campaign budget **차감**
 11. `ad_views` quiz_result/pass 상태 **update**
 12. users balance cache가 있다면 ledger 합계와 함께 **update**
 13. 모든 작업은 **하나의 transaction**으로 처리
 
 Stage 3-0: 위 순서는 contract 문서화만 — **실행 코드 없음**.
+
+**Stage 3-B:** `rpc_stage3b_dev_submit_quiz_reward_transaction`이 dev-only로 위 순서를 구현. Production mutation 금지. 상세: [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md)
 
 ---
 

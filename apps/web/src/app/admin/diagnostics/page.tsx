@@ -12,6 +12,7 @@ import { ShellCard } from "@/components/ShellCard";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
+import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -90,12 +91,78 @@ export default async function DiagnosticsPage() {
   const molitBaselinePreserved = pageData.molitLegalDongBaselinePreserved;
   const stage30 = getStage30ReadinessState();
   const stage3A = getStage3ADiagnosticsState();
+  const stage3B = getStage3BDiagnosticsState();
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <section
+        aria-label="Stage 3-B quiz reward full transaction dev-only markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-amber-400 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-B Quiz Reward Full Transaction Dev-Only (current)
+        </p>
+        <p>
+          stage3BFullTransactionDevOnly=
+          {String(stage3B.stage3BFullTransactionDevOnly)}
+        </p>
+        <p>stage3BRpcName={stage3B.stage3BRpcName}</p>
+        <p>stage3BEntryTypeCanonical={stage3B.stage3BEntryTypeCanonical}</p>
+        <p>
+          stage3BLegacyStage3AEntryType={stage3B.stage3BLegacyStage3AEntryType}
+        </p>
+        <p>
+          stage3BProductionMutationBlocked=
+          {String(stage3B.stage3BProductionMutationBlocked)}
+        </p>
+        <p>
+          stage3BProdPointLedgerMutation=
+          {String(stage3B.stage3BProdPointLedgerMutation)}
+        </p>
+        <p>
+          stage3BProdCampaignBudgetMutation=
+          {String(stage3B.stage3BProdCampaignBudgetMutation)}
+        </p>
+        <p>
+          stage3BProdUsersBalanceMutation=
+          {String(stage3B.stage3BProdUsersBalanceMutation)}
+        </p>
+        <p>
+          stage3BProdAdViewsMutation=
+          {String(stage3B.stage3BProdAdViewsMutation)}
+        </p>
+        <p>
+          stage3BQuizAnswerExposure=
+          {String(stage3B.stage3BQuizAnswerExposure)}
+        </p>
+        <p>
+          stage3BConsumerRoleOnly={String(stage3B.stage3BConsumerRoleOnly)}
+        </p>
+        <p>
+          stage3BAdvertiserRpcBlocked=
+          {String(stage3B.stage3BAdvertiserRpcBlocked)}
+        </p>
+        <p>
+          stage3BPartnerRpcBlocked={String(stage3B.stage3BPartnerRpcBlocked)}
+        </p>
+        <p>stage3BAdminRpcBlocked={String(stage3B.stage3BAdminRpcBlocked)}</p>
+        <p>
+          stage3BAdvertiserPartnerRawLedgerBlocked=
+          {String(stage3B.stage3BAdvertiserPartnerRawLedgerBlocked)}
+        </p>
+        <p>
+          stage3BPublicMarkerExposed=
+          {String(stage3B.stage3BPublicMarkerExposed)}
+        </p>
+        <p>
+          stage3BCurrentSupabaseProjectRef=
+          {stage3B.stage3BCurrentSupabaseProjectRef}
+        </p>
+        <p>stage3BDeployCommit={stage3B.stage3BDeployCommit}</p>
+      </section>
       <section
         aria-label="Stage 3-A point ledger dev-only dry-run markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-400 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"

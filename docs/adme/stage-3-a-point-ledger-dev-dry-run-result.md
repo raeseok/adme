@@ -7,6 +7,8 @@
 
 **선행:** [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md) · [stage-3-0-quiz-reward-transaction-contract.md](./stage-3-0-quiz-reward-transaction-contract.md)
 
+**후속:** [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md) — canonical `quiz_reward` entry_type 및 full transaction
+
 ---
 
 ## 범위

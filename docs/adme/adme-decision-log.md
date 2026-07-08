@@ -199,3 +199,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | future Stage 3-B+, admin adjust 설계 |
 | **Implementation Stage** | Stage 3-A (정책), 실행은 후속 Stage |
 | **Related files** | docs/adme/stage-3-a-point-ledger-dev-dry-run-result.md, docs/adme/stage-3-0-point-ledger-safety-preflight.md |
+
+---
+
+## ADME-DECISION-20260709-001
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-B quiz_reward canonical entry_type 및 dev-only full transaction |
+| **Status** | implemented |
+| **Decision** | quiz_reward 지급 시 `point_ledger.entry_type='quiz_reward'`를 canonical로 사용한다. full transaction은 `rpc_stage3b_dev_submit_quiz_reward_transaction`으로 dev JWT에서만 actual mutation(budget, ledger, ad_views, balance cache)을 허용한다. consumer role 내부 gate 필수. advertiser/partner는 consumer raw ledger 접근 금지. |
+| **Reason** | Stage 3-A dry-run 이후 원자적 transaction 검증; Production mutation 분리 유지 |
+| **Impact** | enum 확장, idempotency receipt, diagnostics stage3B markers, verify scripts |
+| **Implementation Stage** | Stage 3-B |
+| **Related files** | docs/adme/stage-3-b-quiz-reward-full-transaction-dev-only.md, supabase/migrations/20260709120000_stage_3_b_quiz_reward_full_transaction_dev_only.sql |
