@@ -136,6 +136,6 @@ UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참
 | Stage 3-1 / 3-1-R | 완료 (dev/prod 분리, DB UUID E2E 회복) |
 | Stage 1-G | planned (프로필 확장·UX 문구) |
 | Stage 3-A | planned (ledger actual mutation dev dry-run) |
-| DOC-0 | current (본 living document 체계) |
+| DOC-0 | 완료 (living document + decision log) |
 
 상세 roadmap: [stage-roadmap-current.md](./stage-roadmap-current.md)
