@@ -13,6 +13,7 @@ import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
+import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -92,12 +93,105 @@ export default async function DiagnosticsPage() {
   const stage30 = getStage30ReadinessState();
   const stage3A = getStage3ADiagnosticsState();
   const stage3B = getStage3BDiagnosticsState();
+  const stage3C = getStage3CDiagnosticsState();
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <section
+        aria-label="Stage 3-C consumer quiz submit UI controlled integration markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-lime-500 bg-lime-50 px-3 py-3 font-mono text-xs text-lime-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-C Consumer Quiz Submit UI Controlled Integration (current)
+        </p>
+        <p>
+          stage3CConsumerQuizSubmitUi=
+          {String(stage3C.stage3CConsumerQuizSubmitUi)}
+        </p>
+        <p>
+          stage3CControlledIntegration=
+          {String(stage3C.stage3CControlledIntegration)}
+        </p>
+        <p>
+          stage3CServerActionOrRouteHandler=
+          {stage3C.stage3CServerActionOrRouteHandler}
+        </p>
+        <p>stage3CRpcName={stage3C.stage3CRpcName}</p>
+        <p>
+          stage3CClientDirectRpcCall=
+          {String(stage3C.stage3CClientDirectRpcCall)}
+        </p>
+        <p>
+          stage3CProductionRewardBlocked=
+          {String(stage3C.stage3CProductionRewardBlocked)}
+        </p>
+        <p>
+          stage3CProductionPointLedgerMutation=
+          {String(stage3C.stage3CProductionPointLedgerMutation)}
+        </p>
+        <p>
+          stage3CProductionCampaignBudgetMutation=
+          {String(stage3C.stage3CProductionCampaignBudgetMutation)}
+        </p>
+        <p>
+          stage3CProductionUsersBalanceMutation=
+          {String(stage3C.stage3CProductionUsersBalanceMutation)}
+        </p>
+        <p>
+          stage3CProductionAdViewsMutation=
+          {String(stage3C.stage3CProductionAdViewsMutation)}
+        </p>
+        <p>
+          stage3CProductionPartnerSettlementsMutation=
+          {String(stage3C.stage3CProductionPartnerSettlementsMutation)}
+        </p>
+        <p>
+          stage3CProductionCashOutMutation=
+          {String(stage3C.stage3CProductionCashOutMutation)}
+        </p>
+        <p>
+          stage3CQuizAnswerExposure=
+          {String(stage3C.stage3CQuizAnswerExposure)}
+        </p>
+        <p>
+          stage3CAnswerHintOptionLabelExposure=
+          {String(stage3C.stage3CAnswerHintOptionLabelExposure)}
+        </p>
+        <p>
+          stage3CPublicMarkerExposed=
+          {String(stage3C.stage3CPublicMarkerExposed)}
+        </p>
+        <p>
+          stage3CMinViewUiEnabled={String(stage3C.stage3CMinViewUiEnabled)}
+        </p>
+        <p>
+          stage3CWrongRetryUxEnabled=
+          {String(stage3C.stage3CWrongRetryUxEnabled)}
+        </p>
+        <p>
+          stage3CIdempotencyUxEnabled=
+          {String(stage3C.stage3CIdempotencyUxEnabled)}
+        </p>
+        <p>
+          stage3CBudgetInsufficientUxEnabled=
+          {String(stage3C.stage3CBudgetInsufficientUxEnabled)}
+        </p>
+        <p>
+          stage3CProductionBlockedUxEnabled=
+          {String(stage3C.stage3CProductionBlockedUxEnabled)}
+        </p>
+        <p>
+          stage3CServiceRoleUsed={String(stage3C.stage3CServiceRoleUsed)}
+        </p>
+        <p>
+          stage3CCurrentSupabaseProjectRef=
+          {stage3C.stage3CCurrentSupabaseProjectRef}
+        </p>
+        <p>stage3CDeployCommit={stage3C.stage3CDeployCommit}</p>
+      </section>
       <section
         aria-label="Stage 3-B quiz reward full transaction dev-only markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-amber-400 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"

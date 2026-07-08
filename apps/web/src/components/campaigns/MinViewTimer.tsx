@@ -47,13 +47,11 @@ export function MinViewTimer({ requiredSeconds, onComplete }: MinViewTimerProps)
     >
       {!completed ? (
         <>
-          <p>
-            광고 내용을 {requiredSeconds}초 이상 확인한 뒤 퀴즈를 제출할 수 있습니다.
-          </p>
-          <p className="mt-1 font-medium">남은 시간: {remainingSeconds}초</p>
+          <p>광고 내용을 조금 더 확인해 주세요.</p>
+          <p className="mt-1 font-medium">퀴즈 제출까지 {remainingSeconds}초</p>
         </>
       ) : (
-        <p>최소 열람 시간이 완료되었습니다. 퀴즈를 제출할 수 있습니다.</p>
+        <p>이제 퀴즈를 제출할 수 있습니다.</p>
       )}
     </section>
   );

@@ -6,6 +6,11 @@ import {
   submitQuizAttempt,
 } from "@/lib/consumer-ads/stage2c-ad-views.server";
 import { resolveMinViewSeconds } from "@/lib/consumer-ads/min-view";
+import { submitConsumerQuizForReward } from "@/lib/quiz-rewards/stage3c-submit.server";
+import type {
+  Stage3CSubmitResult,
+  SubmitConsumerQuizForRewardInput,
+} from "@/lib/quiz-rewards/stage3c-types";
 import type {
   BeginAdViewActionResult,
   QuizSubmitAttemptInput,
@@ -58,6 +63,22 @@ export async function submitQuizAttemptAction(
     selectedOption: input.selectedOption,
     minViewSeconds: resolveMinViewSeconds(minViewSeconds),
     rewardPointsPreview,
+  });
+}
+
+/** Stage 3-C — consumer quiz reward submit via server-only Stage 3-B RPC path. */
+export async function submitConsumerQuizForRewardAction(
+  input: SubmitConsumerQuizForRewardInput,
+): Promise<Stage3CSubmitResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+
+  return submitConsumerQuizForReward({
+    supabase,
+    userId: user?.id ?? null,
+    input,
   });
 }
 

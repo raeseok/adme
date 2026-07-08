@@ -28,6 +28,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 1-G-R** | 기본/선택 정보 섹션, Production commit 정합화 |
 | **Stage 3-A** | point_ledger actual mutation RPC **dev-only** dry-run |
 | **Stage 3-B** | quiz_reward full transaction RPC **dev-only** (budget + ledger + ad_views) |
+| **Stage 3-C** | consumer quiz submit UI controlled integration (server action → Stage 3-B RPC) |
 
 ---
 
@@ -46,7 +47,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
 | **Stage 3-B** | quiz_reward full transaction (ad_views + budget + ledger) **dev-only** | dev only, prod 금지 |
-| **Stage 3-C** | (후보) consumer quiz submit UI controlled integration | prod 금지 유지 |
+| **Stage 3-D** | (후보) Production reward open preflight | 별도 승인 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 
 ### Stage 3-B 완료 기준
@@ -59,8 +60,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 ## 권장 순서
 
-1. **Stage 3-C** — consumer quiz submit controlled integration (prod mutation 별도 승인)
-2. 이후 **Stage 1-H** 또는 Production mutation enable는 별도 승인
+1. **Stage 3-D** — Production reward open preflight (별도 승인)
+2. 이후 **Stage 1-H** 또는 advertiser campaign authoring
 
 ---
 
@@ -80,7 +81,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 1-G-R** | ✅ 완료 |
 | **Stage 3-A** | ✅ 완료 (dev-only dry-run; Production mutation=false) |
 | **Stage 3-B** | ✅ 완료 (dev-only full transaction; Production mutation=false) |
-| Stage 3-C | 📋 planned |
+| **Stage 3-C** | ✅ 완료 (UI controlled integration; Production mutation=false) |
 
 ---
 
@@ -94,6 +95,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 1-G-R: `smoke:stage1g-r-profile-basic-optional-ux`, `verify:stage1g-r-production-commit`, `verify:stage1g-r-public-marker-guard`
 - Stage 3-A: `verify:stage3a-dev-dry-run`, `verify:stage3a-production-blocked`, `verify:stage3a-public-marker-guard`
 - Stage 3-B: `verify:stage3b-dev-full-transaction`, `verify:stage3b-production-blocked`, `verify:stage3b-quiz-answer-non-exposure`, `verify:stage3b-ledger-raw-access-guard`, `verify:stage3b-public-marker-guard`
+- Stage 3-C: `verify:stage3c-preflight-answer-hint-guard`, `verify:stage3c-client-direct-rpc-guard`, `verify:stage3c-quiz-answer-non-exposure`, `verify:stage3c-dev-ui-controlled-submit`, `verify:stage3c-production-reward-blocked`, `verify:stage3c-public-marker-guard`
 
 ---
 
@@ -103,6 +105,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-1-g-r-profile-basic-optional-sections.md](./stage-1-g-r-profile-basic-optional-sections.md)
 - [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md)
 - [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md)
+- [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

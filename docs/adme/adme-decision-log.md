@@ -214,3 +214,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | enum 확장, idempotency receipt, diagnostics stage3B markers, verify scripts |
 | **Implementation Stage** | Stage 3-B |
 | **Related files** | docs/adme/stage-3-b-quiz-reward-full-transaction-dev-only.md, supabase/migrations/20260709120000_stage_3_b_quiz_reward_full_transaction_dev_only.sql |
+
+---
+
+## ADME-DECISION-20260709-002
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-C consumer quiz submit UI controlled integration |
+| **Status** | implemented |
+| **Decision** | Stage 3-B RPC는 `submitConsumerQuizForRewardAction` server action을 통해서만 호출한다. client component 직접 RPC 호출 금지. dev/preview + controlled E2E fixture campaign에서만 actual mutation 허용. Production은 app gate(`STAGE3C_PRODUCTION_REWARD_BLOCKED`) + Stage 3-B RPC gate 이중 차단. quiz_answer 및 정답 암시 label 비노출 유지. |
+| **Reason** | 제품 UI 연결과 Production reward open 분리 |
+| **Impact** | consumer ad detail UI, diagnostics stage3C markers, verify:stage3c-* scripts |
+| **Implementation Stage** | Stage 3-C |
+| **Related files** | docs/adme/stage-3-c-consumer-quiz-submit-ui-controlled-integration.md, apps/web/src/lib/quiz-rewards/, apps/web/src/components/campaigns/QuizSubmitControlledPanel.tsx |

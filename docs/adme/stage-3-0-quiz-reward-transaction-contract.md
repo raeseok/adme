@@ -51,6 +51,8 @@ Stage 3-0: 위 순서는 contract 문서화만 — **실행 코드 없음**.
 
 **Stage 3-B:** `rpc_stage3b_dev_submit_quiz_reward_transaction`이 dev-only로 위 순서를 구현. Production mutation 금지. 상세: [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md)
 
+**Stage 3-C:** 소비자 UI 제출은 server action → Stage 3-B RPC 경로만 허용. client 직접 RPC 금지. Production app gate `STAGE3C_PRODUCTION_REWARD_BLOCKED`. 상세: [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md)
+
 ---
 
 ## 실패 시 응답 계약

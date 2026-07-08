@@ -19,7 +19,7 @@ export default async function ConsumerAdsPage() {
         <p className="font-semibold">Stage 2-A: 광고 카드·퀴즈 안전 골격</p>
         <p>읽기 전용 광고 카드 미리보기</p>
         <p>포인트 원장 변경 없음</p>
-        <p>퀴즈 정답은 화면과 네트워크 응답에 포함하지 않습니다</p>
+        <p>퀴즈의 비공개 채점 값은 화면과 네트워크 응답에 포함하지 않습니다</p>
         <p>카카오톡 광고 도착 알림은 향후 선택 동의 기반 기능으로 검토 중입니다</p>
       </section>
 
