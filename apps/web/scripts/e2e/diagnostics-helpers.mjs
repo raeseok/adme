@@ -22,6 +22,7 @@ export async function loadDiagnosticsFromHttp(baseUrl, options = {}) {
 
     const html = normalizeDiagnosticsText(await response.text());
     const coverage = extractMarkerValue(html, "stage1FRegionSeedCoverage");
+    const stage30Build = extractMarkerValue(html, "stage30Build");
     const sources = {
       combined: html,
       textContent: html,
@@ -29,7 +30,7 @@ export async function loadDiagnosticsFromHttp(baseUrl, options = {}) {
       html,
     };
 
-    if (coverage === "full" || coverage === "adequate") {
+    if (coverage === "full" || coverage === "adequate" || stage30Build.includes("stage3-0")) {
       if (attempt > 1) {
         console.log(`INFO: diagnostics HTTP markers ready on attempt ${attempt}`);
       }
@@ -62,7 +63,8 @@ export async function loadDiagnosticsSources(page, baseUrl, options = {}) {
           return (
             text.includes("DB check status") ||
             html.includes("stage1FRegionSeedCoverage=") ||
-            html.includes("stage2ABuild=")
+            html.includes("stage2ABuild=") ||
+            html.includes("stage30Build=")
           );
         },
         { timeout: timeoutMs },
@@ -87,7 +89,8 @@ export async function loadDiagnosticsSources(page, baseUrl, options = {}) {
     };
 
     const coverage = extractMarkerValue(lastSources.combined, "stage1FRegionSeedCoverage");
-    if (coverage === "full" || coverage === "adequate") {
+    const stage30Build = extractMarkerValue(lastSources.combined, "stage30Build");
+    if (coverage === "full" || coverage === "adequate" || stage30Build.includes("stage3-0")) {
       if (attempt > 1) {
         console.log(`INFO: diagnostics markers ready on attempt ${attempt}`);
       }
@@ -106,7 +109,8 @@ export async function loadDiagnosticsSources(page, baseUrl, options = {}) {
     const response = await fetch(`${baseUrl}${path}`);
     const fetchHtml = normalizeDiagnosticsText(await response.text());
     const fetchCoverage = extractMarkerValue(fetchHtml, "stage1FRegionSeedCoverage");
-    if (fetchCoverage === "full" || fetchCoverage === "adequate") {
+    const fetchStage30 = extractMarkerValue(fetchHtml, "stage30Build");
+    if (fetchCoverage === "full" || fetchCoverage === "adequate" || fetchStage30.includes("stage3-0")) {
       console.log("INFO: diagnostics markers resolved via HTTP fetch fallback");
       return {
         combined: fetchHtml,

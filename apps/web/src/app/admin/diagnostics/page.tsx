@@ -10,6 +10,7 @@ import {
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
+import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -86,12 +87,96 @@ export default async function DiagnosticsPage() {
   const stage1FCoverage = pageData.hierarchicalSeedCoverage;
   const stage1FCounts = pageData.regionLevelCounts;
   const molitBaselinePreserved = pageData.molitLegalDongBaselinePreserved;
+  const stage30 = getStage30ReadinessState();
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <section
+        aria-label="Stage 3-0 Supabase env separation and point ledger safety readiness markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-400 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-0 Supabase Dev/Prod Separation · Point Ledger Safety Preflight
+          (current)
+        </p>
+        <p>stage30Build={stage30.stage30Build}</p>
+        <p>
+          stage30CurrentSupabaseProjectRef=
+          {stage30.stage30CurrentSupabaseProjectRef}
+        </p>
+        <p>
+          stage30KnownSingleProjectRef={stage30.stage30KnownSingleProjectRef}
+        </p>
+        <p>stage30VercelEnv={stage30.stage30VercelEnv}</p>
+        <p>stage30DeployCommit={stage30.stage30DeployCommit}</p>
+        <p>
+          stage30ExpectedProdSupabaseRefConfigured=
+          {String(stage30.stage30ExpectedProdSupabaseRefConfigured)}
+        </p>
+        <p>
+          stage30ExpectedDevSupabaseRefConfigured=
+          {String(stage30.stage30ExpectedDevSupabaseRefConfigured)}
+        </p>
+        <p>
+          stage30DevProdSupabaseSeparated=
+          {String(stage30.stage30DevProdSupabaseSeparated)}
+        </p>
+        <p>
+          stage30CurrentEnvMatchesExpectedRef=
+          {stage30.stage30CurrentEnvMatchesExpectedRef}
+        </p>
+        <p>stage30ReadinessStatus={stage30.stage30ReadinessStatus}</p>
+        <p>
+          stage30PointLedgerActualMutationEnabled=
+          {String(stage30.stage30PointLedgerActualMutationEnabled)}
+        </p>
+        <p>
+          stage30QuizRewardActualMutationEnabled=
+          {String(stage30.stage30QuizRewardActualMutationEnabled)}
+        </p>
+        <p>
+          stage30PointLedgerMutation=
+          {String(stage30.stage30PointLedgerMutation)}
+        </p>
+        <p>
+          stage30CampaignBudgetMutation=
+          {String(stage30.stage30CampaignBudgetMutation)}
+        </p>
+        <p>
+          stage30UsersBalanceMutation=
+          {String(stage30.stage30UsersBalanceMutation)}
+        </p>
+        <p>
+          stage30PartnerSettlementsMutation=
+          {String(stage30.stage30PartnerSettlementsMutation)}
+        </p>
+        <p>stage30CashOutMutation={String(stage30.stage30CashOutMutation)}</p>
+        <p>stage30KakaoActualSend={String(stage30.stage30KakaoActualSend)}</p>
+        <p>
+          stage30ServiceRoleClientExposed=
+          {String(stage30.stage30ServiceRoleClientExposed)}
+        </p>
+        <p>stage30RlsDisabled={String(stage30.stage30RlsDisabled)}</p>
+        <p>
+          stage30AnonWritePolicyAdded=
+          {String(stage30.stage30AnonWritePolicyAdded)}
+        </p>
+        <p>
+          stage30PublicMarkerExposed=
+          {String(stage30.stage30PublicMarkerExposed)}
+        </p>
+        <p>
+          stage30QuizAnswerClientExposure=
+          {String(stage30.stage30QuizAnswerClientExposure)}
+        </p>
+        <p>
+          stage30TransactionContractVersion=
+          {stage30.stage30TransactionContractVersion}
+        </p>
+      </section>
       <section
         aria-label="Stage 2-C ad views and server authoritative min view markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
