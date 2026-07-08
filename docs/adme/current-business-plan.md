@@ -85,21 +85,30 @@ AdMe는 **소비자가 자신의 소비정보 조건을 먼저 제시**하고, *
 
 ---
 
-## 소비 의향 프로필 최신 설계
+## 소비 의향 프로필 최신 설계 (Stage 1-G-R)
 
-| 축 | 설명 | 비고 |
+### 기본 정보 (최소 소비 조건)
+
+| 항목 | 설명 | 비고 |
 |---|---|---|
-| 관심 분야 | interest scope / 카테고리 | 전체·개별 선택 |
-| 주거지역 | hierarchical region (시도→시군구→동) | 최대 1 |
+| 출생년도 | birth_year 기반 | UX상 기본 정보 — 저장 차단은 주거지역만 유지 (방식 B) |
+| 성별 | 선택 입력 | UX상 기본 정보 |
+| 주거지역 | hierarchical region (시도→시군구→동) | 최대 1, 저장 시 필수 |
+
+### 선택 정보 (추가 소비 조건)
+
+| 항목 | 설명 | 비고 |
+|---|---|---|
+| 가장 큰 자녀 생년 | 자녀 연령대 관련 소비정보 조건 (Stage 1-G) | 미입력 허용 |
+| 막내 자녀 생년 | 동일 | 미입력 허용 |
+| 반려동물 조건 | dog/cat/other 복수 선택 (Stage 1-G) | 미입력 허용 |
 | 주활동지역 | hierarchical region | 최대 2 |
-| 성별 | 선택 입력 | 미입력 허용 |
-| 출생년도 / 연령 | birth_year 기반 | 미입력 허용 |
-| **가장 큰 자녀 생년** | 선택 항목 (Stage 1-G implemented) | 미입력 허용 |
-| **막내 자녀 생년** | 선택 항목 (Stage 1-G implemented) | 미입력 허용 |
-| **반려동물 조건** | dog/cat/other 복수 선택 (Stage 1-G implemented) | 미입력 허용 |
+| 관심 분야 | interest scope / 카테고리 | 전체·개별 선택, 미입력 시 전체로 저장 |
 
 원칙:
-- 모든 항목은 **선택 입력** — 미입력 허용
+- **기본 정보**는 맞춤 소비정보 제공을 위한 **최소 소비 조건**
+- **선택 정보**는 더 정교한 맞춤 소비정보를 받기 위한 **추가 조건** — 미입력 허용
+- “더 많은 조건을 등록할수록 더 많은 맞춤 소비정보를 받을 수 있습니다.” 문구는 **선택 정보 섹션 내부**에 노출
 - 가족·자녀 생년은 **가족 개인정보 수집이 아니라 자녀 관련 소비정보 조건**
 - 반려동물 조건은 **반려동물 관련 소비정보 조건** (matching actual 활용은 후속 Stage)
 - 광고주에게 **소비자 개인 식별 row 직접 노출 금지**
@@ -137,6 +146,7 @@ UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참
 | Stage 3-0 | 완료 (readiness·safety preflight) |
 | Stage 3-1 / 3-1-R | 완료 (dev/prod 분리, DB UUID E2E 회복) |
 | Stage 1-G | 완료 (자녀 생년·반려동물 조건·능동형 UX) |
+| Stage 1-G-R | 완료 (기본/선택 정보 섹션, Production commit 정합화) |
 | Stage 3-A | planned (ledger actual mutation dev dry-run) |
 | DOC-0 | 완료 (living document + decision log) |
 

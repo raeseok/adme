@@ -9,6 +9,7 @@ import {
   isPetTypeValue,
   isValidChildBirthYear,
   INTEREST_SCOPE_ALL,
+  INTEREST_SCOPE_SELECTED,
   normalizePetTypes,
 } from "@/lib/consumer-profile/constants";
 import type {
@@ -88,10 +89,6 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
 
   if (!isInterestScopeValue(input.interestScope)) {
     return "관심정보 선택 방식이 올바르지 않습니다.";
-  }
-
-  if (input.interestScope === "selected" && !input.categoryIds.length) {
-    return "관심 분야를 1개 이상 선택하거나 '전체'를 선택해 주세요.";
   }
 
   if (input.interestScope === "selected") {
@@ -255,7 +252,11 @@ export async function saveConsumerProfileAction(
   const birthYear = input.birthYear;
   const gender =
     input.gender && input.gender.length > 0 ? input.gender : null;
-  const interestScope = input.interestScope;
+  const interestScope =
+    input.interestScope === INTEREST_SCOPE_SELECTED &&
+    input.categoryIds.length === 0
+      ? INTEREST_SCOPE_ALL
+      : input.interestScope;
   const oldestChildBirthYear = input.oldestChildBirthYear;
   const youngestChildBirthYear = input.youngestChildBirthYear;
   const petTypes = normalizePetTypes(input.petTypes);

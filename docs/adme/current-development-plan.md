@@ -90,6 +90,7 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 | Stage 3-0 | 완료 | ledger safety preflight, readiness markers |
 | Stage 3-1 / 3-1-R | 완료 | dev/prod split, DB UUID E2E 회복 |
 | Stage 1-G | 완료 | child/pet profile fields, active UX copy, diagnostics |
+| Stage 1-G-R | 완료 | basic/optional profile sections, completion copy, stage1GR markers |
 
 ---
 
@@ -106,6 +107,21 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 
 ---
 
+## Stage 1-G-R 완료 (2026-07-08)
+
+- Production deploy commit = repo HEAD 정합화 (재보류 해소)
+- UI: `/consumer/profile` **기본 정보** / **선택 정보** 섹션 분리
+- 기본 정보: 출생년도, 성별, 주거지역 (방식 B — 주거지역만 저장 필수)
+- 선택 정보: 자녀 생년, 반려동물, 주활동지역, 관심정보
+- 선택 정보 섹션 내부에 “더 많은 조건을 등록할수록…” 문구 배치
+- diagnostics: stage1GR markers on `/admin/diagnostics` only
+- verify: `smoke:stage1g-r-*`, `verify:stage1g-r-*` + Stage 1-G 회귀
+- 금전성 mutation: **없음**
+
+상세: [stage-1-g-r-profile-basic-optional-sections.md](./stage-1-g-r-profile-basic-optional-sections.md)
+
+---
+
 ## 현재 보안 불가침 원칙
 
 | 원칙 | enforce |
@@ -116,7 +132,7 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 | users balance mutation 금지 | Stage 3-0까지 |
 | partner_settlements mutation 금지 | Stage 3-0까지 |
 | service role client 노출 금지 | browser/client 미사용 |
-| public marker guard | stage30·stage1G 등은 `/admin/diagnostics` only |
+| public marker guard | stage30·stage1G·stage1GR 등은 `/admin/diagnostics` only |
 | RLS disable / anon write policy 추가 금지 | migration·운영 금지 |
 | consumer_profiles child/pet raw row | advertiser/partner 직접 조회 금지 |
 
@@ -151,6 +167,9 @@ point_ledger **actual mutation** dev-only dry-run:
 - `verify:stage2c-db-uuid-campaign`
 - `verify:stage1g-profile-family-pet`
 - `verify:stage1g-public-marker-guard`
+- `smoke:stage1g-r-profile-basic-optional-ux`
+- `verify:stage1g-r-production-commit`
+- `verify:stage1g-r-public-marker-guard`
 - `verify:doc-0-current-docs`
 
 ---

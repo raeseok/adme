@@ -74,7 +74,7 @@ export function ConsumerProfileForm({
     initialDraft?.activitySlot2RegionId ?? "",
   );
   const [interestScope, setInterestScope] = useState(
-    initialDraft?.interestScope ?? INTEREST_SCOPE_SELECTED,
+    initialDraft?.interestScope ?? INTEREST_SCOPE_ALL,
   );
   const [categoryIds, setCategoryIds] = useState<string[]>(
     initialDraft?.categoryIds ?? [],
@@ -103,8 +103,25 @@ export function ConsumerProfileForm({
         savableRegionIds,
         interestScope,
         categoryIds,
+        oldestChildBirthYear,
+        youngestChildBirthYear,
+        petTypes,
+        activitySlot1RegionId,
+        activitySlot2RegionId,
       }),
-    [birthYear, gender, residenceRegionId, savableRegionIds, interestScope, categoryIds],
+    [
+      birthYear,
+      gender,
+      residenceRegionId,
+      savableRegionIds,
+      interestScope,
+      categoryIds,
+      oldestChildBirthYear,
+      youngestChildBirthYear,
+      petTypes,
+      activitySlot1RegionId,
+      activitySlot2RegionId,
+    ],
   );
 
   const duplicateActivityWarning = useMemo(() => {
@@ -198,9 +215,6 @@ export function ConsumerProfileForm({
           소비성향 프로필은 광고를 보내달라는 나의 요구입니다.
         </p>
         <p className="text-blue-800">
-          더 많은 조건을 등록할수록 더 많은 맞춤 소비정보를 받을 수 있습니다.
-        </p>
-        <p className="text-blue-800">
           아래 항목은 개인 신원이 아닌 <strong>소비정보 조건</strong>입니다. 내가
           원하는 광고와 혜택을 받기 위한 조건을 능동적으로 제시해 주세요.
         </p>
@@ -210,17 +224,21 @@ export function ConsumerProfileForm({
         <p className="font-semibold text-zinc-900">
           소비 의향 프로필 완성도 {completion.percent}%
         </p>
-        {completion.remainingLabels.length > 0 ? (
-          <p className="text-zinc-600">
-            남은 항목: {completion.remainingLabels.join(", ")}
+        <p className="text-zinc-600">
+          기본 정보 {completion.basicCompletedCount}/{completion.basicTotalCount}
+          {completion.basicRemainingLabels.length > 0
+            ? ` — 남은 항목: ${completion.basicRemainingLabels.join(", ")}`
+            : " — 기본 정보 입력 완료"}
+        </p>
+        {completion.optionalAvailableLabels.length > 0 ? (
+          <p className="text-xs text-zinc-500">
+            선택 정보 추가 가능: {completion.optionalAvailableLabels.join(", ")}
           </p>
         ) : (
-          <p className="text-emerald-700">프로필 기본 항목이 모두 입력되었습니다.</p>
+          <p className="text-xs text-emerald-700">
+            선택 정보도 충분히 등록되었습니다.
+          </p>
         )}
-        <p className="text-xs text-zinc-500">
-          조건을 더 많이 등록할수록 나에게 맞는 광고와 혜택을 더 정교하게 받을 수
-          있습니다.
-        </p>
       </section>
 
       <section className="space-y-2 rounded-lg bg-violet-50 px-3 py-3 text-sm text-violet-900">
@@ -254,230 +272,274 @@ export function ConsumerProfileForm({
         )}
       </section>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">출생년도</legend>
-        <p className="text-xs text-zinc-500">
-          연령대 소비정보 조건으로만 사용됩니다. 광고주에게 개인 식별 정보로 제공되지
-          않습니다.
-        </p>
-        <select
-          value={birthYear ?? ""}
-          onChange={(e) =>
-            setBirthYear(e.target.value ? Number(e.target.value) : null)
-          }
-          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">예: 1985</option>
-          {birthYearOptions.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </fieldset>
-
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">성별</legend>
-        <p className="text-xs text-zinc-500">
-          소비정보 조건으로만 사용됩니다. 광고주에게 개인 식별 정보로 제공되지
-          않습니다.
-        </p>
-        <div className="space-y-2">
-          {GENDER_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
-            >
-              <input
-                type="radio"
-                name="gender"
-                value={opt.value}
-                checked={gender === opt.value}
-                onChange={() => setGender(opt.value)}
-              />
-              {opt.label}
-            </label>
-          ))}
+      <section
+        aria-labelledby="basic-profile-heading"
+        className="space-y-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-4"
+      >
+        <div className="space-y-1">
+          <h2 id="basic-profile-heading" className="text-base font-semibold text-zinc-900">
+            기본 정보
+          </h2>
+          <p className="text-sm text-zinc-700">
+            기본 정보는 맞춤 소비정보를 받기 위한 최소 조건입니다.
+          </p>
+          <p className="text-xs text-zinc-500">
+            본인 출생년도, 성별, 주거지역은 기본 정보로 등록해 주세요. 광고주에게
+            개인 식별 정보로 제공되지 않습니다.
+          </p>
         </div>
-      </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          가장 큰 자녀 생년
-        </legend>
-        <p className="text-xs text-zinc-500">
-          자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
-        </p>
-        <p className="text-xs text-zinc-500">
-          자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
-        </p>
-        <select
-          value={oldestChildBirthYear ?? ""}
-          onChange={(e) =>
-            setOldestChildBirthYear(
-              e.target.value ? Number(e.target.value) : null,
-            )
-          }
-          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">선택 안 함</option>
-          {childBirthYearOptions.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">출생년도</legend>
+          <p className="text-xs text-zinc-500">
+            연령대 소비정보 조건으로만 사용됩니다.
+          </p>
+          <select
+            value={birthYear ?? ""}
+            onChange={(e) =>
+              setBirthYear(e.target.value ? Number(e.target.value) : null)
+            }
+            className="w-full max-w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">예: 1985</option>
+            {birthYearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          막내 자녀 생년
-        </legend>
-        <p className="text-xs text-zinc-500">
-          자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
-        </p>
-        <p className="text-xs text-zinc-500">
-          자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
-        </p>
-        <select
-          value={youngestChildBirthYear ?? ""}
-          onChange={(e) =>
-            setYoungestChildBirthYear(
-              e.target.value ? Number(e.target.value) : null,
-            )
-          }
-          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-        >
-          <option value="">선택 안 함</option>
-          {childBirthYearOptions.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">성별</legend>
+          <p className="text-xs text-zinc-500">
+            소비정보 조건으로만 사용됩니다.
+          </p>
+          <div className="space-y-2">
+            {GENDER_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50"
+              >
+                <input
+                  type="radio"
+                  name="gender"
+                  value={opt.value}
+                  checked={gender === opt.value}
+                  onChange={() => setGender(opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">반려동물 조건</legend>
-        <p className="text-xs text-zinc-500">
-          반려동물이 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
-        </p>
-        <p className="text-xs text-zinc-500">
-          반려동물 정보는 반려동물 관련 소비정보 조건으로만 사용됩니다.
-        </p>
-        <div className="space-y-2">
-          {PET_TYPE_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
-            >
-              <input
-                type="checkbox"
-                checked={petTypes?.includes(opt.value) ?? false}
-                onChange={() => togglePetType(opt.value)}
-              />
-              {opt.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <RegionHierarchySelector
-        key={`residence-${residenceRegionId}-${pageData.regionRows.length}`}
-        legend="주거지역 (최대 1개)"
-        required
-        testId="region-selector-residence"
-        regionRows={pageData.regionRows}
-        selectorRows={pageData.selectorRegionRows}
-        value={residenceRegionId}
-        onChange={setResidenceRegionId}
-        disabled={pageData.regionsEmpty}
-        emptyPlaceholder="주거지역 선택"
-      />
-      {legacyRegionWarning ? (
-        <p className="text-sm text-amber-700">{legacyRegionWarning}</p>
-      ) : null}
-      {pageData.regionsEmpty ? (
-        <p className="text-sm text-amber-700">
-          지역 목록이 비어 있습니다.
-          {!isAuthenticated
-            ? " 로그인 후 다시 시도해 주세요."
-            : " seed 데이터 또는 RLS를 확인해 주세요."}
-        </p>
-      ) : null}
-
-      <RegionHierarchySelector
-        key={`activity1-${activitySlot1RegionId}-${pageData.regionRows.length}`}
-        legend="주활동지역 1 (선택)"
-        testId="region-selector-activity-1"
-        regionRows={pageData.regionRows}
-        selectorRows={pageData.selectorRegionRows}
-        value={activitySlot1RegionId}
-        onChange={setActivitySlot1RegionId}
-        disabled={pageData.regionsEmpty}
-      />
-
-      <div className="space-y-2">
         <RegionHierarchySelector
-          key={`activity2-${activitySlot2RegionId}-${pageData.regionRows.length}`}
-          legend="주활동지역 2 (선택)"
-          testId="region-selector-activity-2"
+          key={`residence-${residenceRegionId}-${pageData.regionRows.length}`}
+          legend="주거지역 (최대 1개)"
+          required
+          testId="region-selector-residence"
           regionRows={pageData.regionRows}
           selectorRows={pageData.selectorRegionRows}
-          value={activitySlot2RegionId}
-          onChange={setActivitySlot2RegionId}
+          value={residenceRegionId}
+          onChange={setResidenceRegionId}
           disabled={pageData.regionsEmpty}
+          emptyPlaceholder="주거지역 선택"
         />
-        {duplicateActivityWarning ? (
-          <p className="text-sm text-amber-700">{duplicateActivityWarning}</p>
+        {legacyRegionWarning ? (
+          <p className="text-sm text-amber-700">{legacyRegionWarning}</p>
         ) : null}
-      </div>
-
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-zinc-900">
-          관심정보 <span className="text-red-600">*</span>
-        </legend>
-        {pageData.categoriesEmpty ? (
+        {pageData.regionsEmpty ? (
           <p className="text-sm text-amber-700">
-            관심 분야 목록이 비어 있습니다.
+            지역 목록이 비어 있습니다.
             {!isAuthenticated
               ? " 로그인 후 다시 시도해 주세요."
               : " seed 데이터 또는 RLS를 확인해 주세요."}
           </p>
         ) : null}
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={selectAllInterests}
-            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-              interestScope === INTEREST_SCOPE_ALL
-                ? "border-blue-600 bg-blue-600 text-white"
-                : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
-            }`}
+      </section>
+
+      <section
+        data-testid="optional-profile-section"
+        aria-labelledby="optional-profile-heading"
+        className="space-y-4 rounded-lg border border-zinc-200 bg-white px-3 py-4"
+      >
+        <div className="space-y-1">
+          <h2
+            id="optional-profile-heading"
+            className="text-base font-semibold text-zinc-900"
           >
-            전체
-          </button>
-          {pageData.categories.map((c) => {
-            const selected =
-              interestScope === INTEREST_SCOPE_SELECTED &&
-              categoryIds.includes(c.id);
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => toggleCategory(c.id)}
-                className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                  selected
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
-                }`}
-              >
-                {c.name}
-              </button>
-            );
-          })}
+            선택 정보
+          </h2>
+          <p className="text-sm text-zinc-700">
+            선택 정보는 더 정교한 맞춤 소비정보를 받기 위한 추가 조건입니다.
+          </p>
+          <p className="text-sm font-medium text-blue-900">
+            더 많은 조건을 등록할수록 더 많은 맞춤 소비정보를 받을 수 있습니다.
+          </p>
+          <p className="text-xs text-zinc-500">
+            입력하지 않아도 기본 프로필 저장은 가능합니다. 필요한 소비정보가
+            많을수록 조건을 더 자세히 등록해 주세요.
+          </p>
         </div>
-      </fieldset>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">
+            가장 큰 자녀 생년
+          </legend>
+          <p className="text-xs text-zinc-500">
+            자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+          </p>
+          <p className="text-xs text-zinc-500">
+            자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
+          </p>
+          <select
+            value={oldestChildBirthYear ?? ""}
+            onChange={(e) =>
+              setOldestChildBirthYear(
+                e.target.value ? Number(e.target.value) : null,
+              )
+            }
+            className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          >
+            <option value="">선택 안 함</option>
+            {childBirthYearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </fieldset>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">
+            막내 자녀 생년
+          </legend>
+          <p className="text-xs text-zinc-500">
+            자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+          </p>
+          <p className="text-xs text-zinc-500">
+            자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
+          </p>
+          <select
+            value={youngestChildBirthYear ?? ""}
+            onChange={(e) =>
+              setYoungestChildBirthYear(
+                e.target.value ? Number(e.target.value) : null,
+              )
+            }
+            className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          >
+            <option value="">선택 안 함</option>
+            {childBirthYearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </fieldset>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">반려동물 조건</legend>
+          <p className="text-xs text-zinc-500">
+            반려동물이 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+          </p>
+          <p className="text-xs text-zinc-500">
+            반려동물 정보는 반려동물 관련 소비정보 조건으로만 사용됩니다.
+          </p>
+          <div className="space-y-2">
+            {PET_TYPE_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
+              >
+                <input
+                  type="checkbox"
+                  checked={petTypes?.includes(opt.value) ?? false}
+                  onChange={() => togglePetType(opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <RegionHierarchySelector
+          key={`activity1-${activitySlot1RegionId}-${pageData.regionRows.length}`}
+          legend="주활동지역 1 (선택)"
+          testId="region-selector-activity-1"
+          regionRows={pageData.regionRows}
+          selectorRows={pageData.selectorRegionRows}
+          value={activitySlot1RegionId}
+          onChange={setActivitySlot1RegionId}
+          disabled={pageData.regionsEmpty}
+        />
+
+        <div className="space-y-2">
+          <RegionHierarchySelector
+            key={`activity2-${activitySlot2RegionId}-${pageData.regionRows.length}`}
+            legend="주활동지역 2 (선택)"
+            testId="region-selector-activity-2"
+            regionRows={pageData.regionRows}
+            selectorRows={pageData.selectorRegionRows}
+            value={activitySlot2RegionId}
+            onChange={setActivitySlot2RegionId}
+            disabled={pageData.regionsEmpty}
+          />
+          {duplicateActivityWarning ? (
+            <p className="text-sm text-amber-700">{duplicateActivityWarning}</p>
+          ) : null}
+        </div>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-semibold text-zinc-900">
+            관심정보 (관심 소비 분야)
+          </legend>
+          <p className="text-xs text-zinc-500">
+            선택 입력입니다. 미선택 시에도 기본 프로필 저장이 가능합니다.
+          </p>
+          {pageData.categoriesEmpty ? (
+            <p className="text-sm text-amber-700">
+              관심 분야 목록이 비어 있습니다.
+              {!isAuthenticated
+                ? " 로그인 후 다시 시도해 주세요."
+                : " seed 데이터 또는 RLS를 확인해 주세요."}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={selectAllInterests}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                interestScope === INTEREST_SCOPE_ALL
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
+              }`}
+            >
+              전체
+            </button>
+            {pageData.categories.map((c) => {
+              const selected =
+                interestScope === INTEREST_SCOPE_SELECTED &&
+                categoryIds.includes(c.id);
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => toggleCategory(c.id)}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                    selected
+                      ? "border-blue-600 bg-blue-600 text-white"
+                      : "border-zinc-300 bg-white text-zinc-800 hover:border-blue-400"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      </section>
 
       <button
         type="submit"

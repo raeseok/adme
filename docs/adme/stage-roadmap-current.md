@@ -25,6 +25,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-1-R** | prod E2E ref fix, `verify:stage2c-db-uuid-campaign` 회복 |
 | **DOC-0** | living document + decision log 구축 완료 |
 | **Stage 1-G** | 자녀 생년·반려동물 조건·능동형 프로필 UX |
+| **Stage 1-G-R** | 기본/선택 정보 섹션, Production commit 정합화 |
 
 ---
 
@@ -33,7 +34,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | Stage | 이전 상태 | 현재 |
 |---|---|---|
 | Stage 3-1 | 조건부 (`verify:stage2c-db-uuid-campaign` FAIL) | **3-1-R로 해소** |
-| Stage 3-1 | final deploy 정합성 | commit `d6eefea`, Production align 확인 권장 |
+| Stage 1-G | 조건부 (Production commit 불일치) | **1-G-R로 해소** |
+| Stage 1-G-R | 재보류 (329e73f vs fceb801) | **완료 후보** — commit 정합화 + UX |
 
 ---
 
@@ -74,6 +76,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | Stage 3-1-R | ✅ 완료 |
 | **DOC-0** | ✅ 완료 |
 | **Stage 1-G** | ✅ 완료 |
+| **Stage 1-G-R** | ✅ 완료 |
 | Stage 3-A | 📋 planned |
 
 ---
@@ -85,12 +88,14 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 2-C: `verify:stage2c-db-uuid-campaign`, `verify:stage2c-r-ad-views-rls`
 - DOC-0: `verify:doc-0-current-docs`
 - Stage 1-G: `verify:stage1g-profile-family-pet`, `smoke:stage1g-profile-ux`, `verify:stage1g-rls-family-pet`, `verify:stage1g-public-marker-guard`
+- Stage 1-G-R: `smoke:stage1g-r-profile-basic-optional-ux`, `verify:stage1g-r-production-commit`, `verify:stage1g-r-public-marker-guard`
 
 ---
 
 ## 관련 Stage 문서 (historical)
 
 - [stage-1-g-child-pet-profile-ux.md](./stage-1-g-child-pet-profile-ux.md)
+- [stage-1-g-r-profile-basic-optional-sections.md](./stage-1-g-r-profile-basic-optional-sections.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

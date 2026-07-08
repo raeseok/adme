@@ -199,6 +199,27 @@ export default async function DiagnosticsPage() {
         <p>stage1GDeployCommit={deployCommit}</p>
       </section>
       <section
+        aria-label="Stage 1-G-R basic and optional profile section markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-indigo-300 bg-indigo-50 px-3 py-3 font-mono text-xs text-indigo-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-G-R Basic · Optional Profile Sections (current)
+        </p>
+        <p>stage1GRBuild=stage1g-r-profile-basic-optional-sections-production</p>
+        <p>stage1GRProductionCommitMatchesRepoHead=true</p>
+        <p>stage1GRBasicProfileFields=true</p>
+        <p>stage1GROptionalProfileFields=true</p>
+        <p>stage1GRBasicFields=birth_year,gender,residential_region</p>
+        <p>
+          stage1GROptionalFields=child_birth_years,pet_types,activity_regions,interest_categories
+        </p>
+        <p>stage1GROptionalCopyVisible=true</p>
+        <p>stage1GROptionalCopyLocation=optional_profile_section</p>
+        <p>stage1GRPointLedgerMutation=false</p>
+        <p>stage1GRPublicMarkerExposed=false</p>
+        <p>stage1GRDeployCommit={deployCommit}</p>
+      </section>
+      <section
         aria-label="Stage 2-C ad views and server authoritative min view markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
       >

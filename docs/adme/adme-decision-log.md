@@ -139,3 +139,33 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | consumer profile UI, consumer_profiles schema, diagnostics, verify scripts |
 | **Implementation Stage** | Stage 1-G |
 | **Related files** | docs/adme/stage-1-g-child-pet-profile-ux.md, apps/web/src/app/consumer/profile/, supabase/migrations/20260708130000_stage_1_g_child_pet_profile_conditions.sql |
+
+---
+
+## ADME-DECISION-20260708-010
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-08 |
+| **Title** | 소비 의향 프로필 기본 정보와 선택 정보 구분 |
+| **Status** | implemented |
+| **Decision** | 본인 출생년도, 성별, 주거지역을 **기본 정보**로 정리하고, 자녀 생년·반려동물 조건·주활동지역·관심정보는 **선택 정보**로 구분한다. 저장 차단은 방식 B — 주거지역만 필수, 출생년도·성별은 UX 강조만. |
+| **Reason** | Stage 1-G 재보류 해소 및 프로필 정보 구조 명확화 |
+| **Impact** | consumer profile UX, completion copy, diagnostics, documentation |
+| **Implementation Stage** | Stage 1-G-R |
+| **Related files** | docs/adme/stage-1-g-r-profile-basic-optional-sections.md, apps/web/src/app/consumer/profile/ConsumerProfileForm.tsx |
+
+---
+
+## ADME-DECISION-20260708-011
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-08 |
+| **Title** | 선택 정보 입력 영역의 맞춤 소비정보 확대 문구 배치 |
+| **Status** | implemented |
+| **Decision** | “더 많은 조건을 등록할수록 더 많은 맞춤 소비정보를 받을 수 있습니다.” 문구를 **선택 정보 입력 영역**에 직접 노출한다. 상단 안내에만 두고 선택 섹션 내부에 없으면 FAIL. |
+| **Reason** | 선택 정보 입력 동기 부여, 기술사님 UX 요구 |
+| **Impact** | consumer profile UX, optional profile section copy, smoke verification |
+| **Implementation Stage** | Stage 1-G-R |
+| **Related files** | apps/web/src/app/consumer/profile/ConsumerProfileForm.tsx, apps/web/scripts/smoke-stage1g-r-profile-basic-optional-ux.mjs |
