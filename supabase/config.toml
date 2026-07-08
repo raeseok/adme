@@ -26,6 +26,8 @@ additional_redirect_urls = [
   "http://127.0.0.1:3000",
   "https://127.0.0.1:3000",
   "https://web-ashen-xi-52.vercel.app/auth/callback",
+  "https://web-bthafe4e6-raeseoks-projects.vercel.app",
+  "https://web-bthafe4e6-raeseoks-projects.vercel.app/auth/callback",
 ]
 jwt_expiry = 3600
 enable_signup = true

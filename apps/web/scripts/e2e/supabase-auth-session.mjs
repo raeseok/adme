@@ -2,8 +2,26 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
+import {
+  extractMarkerValue,
+  loadDiagnosticsFromHttp,
+} from "./diagnostics-helpers.mjs";
+import {
+  PRODUCTION_E2E_BASE_URL,
+  resolveProductionE2eBaseUrl,
+} from "./e2e-base-url.mjs";
 
 const WEB_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const REPO_ROOT = join(WEB_ROOT, "..", "..");
+
+/** Historical single-project ref — dev after Stage 3-1 split. */
+export const KNOWN_DEV_SUPABASE_REF = "ogncvdxrrsjnwsuvgoyh";
+
+/** Production Supabase ref after Stage 3-1 split. */
+export const KNOWN_PROD_SUPABASE_REF = "vupsalteyltjqumppltc";
+
+let cachedProductionSupabaseEnv = null;
+let cachedProductionSupabaseRef = null;
 
 function loadEnvFile(path) {
   if (!existsSync(path)) return;
@@ -27,49 +45,77 @@ function loadEnvFile(path) {
   }
 }
 
-let cachedProductionSupabaseEnv = null;
+function isProductionE2eBaseUrl(baseUrl) {
+  if (!baseUrl) return false;
+  try {
+    const normalized = baseUrl.replace(/\/$/, "");
+    const production = resolveProductionE2eBaseUrl().replace(/\/$/, "");
+    return normalized === production || normalized === PRODUCTION_E2E_BASE_URL;
+  } catch {
+    return false;
+  }
+}
 
-const PRODUCTION_PROJECT_REF = "ogncvdxrrsjnwsuvgoyh";
-const REPO_ROOT = join(WEB_ROOT, "..", "..");
-
-async function loadSupabaseEnvFromCli() {
+async function loadSupabaseEnvFromCli(projectRef) {
   const { execSync } = await import("node:child_process");
   const out = execSync(
-    `npx supabase projects api-keys --project-ref ${PRODUCTION_PROJECT_REF}`,
+    `npx supabase projects api-keys --project-ref ${projectRef} -o json`,
     { cwd: REPO_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
   );
   const parsed = JSON.parse(out);
-  const anon = parsed.keys?.find(
+  const keys = Array.isArray(parsed) ? parsed : (parsed.keys ?? []);
+  const anon = keys.find(
     (k) => k.id === "anon" && typeof k.api_key === "string" && k.api_key.startsWith("eyJ"),
   );
   if (!anon?.api_key) {
-    throw new Error("anon key not found via supabase CLI");
+    throw new Error(`anon key not found via supabase CLI for ref ${projectRef}`);
   }
   return {
-    url: `https://${PRODUCTION_PROJECT_REF}.supabase.co`,
+    url: `https://${projectRef}.supabase.co`,
     key: anon.api_key,
+    projectRef,
   };
+}
+
+async function resolveProductionSupabaseRef(baseUrl) {
+  if (cachedProductionSupabaseRef) {
+    return cachedProductionSupabaseRef;
+  }
+
+  const sources = await loadDiagnosticsFromHttp(baseUrl.replace(/\/$/, ""), {
+    maxWaitMs: 90000,
+  });
+  const currentRef = extractMarkerValue(
+    sources.combined,
+    "stage30CurrentSupabaseProjectRef",
+  );
+  const expectedProdRef = extractMarkerValue(
+    sources.combined,
+    "stage30ExpectedProdSupabaseRef",
+  );
+
+  const ref =
+    (currentRef && currentRef !== "unknown" ? currentRef : "") ||
+    (expectedProdRef && expectedProdRef !== "unconfigured"
+      ? expectedProdRef
+      : "");
+
+  if (!ref) {
+    throw new Error(
+      "unable to resolve production Supabase project-ref from /admin/diagnostics",
+    );
+  }
+
+  cachedProductionSupabaseRef = ref;
+  console.log(`INFO: production E2E Supabase project-ref=${ref}`);
+  return ref;
 }
 
 async function loadProductionSupabaseEnv(baseUrl) {
   if (cachedProductionSupabaseEnv) return cachedProductionSupabaseEnv;
 
-  try {
-    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/auth/login`);
-    if (response.ok) {
-      const html = await response.text();
-      const urlMatch = html.match(/https:\/\/[a-z0-9]+\.supabase\.co/);
-      const keyMatch = html.match(/eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/);
-      if (urlMatch?.[0] && keyMatch?.[0]) {
-        cachedProductionSupabaseEnv = { url: urlMatch[0], key: keyMatch[0] };
-        return cachedProductionSupabaseEnv;
-      }
-    }
-  } catch {
-    // fall through to CLI
-  }
-
-  cachedProductionSupabaseEnv = await loadSupabaseEnvFromCli();
+  const projectRef = await resolveProductionSupabaseRef(baseUrl);
+  cachedProductionSupabaseEnv = await loadSupabaseEnvFromCli(projectRef);
   return cachedProductionSupabaseEnv;
 }
 
@@ -79,6 +125,13 @@ export function loadSupabaseEnv() {
 }
 
 export async function createAnonSupabaseClient(baseUrl) {
+  if (isProductionE2eBaseUrl(baseUrl)) {
+    const production = await loadProductionSupabaseEnv(baseUrl);
+    process.env.NEXT_PUBLIC_SUPABASE_URL = production.url;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = production.key;
+    return createClient(production.url, production.key);
+  }
+
   loadSupabaseEnv();
   let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -100,11 +153,10 @@ export async function createAnonSupabaseClient(baseUrl) {
 }
 
 export function getSupabaseProjectRef() {
-  loadSupabaseEnv();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
   if (match?.[1]) return match[1];
-  return PRODUCTION_PROJECT_REF;
+  return KNOWN_DEV_SUPABASE_REF;
 }
 
 export function encodeSupabaseAuthCookie(session) {

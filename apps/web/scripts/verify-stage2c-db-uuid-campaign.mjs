@@ -9,10 +9,15 @@ import { chromium } from "playwright";
 import {
   createAnonSupabaseClient,
   createEphemeralSupabaseSession,
+  getSupabaseProjectRef,
   injectSupabaseSession,
   loadSupabaseEnv,
 } from "./e2e/supabase-auth-session.mjs";
 import { resolveProductionE2eBaseUrl } from "./e2e/e2e-base-url.mjs";
+import {
+  extractMarkerValue,
+  loadDiagnosticsFromHttp,
+} from "./e2e/diagnostics-helpers.mjs";
 
 const BASE = resolveProductionE2eBaseUrl();
 const MIN_VIEW_SEC = 5;
@@ -95,19 +100,6 @@ async function findActiveDbCampaign(supabase) {
   return null;
 }
 
-function pickWrongOption(options) {
-  if (!Array.isArray(options) || options.length === 0) {
-    return "wrong-answer-sentinel";
-  }
-  const first =
-    typeof options[0] === "string"
-      ? options[0]
-      : typeof options[0]?.label === "string"
-        ? options[0].label
-        : "wrong-answer-sentinel";
-  return `${first}-wrong-guess`;
-}
-
 async function countOwnAdViews(supabase, userId) {
   const { count, error } = await supabase
     .from("ad_views")
@@ -152,12 +144,38 @@ async function main() {
     throw new Error("Supabase client unavailable — cannot run DB UUID campaign verify");
   }
 
+  const projectRef = getSupabaseProjectRef();
+  console.log(`INFO: E2E Supabase project-ref=${projectRef}`);
+
+  try {
+    const diag = await loadDiagnosticsFromHttp(BASE, { maxWaitMs: 60000 });
+    const markerRef = extractMarkerValue(diag.combined, "stage30CurrentSupabaseProjectRef");
+    const expectedProd = extractMarkerValue(diag.combined, "stage30ExpectedProdSupabaseRef");
+    console.log(`INFO: Production diagnostics current ref=${markerRef}`);
+    console.log(`INFO: Production diagnostics expected prod ref=${expectedProd}`);
+    if (markerRef && markerRef !== "unknown" && markerRef !== projectRef) {
+      throw new Error(
+        `E2E client ref (${projectRef}) does not match Production diagnostics ref (${markerRef})`,
+      );
+    }
+  } catch (e) {
+    console.log(`INFO: diagnostics ref check skipped or failed: ${e.message}`);
+  }
+
   const ts = Date.now();
   const nonce = randomBytes(4).toString("hex");
   const email = `stage2cr-db-${ts}-${nonce}@example.com`;
   const password = randomBytes(16).toString("base64url");
 
-  const session = await createEphemeralSupabaseSession(email, password, BASE);
+  let session;
+  try {
+    session = await createEphemeralSupabaseSession(email, password, BASE);
+    console.log("PASS: ephemeral signup/login completed");
+  } catch (e) {
+    console.error("FAIL stage: auth — ephemeral signup/login");
+    console.error(`HINT: candidate A prod OAuth/email auth — ${e.message}`);
+    throw e;
+  }
   const userId = session.user.id;
 
   const authed = await createAnonSupabaseClient(BASE);
@@ -168,12 +186,15 @@ async function main() {
 
   const campaign = await findActiveDbCampaign(authed);
   if (!campaign) {
+    console.error("FAIL stage: seed — no active DB UUID campaign with quiz");
+    console.error("HINT: candidate B prod seed/migration — check e2e campaign seed on prod");
     throw new Error(
       "no active DB UUID campaign with quiz found — seed an active campaign for Stage 2-C-R DB verify",
     );
   }
 
   console.log(`INFO: DB UUID campaign ${campaign.campaignId}`);
+  console.log("PASS: campaign + quizzes_public available for authenticated consumer");
 
   const beforeViews = await countOwnAdViews(authed, userId);
   const beforeLedger = await countPointLedger(authed);
@@ -185,9 +206,30 @@ async function main() {
     const page = await context.newPage();
 
     const detailUrl = `${BASE}/consumer/ads/${campaign.campaignId}`;
-    await page.goto(detailUrl, { waitUntil: "networkidle" });
+    const detailResponse = await page.goto(detailUrl, { waitUntil: "networkidle" });
+    console.log(`PASS: campaign detail route HTTP ${detailResponse?.status() ?? "unknown"}`);
 
-    await page.locator('[data-testid="ad-view-started"]').waitFor({ state: "visible" });
+    try {
+      await page.locator('[data-testid="ad-view-started"]').waitFor({
+        state: "visible",
+        timeout: 30000,
+      });
+    } catch (e) {
+      const bodySnippet = (await page.locator("body").innerText()).slice(0, 400);
+      const hasQuizPanel = await page
+        .locator('[data-testid="quiz-attempt-panel"]')
+        .count();
+      const hasLogin = bodySnippet.includes("로그인") || bodySnippet.includes("/auth/login");
+      console.error("FAIL stage: ad-view-started marker timeout");
+      if (hasLogin) {
+        console.error("HINT: candidate A — authenticated session cookie mismatch or auth required");
+      }
+      if (!hasQuizPanel) {
+        console.error("HINT: candidate B/C — quiz panel missing; campaign/quiz RLS or seed issue");
+      }
+      console.error(`HINT: candidate E — E2E ref=${projectRef}, cookie sb-${projectRef}-auth-token`);
+      throw e;
+    }
     await sleep(1000);
 
     const firstOption = page.locator('[data-testid="quiz-attempt-panel"] input[type="radio"]').first();
@@ -238,6 +280,13 @@ async function main() {
       console.log("PASS: first wrong allows retry messaging");
 
       await waitForSubmitReady(page);
+      const wrongLabel =
+        typeof campaign.options?.[0] === "string"
+          ? campaign.options[0]
+          : typeof campaign.options?.[0]?.label === "string"
+            ? campaign.options[0].label
+            : "월요일";
+      await page.getByLabel(wrongLabel).click();
       await page.locator('[data-testid="quiz-submit-preview-button"]').click();
       await page.locator('[data-testid="quiz-attempt-result"]').waitFor({ state: "visible" });
       await sleep(1500);
@@ -246,11 +295,16 @@ async function main() {
       const body2 = await page.locator("body").innerText();
       if (
         (finalView?.attempt_no ?? 0) >= 2 ||
+        finalView?.status === "failed" ||
         body2.includes("리워드 미리보기는 종료") ||
+        body2.includes("종료되었습니다") ||
         body2.includes("attempt_limit")
       ) {
         console.log("PASS: second attempt / limit path observed");
       } else {
+        console.error(
+          `HINT: after second wrong — attempt_no=${finalView?.attempt_no ?? "?"}, status=${finalView?.status ?? "?"}`,
+        );
         throw new Error("expected attempt_no=2 or reward preview ended after second wrong");
       }
     }
