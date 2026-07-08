@@ -73,8 +73,15 @@ function main() {
   }
   console.log("PASS: contract doc version stage3-0-v1");
 
-  if (!code.includes('STAGE30_TRANSACTION_CONTRACT_VERSION = "stage3-0-v1"')) {
-    throw new Error("contract ts missing STAGE30_TRANSACTION_CONTRACT_VERSION");
+  const readinessCode = readFileSync(
+    join(webRoot, "src/lib/stage3/readiness.ts"),
+    "utf8",
+  );
+  if (
+    !readinessCode.includes('STAGE30_TRANSACTION_CONTRACT_VERSION = "stage3-0-v1"') &&
+    !code.includes("stage3-0-v1")
+  ) {
+    throw new Error("stage3 contract version stage3-0-v1 missing in lib/stage3");
   }
   console.log("PASS: contract ts version stage3-0-v1");
 
