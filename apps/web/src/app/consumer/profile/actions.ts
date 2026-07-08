@@ -3,9 +3,13 @@
 import {
   getBirthYearMax,
   BIRTH_YEAR_MIN,
+  CHILD_BIRTH_YEAR_MIN,
   isGenderValue,
   isInterestScopeValue,
+  isPetTypeValue,
+  isValidChildBirthYear,
   INTEREST_SCOPE_ALL,
+  normalizePetTypes,
 } from "@/lib/consumer-profile/constants";
 import type {
   SaveConsumerProfileInput,
@@ -94,6 +98,34 @@ function validateInput(input: SaveConsumerProfileInput): string | null {
     for (const id of input.categoryIds) {
       if (!UUID_RE.test(id)) {
         return "관심 분야 형식이 올바르지 않습니다.";
+      }
+    }
+  }
+
+  if (input.oldestChildBirthYear != null) {
+    if (!isValidChildBirthYear(input.oldestChildBirthYear)) {
+      return `가장 큰 자녀 생년은 ${CHILD_BIRTH_YEAR_MIN}년부터 ${getBirthYearMax()}년 사이여야 합니다.`;
+    }
+  }
+
+  if (input.youngestChildBirthYear != null) {
+    if (!isValidChildBirthYear(input.youngestChildBirthYear)) {
+      return `막내 자녀 생년은 ${CHILD_BIRTH_YEAR_MIN}년부터 ${getBirthYearMax()}년 사이여야 합니다.`;
+    }
+  }
+
+  if (
+    input.oldestChildBirthYear != null &&
+    input.youngestChildBirthYear != null &&
+    input.oldestChildBirthYear > input.youngestChildBirthYear
+  ) {
+    return "가장 큰 자녀 생년은 막내 자녀 생년보다 늦을 수 없습니다.";
+  }
+
+  if (input.petTypes != null && input.petTypes.length > 0) {
+    for (const petType of input.petTypes) {
+      if (!isPetTypeValue(petType)) {
+        return "반려동물 조건 저장값이 올바르지 않습니다.";
       }
     }
   }
@@ -224,6 +256,9 @@ export async function saveConsumerProfileAction(
   const gender =
     input.gender && input.gender.length > 0 ? input.gender : null;
   const interestScope = input.interestScope;
+  const oldestChildBirthYear = input.oldestChildBirthYear;
+  const youngestChildBirthYear = input.youngestChildBirthYear;
+  const petTypes = normalizePetTypes(input.petTypes);
 
   const { data: existingProfile, error: profileLookupError } = await supabase
     .from("consumer_profiles")
@@ -242,6 +277,9 @@ export async function saveConsumerProfileAction(
     birth_year: birthYear,
     gender,
     interest_scope: interestScope,
+    oldest_child_birth_year: oldestChildBirthYear,
+    youngest_child_birth_year: youngestChildBirthYear,
+    pet_types: petTypes,
   };
 
   if (!profileId) {

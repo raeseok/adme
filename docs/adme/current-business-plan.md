@@ -94,12 +94,14 @@ AdMe는 **소비자가 자신의 소비정보 조건을 먼저 제시**하고, *
 | 주활동지역 | hierarchical region | 최대 2 |
 | 성별 | 선택 입력 | 미입력 허용 |
 | 출생년도 / 연령 | birth_year 기반 | 미입력 허용 |
-| **가장 큰 자녀 생년** | 선택 항목 (planned Stage 1-G) | 미입력 허용 |
-| **막내 자녀 생년** | 선택 항목 (planned Stage 1-G) | 미입력 허용 |
+| **가장 큰 자녀 생년** | 선택 항목 (Stage 1-G implemented) | 미입력 허용 |
+| **막내 자녀 생년** | 선택 항목 (Stage 1-G implemented) | 미입력 허용 |
+| **반려동물 조건** | dog/cat/other 복수 선택 (Stage 1-G implemented) | 미입력 허용 |
 
 원칙:
 - 모든 항목은 **선택 입력** — 미입력 허용
 - 가족·자녀 생년은 **가족 개인정보 수집이 아니라 자녀 관련 소비정보 조건**
+- 반려동물 조건은 **반려동물 관련 소비정보 조건** (matching actual 활용은 후속 Stage)
 - 광고주에게 **소비자 개인 식별 row 직접 노출 금지**
 
 UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참조.
@@ -134,7 +136,7 @@ UX 문구 원칙은 [product-policy-current.md](./product-policy-current.md) 참
 | Stage 0 ~ 2-C | 완료 |
 | Stage 3-0 | 완료 (readiness·safety preflight) |
 | Stage 3-1 / 3-1-R | 완료 (dev/prod 분리, DB UUID E2E 회복) |
-| Stage 1-G | planned (프로필 확장·UX 문구) |
+| Stage 1-G | 완료 (자녀 생년·반려동물 조건·능동형 UX) |
 | Stage 3-A | planned (ledger actual mutation dev dry-run) |
 | DOC-0 | 완료 (living document + decision log) |
 

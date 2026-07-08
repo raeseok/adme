@@ -89,6 +89,20 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 | Stage 2-C/C-R | 완료 | ad_views, server authoritative min-view |
 | Stage 3-0 | 완료 | ledger safety preflight, readiness markers |
 | Stage 3-1 / 3-1-R | 완료 | dev/prod split, DB UUID E2E 회복 |
+| Stage 1-G | 완료 | child/pet profile fields, active UX copy, diagnostics |
+
+---
+
+## Stage 1-G 완료 (2026-07-08)
+
+- migration: `20260708130000_stage_1_g_child_pet_profile_conditions.sql`
+- columns: `oldest_child_birth_year`, `youngest_child_birth_year`, `pet_types`
+- UI: `/consumer/profile` 능동형 소비정보 요청 copy + 자녀 생년·반려동물 조건
+- diagnostics: stage1G markers on `/admin/diagnostics` only
+- verify: `verify:stage1g-*`, `smoke:stage1g-profile-ux`
+- 금전성 mutation: **없음**
+
+상세: [stage-1-g-child-pet-profile-ux.md](./stage-1-g-child-pet-profile-ux.md)
 
 ---
 
@@ -102,19 +116,11 @@ Env 체크리스트: [stage-3-1-vercel-env-checklist.md](./stage-3-1-vercel-env-
 | users balance mutation 금지 | Stage 3-0까지 |
 | partner_settlements mutation 금지 | Stage 3-0까지 |
 | service role client 노출 금지 | browser/client 미사용 |
-| public marker guard | stage30 등은 `/admin/diagnostics` only |
+| public marker guard | stage30·stage1G 등은 `/admin/diagnostics` only |
 | RLS disable / anon write policy 추가 금지 | migration·운영 금지 |
+| consumer_profiles child/pet raw row | advertiser/partner 직접 조회 금지 |
 
 Preflight: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)
-
----
-
-## Stage 1-G 후보 (planned)
-
-- 소비 의향 프로필 **가장 큰 자녀 생년·막내 자녀 생년** 선택 항목
-- **능동형 UX 문구** — “광고를 보내달라는 나의 요구” 관점
-- 개인정보 방어심리 완화 copy
-- DB migration·UI는 별도 Stage에서 — DOC-0 범위 외
 
 ---
 
@@ -143,6 +149,8 @@ point_ledger **actual mutation** dev-only dry-run:
 - `verify:stage3-1-env-split-production`
 - `verify:stage3-0-point-ledger-no-mutation`
 - `verify:stage2c-db-uuid-campaign`
+- `verify:stage1g-profile-family-pet`
+- `verify:stage1g-public-marker-guard`
 - `verify:doc-0-current-docs`
 
 ---

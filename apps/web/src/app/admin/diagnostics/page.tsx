@@ -184,6 +184,21 @@ export default async function DiagnosticsPage() {
         </p>
       </section>
       <section
+        aria-label="Stage 1-G child birth year and pet condition profile UX markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-300 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 1-G Child Birth Year · Pet Condition Profile UX (current)
+        </p>
+        <p>stage1GBuild=stage1g-child-pet-profile-ux-production</p>
+        <p>stage1GChildBirthYearFields=true</p>
+        <p>stage1GPetConditionFields=true</p>
+        <p>stage1GProfileActiveRequestCopy=true</p>
+        <p>stage1GPointLedgerMutation=false</p>
+        <p>stage1GPublicMarkerExposed=false</p>
+        <p>stage1GDeployCommit={deployCommit}</p>
+      </section>
+      <section
         aria-label="Stage 2-C ad views and server authoritative min view markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-3 py-3 font-mono text-xs text-teal-950"
       >

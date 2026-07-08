@@ -83,3 +83,41 @@ export function buildBirthYearOptions(): number[] {
   }
   return years;
 }
+
+export const CHILD_BIRTH_YEAR_MIN = 1970;
+
+export function buildChildBirthYearOptions(): number[] {
+  const max = getBirthYearMax();
+  const years: number[] = [];
+  for (let y = max; y >= CHILD_BIRTH_YEAR_MIN; y -= 1) {
+    years.push(y);
+  }
+  return years;
+}
+
+export function isValidChildBirthYear(value: number | null | undefined): boolean {
+  if (value == null) return false;
+  if (!Number.isInteger(value)) return false;
+  return value >= CHILD_BIRTH_YEAR_MIN && value <= getBirthYearMax();
+}
+
+export const PET_TYPE_OPTIONS = [
+  { value: "dog", label: "강아지" },
+  { value: "cat", label: "고양이" },
+  { value: "other", label: "기타" },
+] as const;
+
+export type PetTypeValue = (typeof PET_TYPE_OPTIONS)[number]["value"];
+
+export function isPetTypeValue(value: string): value is PetTypeValue {
+  return PET_TYPE_OPTIONS.some((o) => o.value === value);
+}
+
+export function normalizePetTypes(
+  types: readonly string[] | null | undefined,
+): PetTypeValue[] | null {
+  if (!types || types.length === 0) return null;
+  const filtered = types.filter((t): t is PetTypeValue => isPetTypeValue(t));
+  if (filtered.length === 0) return null;
+  return [...new Set(filtered)].sort();
+}

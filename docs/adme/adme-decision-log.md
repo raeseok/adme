@@ -57,12 +57,12 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | 필드 | 내용 |
 |---|---|
 | **Date** | 2026-07-08 |
-| **Title** | 소비 의향 프로필에 가장 큰 자녀 생년·막내 자녀 생년 선택 항목 추가 예정 |
-| **Status** | planned |
+| **Title** | 소비 의향 프로필에 가장 큰 자녀 생년·막내 자녀 생년 선택 항목 추가 |
+| **Status** | implemented |
 | **Decision** | 소비 의향 프로필에 선택 항목으로 가장 큰 자녀 생년, 막내 자녀 생년을 추가한다. 미입력 허용. |
 | **Reason** | 자녀 관련 소비정보 조건 매칭 (가족 개인정보 수집 목적 아님) |
 | **Impact** | Stage 1-G schema/UI, copy |
-| **Implementation Stage** | Stage 1-G (planned) |
+| **Implementation Stage** | Stage 1-G |
 | **Related files** | docs/adme/current-business-plan.md, docs/adme/stage-roadmap-current.md |
 
 ---
@@ -77,7 +77,7 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Decision** | 프로필 UX 문구는 “개인정보를 내주는” 톤이 아니라 “내가 원하는 광고 조건을 제시한다”는 능동적 소비정보 요청 관점으로 작성한다. |
 | **Reason** | 전환율·신뢰, 본질 재정의와 정합 |
 | **Impact** | Stage 1-G copy, product-policy |
-| **Implementation Stage** | DOC-0 (정책), Stage 1-G (구현) |
+| **Implementation Stage** | DOC-0 (정책), Stage 1-G (구현 완료) |
 | **Related files** | docs/adme/product-policy-current.md |
 
 ---
@@ -124,3 +124,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | 운영 체크리스트, 사용자 로그인 UX |
 | **Implementation Stage** | Stage 3-1-R 잔여, 운영 |
 | **Related files** | docs/adme/stage-3-1-r-prod-oauth-parity-result.md, docs/adme/stage-3-1-vercel-env-checklist.md |
+
+---
+
+## ADME-DECISION-20260708-009
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-08 |
+| **Title** | Stage 1-G 자녀 생년 및 반려동물 조건 선택 UX 구현 |
+| **Status** | implemented |
+| **Decision** | 소비 의향 프로필에 가장 큰 자녀 생년·막내 자녀 생년·반려동물 조건(dog/cat/other)을 nullable 선택 항목으로 구현하고, 프로필 문구를 능동형 소비정보 요청 관점으로 전환한다. |
+| **Reason** | DOC-0 제품 철학의 사용자-facing 반영, 금전성 mutation 없이 프로필 확장 |
+| **Impact** | consumer profile UI, consumer_profiles schema, diagnostics, verify scripts |
+| **Implementation Stage** | Stage 1-G |
+| **Related files** | docs/adme/stage-1-g-child-pet-profile-ux.md, apps/web/src/app/consumer/profile/, supabase/migrations/20260708130000_stage_1_g_child_pet_profile_conditions.sql |

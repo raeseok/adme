@@ -1,6 +1,9 @@
 import type { SessionSnapshot } from "@/lib/auth/session";
 import type { ConsumerProfileReadMeta } from "@/lib/consumer-profile/page-data";
-import type { InterestScopeValue } from "@/lib/consumer-profile/constants";
+import type {
+  InterestScopeValue,
+  PetTypeValue,
+} from "@/lib/consumer-profile/constants";
 import type { RegionRow } from "@/lib/consumer-profile/regions";
 
 export type RegionOption = {
@@ -52,6 +55,9 @@ export type ConsumerProfileStage1CContext = {
 export type SaveConsumerProfileInput = {
   birthYear: number | null;
   gender: string | null;
+  oldestChildBirthYear: number | null;
+  youngestChildBirthYear: number | null;
+  petTypes: PetTypeValue[] | null;
   residenceRegionId: string;
   activitySlot1RegionId: string;
   activitySlot2RegionId: string;

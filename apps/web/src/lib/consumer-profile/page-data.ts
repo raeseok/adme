@@ -3,6 +3,9 @@ import {
   INTEREST_SCOPE_SELECTED,
   intentToSpendRange,
   isInterestScopeValue,
+  isPetTypeValue,
+  normalizePetTypes,
+  type PetTypeValue,
 } from "./constants";
 import type { InterestScopeValue } from "./constants";
 import type { ConsumerProfilePageData } from "./types";
@@ -152,6 +155,9 @@ export async function getConsumerProfilePageData(
 export type ConsumerProfileDraft = {
   birthYear: number | null;
   gender: string | null;
+  oldestChildBirthYear: number | null;
+  youngestChildBirthYear: number | null;
+  petTypes: PetTypeValue[] | null;
   residenceRegionId: string;
   activitySlot1RegionId: string;
   activitySlot2RegionId: string;
@@ -184,7 +190,7 @@ export async function loadConsumerProfileDraft(
   const { data: profile, error: profileError } = await supabase
     .from("consumer_profiles")
     .select(
-      "id, region_id, monthly_intent_min, monthly_intent_max, birth_year, gender, interest_scope",
+      "id, region_id, monthly_intent_min, monthly_intent_max, birth_year, gender, interest_scope, oldest_child_birth_year, youngest_child_birth_year, pet_types",
     )
     .eq("user_id", userId)
     .maybeSingle();
@@ -257,10 +263,25 @@ export async function loadConsumerProfileDraft(
     profile.interest_scope as string | null | undefined,
   );
 
+  const rawPetTypes = (profile.pet_types as string[] | null) ?? null;
+  const petTypes =
+    rawPetTypes == null
+      ? null
+      : normalizePetTypes(
+          rawPetTypes.filter((value): value is PetTypeValue =>
+            isPetTypeValue(value),
+          ),
+        );
+
   return {
     draft: {
       birthYear: (profile.birth_year as number | null) ?? null,
       gender: normalizeGender(profile.gender as string | null),
+      oldestChildBirthYear:
+        (profile.oldest_child_birth_year as number | null) ?? null,
+      youngestChildBirthYear:
+        (profile.youngest_child_birth_year as number | null) ?? null,
+      petTypes,
       residenceRegionId,
       activitySlot1RegionId,
       activitySlot2RegionId,

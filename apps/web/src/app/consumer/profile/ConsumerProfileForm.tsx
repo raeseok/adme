@@ -5,9 +5,12 @@ import Link from "next/link";
 import { logoutAction } from "@/app/auth/logout/actions";
 import {
   buildBirthYearOptions,
+  buildChildBirthYearOptions,
   GENDER_OPTIONS,
   INTEREST_SCOPE_ALL,
   INTEREST_SCOPE_SELECTED,
+  PET_TYPE_OPTIONS,
+  type PetTypeValue,
 } from "@/lib/consumer-profile/constants";
 import { computeProfileCompletion } from "@/lib/consumer-profile/completion";
 import type { ConsumerProfileDraft } from "@/lib/consumer-profile/page-data";
@@ -52,6 +55,15 @@ export function ConsumerProfileForm({
   const [gender, setGender] = useState<string | null>(
     initialDraft?.gender ?? null,
   );
+  const [oldestChildBirthYear, setOldestChildBirthYear] = useState<number | null>(
+    initialDraft?.oldestChildBirthYear ?? null,
+  );
+  const [youngestChildBirthYear, setYoungestChildBirthYear] = useState<
+    number | null
+  >(initialDraft?.youngestChildBirthYear ?? null);
+  const [petTypes, setPetTypes] = useState<PetTypeValue[] | null>(
+    initialDraft?.petTypes ?? null,
+  );
   const [residenceRegionId, setResidenceRegionId] = useState(
     initialDraft?.residenceRegionId ?? "",
   );
@@ -76,6 +88,7 @@ export function ConsumerProfileForm({
   const saveStatus = mapSaveStatus(saveResult);
   const isAuthenticated = stage1C.session.sessionStatus === "authenticated";
   const birthYearOptions = useMemo(() => buildBirthYearOptions(), []);
+  const childBirthYearOptions = useMemo(() => buildChildBirthYearOptions(), []);
   const savableRegionIds = useMemo(
     () => new Set(pageData.savableRegionIds),
     [pageData.savableRegionIds],
@@ -119,12 +132,44 @@ export function ConsumerProfileForm({
     setCategoryIds([]);
   }
 
+  function togglePetType(value: PetTypeValue) {
+    setPetTypes((prev) => {
+      const current = prev ?? [];
+      if (current.includes(value)) {
+        const next = current.filter((item) => item !== value);
+        return next.length === 0 ? null : next;
+      }
+      return [...current, value];
+    });
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (
+      oldestChildBirthYear != null &&
+      youngestChildBirthYear != null &&
+      oldestChildBirthYear > youngestChildBirthYear
+    ) {
+      setSaveResult({
+        ok: false,
+        code: "VALIDATION_ERROR",
+        mutationExecuted: false,
+        pointLedgerMutation: false,
+        quizAnswerAccess: false,
+        serviceRoleUsed: false,
+        message: "가장 큰 자녀 생년은 막내 자녀 생년보다 늦을 수 없습니다.",
+        stage1CProfileSaveStatus: "error",
+        stage1CMutationExecuted: false,
+      });
+      return;
+    }
     startTransition(async () => {
       const result = await saveConsumerProfileAction({
         birthYear,
         gender,
+        oldestChildBirthYear,
+        youngestChildBirthYear,
+        petTypes,
         residenceRegionId,
         activitySlot1RegionId,
         activitySlot2RegionId,
@@ -149,10 +194,15 @@ export function ConsumerProfileForm({
     >
       <section className="space-y-2 rounded-lg bg-blue-50 px-3 py-3 text-sm text-blue-900">
         <p className="font-semibold">AdMe 소비 의향 프로필</p>
+        <p className="font-medium text-blue-950">
+          소비성향 프로필은 광고를 보내달라는 나의 요구입니다.
+        </p>
         <p className="text-blue-800">
-          이 정보는 개인 신원이 아닌 <strong>소비 의향</strong>입니다. 출생년도·성별·
-          지역·관심정보는 광고 매칭에만 사용되며 광고주에게 개인 식별 정보로 제공되지
-          않습니다.
+          더 많은 조건을 등록할수록 더 많은 맞춤 소비정보를 받을 수 있습니다.
+        </p>
+        <p className="text-blue-800">
+          아래 항목은 개인 신원이 아닌 <strong>소비정보 조건</strong>입니다. 내가
+          원하는 광고와 혜택을 받기 위한 조건을 능동적으로 제시해 주세요.
         </p>
       </section>
 
@@ -168,7 +218,8 @@ export function ConsumerProfileForm({
           <p className="text-emerald-700">프로필 기본 항목이 모두 입력되었습니다.</p>
         )}
         <p className="text-xs text-zinc-500">
-          프로필을 완성하면 더 적합한 지역 소비 정보를 받을 수 있습니다.
+          조건을 더 많이 등록할수록 나에게 맞는 광고와 혜택을 더 정교하게 받을 수
+          있습니다.
         </p>
       </section>
 
@@ -206,7 +257,8 @@ export function ConsumerProfileForm({
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">출생년도</legend>
         <p className="text-xs text-zinc-500">
-          연령대 매칭에만 사용되며 광고주에게 개인 정보로 제공되지 않습니다.
+          연령대 소비정보 조건으로만 사용됩니다. 광고주에게 개인 식별 정보로 제공되지
+          않습니다.
         </p>
         <select
           value={birthYear ?? ""}
@@ -227,7 +279,7 @@ export function ConsumerProfileForm({
       <fieldset className="space-y-2">
         <legend className="text-sm font-semibold text-zinc-900">성별</legend>
         <p className="text-xs text-zinc-500">
-          광고 매칭 정교도 향상에 사용되며 광고주에게 개인 식별 정보로 제공되지
+          소비정보 조건으로만 사용됩니다. 광고주에게 개인 식별 정보로 제공되지
           않습니다.
         </p>
         <div className="space-y-2">
@@ -242,6 +294,87 @@ export function ConsumerProfileForm({
                 value={opt.value}
                 checked={gender === opt.value}
                 onChange={() => setGender(opt.value)}
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          가장 큰 자녀 생년
+        </legend>
+        <p className="text-xs text-zinc-500">
+          자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+        </p>
+        <p className="text-xs text-zinc-500">
+          자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
+        </p>
+        <select
+          value={oldestChildBirthYear ?? ""}
+          onChange={(e) =>
+            setOldestChildBirthYear(
+              e.target.value ? Number(e.target.value) : null,
+            )
+          }
+          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+        >
+          <option value="">선택 안 함</option>
+          {childBirthYearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">
+          막내 자녀 생년
+        </legend>
+        <p className="text-xs text-zinc-500">
+          자녀가 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+        </p>
+        <p className="text-xs text-zinc-500">
+          자녀 생년은 자녀 관련 소비정보 조건으로만 사용됩니다.
+        </p>
+        <select
+          value={youngestChildBirthYear ?? ""}
+          onChange={(e) =>
+            setYoungestChildBirthYear(
+              e.target.value ? Number(e.target.value) : null,
+            )
+          }
+          className="w-full max-w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+        >
+          <option value="">선택 안 함</option>
+          {childBirthYearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-900">반려동물 조건</legend>
+        <p className="text-xs text-zinc-500">
+          반려동물이 없거나 입력을 원하지 않으면 비워두셔도 됩니다.
+        </p>
+        <p className="text-xs text-zinc-500">
+          반려동물 정보는 반려동물 관련 소비정보 조건으로만 사용됩니다.
+        </p>
+        <div className="space-y-2">
+          {PET_TYPE_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50"
+            >
+              <input
+                type="checkbox"
+                checked={petTypes?.includes(opt.value) ?? false}
+                onChange={() => togglePetType(opt.value)}
               />
               {opt.label}
             </label>
