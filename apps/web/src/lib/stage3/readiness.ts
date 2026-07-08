@@ -26,6 +26,8 @@ export type Stage30ReadinessState = {
   stage30Build: string;
   stage30CurrentSupabaseProjectRef: string;
   stage30KnownSingleProjectRef: string;
+  stage30ExpectedProdSupabaseRef: string;
+  stage30ExpectedDevSupabaseRef: string;
   stage30VercelEnv: Stage30VercelEnv;
   stage30DeployCommit: string;
   stage30ExpectedProdSupabaseRefConfigured: boolean;
@@ -144,6 +146,8 @@ export function getStage30ReadinessState(): Stage30ReadinessState {
     stage30Build: STAGE30_BUILD,
     stage30CurrentSupabaseProjectRef: currentRef || "unknown",
     stage30KnownSingleProjectRef: STAGE30_KNOWN_SINGLE_PROJECT_REF,
+    stage30ExpectedProdSupabaseRef: expectedProdConfigured ? expectedProdRef : "unconfigured",
+    stage30ExpectedDevSupabaseRef: expectedDevConfigured ? expectedDevRef : "unconfigured",
     stage30VercelEnv: vercelEnv,
     stage30DeployCommit: getDeployCommit(),
     stage30ExpectedProdSupabaseRefConfigured: expectedProdConfigured,

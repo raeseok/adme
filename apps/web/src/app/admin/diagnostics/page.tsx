@@ -110,6 +110,12 @@ export default async function DiagnosticsPage() {
         <p>
           stage30KnownSingleProjectRef={stage30.stage30KnownSingleProjectRef}
         </p>
+        <p>
+          stage30ExpectedProdSupabaseRef={stage30.stage30ExpectedProdSupabaseRef}
+        </p>
+        <p>
+          stage30ExpectedDevSupabaseRef={stage30.stage30ExpectedDevSupabaseRef}
+        </p>
         <p>stage30VercelEnv={stage30.stage30VercelEnv}</p>
         <p>stage30DeployCommit={stage30.stage30DeployCommit}</p>
         <p>
