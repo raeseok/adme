@@ -3,6 +3,8 @@
 작성일: 2026-07-08  
 목적: Stage 3 actual mutation 진입 전 dev/prod Supabase 분리 상태를 진단하고 Vercel env 분리 기준을 문서화한다.
 
+**Current living docs:** [current-development-plan.md](./current-development-plan.md) · [stage-roadmap-current.md](./stage-roadmap-current.md)
+
 ---
 
 ## 현재 상태 요약

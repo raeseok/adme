@@ -3,6 +3,8 @@
 작성일: 2026-07-08  
 전략: **권장안 A**
 
+**Current living docs:** [current-development-plan.md](./current-development-plan.md) · [stage-roadmap-current.md](./stage-roadmap-current.md) · [adme-decision-log.md](./adme-decision-log.md)
+
 ---
 
 ## 선택한 분리 전략

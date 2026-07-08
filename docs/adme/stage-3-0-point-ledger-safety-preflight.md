@@ -3,6 +3,8 @@
 작성일: 2026-07-08  
 목적: Stage 3 actual mutation 진입 전 point_ledger·budget·balance 불가침 원칙과 safety gate를 정의한다.
 
+**Current living docs:** [current-development-plan.md](./current-development-plan.md) · [product-policy-current.md](./product-policy-current.md)
+
 ---
 
 ## point_ledger 불가침 원칙

@@ -55,6 +55,7 @@
     "verify:stage3-1-env-split-preview": "node scripts/verify-stage3-1-env-split-preview.mjs",
     "verify:stage3-1-public-marker-guard": "node scripts/verify-stage3-1-public-marker-guard.mjs",
     "verify:stage3-1-no-actual-mutation": "node scripts/verify-stage3-1-no-actual-mutation.mjs",
+    "verify:doc-0-current-docs": "node scripts/verify-doc-0-current-docs.mjs",
     "regions:fetch-mois": "node scripts/regions/fetch-mois-region-source.mjs",
     "regions:parse-mois": "node scripts/regions/parse-mois-regions.mjs",
     "regions:generate-seed-r": "node scripts/regions/generate-stage1f-r-region-seed-sql.mjs",

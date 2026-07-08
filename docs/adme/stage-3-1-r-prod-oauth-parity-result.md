@@ -2,6 +2,8 @@
 
 작성일: 2026-07-08
 
+**Current living docs:** [current-development-plan.md](./current-development-plan.md) · [adme-decision-log.md](./adme-decision-log.md)
+
 ---
 
 ## project-ref
