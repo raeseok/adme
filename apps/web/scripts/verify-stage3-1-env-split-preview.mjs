@@ -1,11 +1,17 @@
 /**
  * Stage 3-1 — Preview deployment must point at dev Supabase ref
  */
+import { execSync } from "node:child_process";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   assertMarkerContains,
   extractMarkerValue,
   loadDiagnosticsFromHttp,
 } from "./e2e/diagnostics-helpers.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const webRoot = join(__dirname, "..");
 
 const SECRET_PATTERNS = [
   { pattern: /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/, label: "JWT-like anon key" },
@@ -45,11 +51,34 @@ function assertNoSecrets(combined) {
   console.log("PASS: preview diagnostics — no secret patterns detected");
 }
 
+async function loadPreviewDiagnostics(baseUrl) {
+  try {
+    const sources = await loadDiagnosticsFromHttp(baseUrl, { maxWaitMs: 20000 });
+    if (extractMarkerValue(sources.combined, "stage30Build").includes("stage3-0")) {
+      return sources;
+    }
+  } catch {
+    // Protected Preview deployments may require Vercel CLI curl bypass.
+  }
+
+  console.log("INFO: falling back to vercel curl for protected Preview deployment");
+  const html = execSync(
+    `npx vercel curl "/admin/diagnostics" --deployment ${JSON.stringify(baseUrl)}`,
+    { cwd: webRoot, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
+  );
+  return {
+    combined: html,
+    textContent: html,
+    innerText: html,
+    html,
+  };
+}
+
 async function main() {
   const base = resolvePreviewBaseUrl();
   console.log(`INFO: preview base URL host=${new URL(base).hostname}`);
 
-  const sources = await loadDiagnosticsFromHttp(base, { maxWaitMs: 90000 });
+  const sources = await loadPreviewDiagnostics(base);
   const combined = sources.combined;
 
   assertEquals(combined, "stage30VercelEnv", "preview", "preview env");
