@@ -5,6 +5,7 @@ import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/c
 import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture";
 import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review";
 import { getStage3KProtectedFundReconciliationDesignState } from "@/lib/compliance/stage3k-protected-fund-reconciliation-design";
+import { getStage3LKycTaxTermsDesignState } from "@/lib/compliance/stage3l-kyc-tax-terms-design";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default function CompliancePreflightPage() {
     getStage3JRPrepaidThresholdDbMigrationDesignReviewState();
   const protectedFundReconciliation =
     getStage3KProtectedFundReconciliationDesignState();
+  const kycTaxTermsDesign = getStage3LKycTaxTermsDesignState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -69,6 +71,44 @@ export default function CompliancePreflightPage() {
           Protected fund preflight 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/kyc-tax-terms-preflight"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          KYC / Tax / Terms preflight 상세 →
+        </Link>
+      </p>
+
+      <section
+        aria-label="Stage 3-L KYC tax terms data model design markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-slate-500 bg-slate-50 px-3 py-3 font-mono text-xs text-slate-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          KYC / Tax / Terms Data Model Design
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-L KYC tax terms data model is designed
+        </p>
+        <p className="font-sans text-sm">
+          Reward open gate and user-level cash-out gate are separated
+        </p>
+        <p className="font-sans text-sm">
+          Actual cash-out remains blocked
+        </p>
+        <p>stage3LKycTaxTermsDesignComplete=true</p>
+        <p>stage3LCashOutGateSeparated=true</p>
+        <p>stage3LActualCashOutStillBlocked=true</p>
+        <p>stage3LLegalTaxExternalReviewStillRequired=true</p>
+        <p>stage3LNoDbMigration=true</p>
+        <p>stage3LNoSupabaseDbPush=true</p>
+        <p>stage3LNoProductionMutation=true</p>
+        {Object.entries(kycTaxTermsDesign).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-K protected fund reconciliation design markers"

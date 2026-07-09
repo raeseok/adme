@@ -467,3 +467,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-K evaluator, admin protected-fund/compliance/diagnostics marker, Stage 3-K document, product policy, roadmap, verify script. protected fund runtime reconciliation implemented=false, DB migration=false, Supabase db push=false, actual protected fund balance available=false, calculation source finalized=false, reward open allowed=false, cash-out actual processing=false 유지 |
 | **Implementation Stage** | Stage 3-K-R-Protected-Fund-Status-Taxonomy-Alignment |
 | **Related files** | docs/adme/stage-3-k-protected-fund-reconciliation-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/protected-fund-reconciliation-evaluator.ts, apps/web/src/app/admin/protected-fund-preflight/page.tsx, apps/web/scripts/verify-stage3k-protected-fund-reconciliation-design.mjs |
+
+---
+
+## ADME-DECISION-20260710-018
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-10 |
+| **Title** | KYC / Tax / Terms Data Model Design Before Cash-Out Implementation |
+| **Status** | accepted |
+| **Decision** | 현금전환 구현 전 KYC, 본인 명의 계좌 확인, 세무 검토, 약관 버전 및 동의/철회 구조를 먼저 설계한다. 이번 decision은 실제 개인정보 수집, 계좌 API 연동, 세무 신고, 현금전환 처리 허용이 아니다. reward open gate와 user-level cash-out gate를 분리한다. 민감정보는 public/client/diagnostics/로그에 원문 노출하지 않는다. 외부 법무/세무 검토 결과가 필요한 항목은 확정 결론으로 작성하지 않는다. |
+| **Reason** | 실제 cash-out 처리 전에 본인확인, 본인 명의 계좌, 세무 검토, 약관 수락/재수락/철회, 광고성 정보 수신 동의/철회, protected fund status를 user-level gate로 분리해 audit 가능한 설계 기준을 고정하기 위함 |
+| **Impact** | Stage 3-L KYC/Tax/Terms SSOT, pure cash-out gate evaluator, proposed data model document, admin KYC/tax/terms preflight, compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, actual personal data collection=false, bank API integrated=false, tax filing=false, withholding calculation=false, cash-out actual processing=false, DB migration=false, Supabase db push=false, Production mutation=false 유지 |
+| **Implementation Stage** | Stage 3-L-KYC-Tax-Terms-Data-Model-Design |
+| **Related files** | docs/adme/stage-3-l-kyc-tax-terms-data-model-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3l-kyc-tax-terms-design.ts, apps/web/src/lib/compliance/kyc-tax-terms-gate-evaluator.ts, apps/web/src/app/admin/kyc-tax-terms-preflight/page.tsx, apps/web/scripts/verify-stage3l-kyc-tax-terms-data-model-design.mjs |
