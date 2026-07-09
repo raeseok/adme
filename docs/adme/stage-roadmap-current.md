@@ -37,6 +37,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (`advertisers.partner_id`; monthly close; mutation=false) |
 | **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | 완료 인정: Partner settlement manual approval design preflight (`settlement_share_rate_snapshot`, `(partner_id, settlement_month)`, `pending -> confirmed -> paid`, paid update blocked, `chargeback next month`, `partners.status='terminated'`, do not null advertiser partner_id; actual processing=false; mutation=false; DB migration=false) |
 | **Stage 3-H-Legal-Tax-Payment-Compliance-Review** | 완료 인정: actual open 전 legal/tax/payment compliance review gate 고정(external review required; all decisions pending/undetermined; mutation=false; DB migration=false) |
+| **Stage 3-H-R-External-Review-Package** | 완료 인정: external legal/tax review package and attestation prep only(external review completed=false; actual open blocked; mutation=false; DB migration=false) |
+| **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** | policy/SSOT/preflight only, no DB migration, no mutation. 초기에는 등록 면제 기준 충족을 전제로 미등록 운영, threshold unknown/exceeded 시 issuance blocked |
 
 ---
 
@@ -57,10 +59,12 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-H-R-External-Review-Package** | 현재 진행 단계: external review package and attestation prep only. external review completed=false, actual open blocked, no mutation, no migration | 없음 |
-| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보. requires explicit owner approval after Stage 3-H-R and external review | 별도 명시 승인 전 보류 |
-| Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation. requires explicit owner approval after Stage 3-H-R and external review | 별도 승인 필요 |
-| Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation. requires explicit owner approval after Stage 3-H-R and external review | 별도 Stage까지 미구현 |
+| **Stage 3-J Prepaid Threshold Monitoring Architecture Design** | 분기말 발행잔액, 연간 총발행액, warning/hard stop, unknown/exceeded block 설계. DB migration 후보는 별도 승인 전까지 설계만 | 없음 |
+| **Stage 3-K Protected Fund Reconciliation Design** | 보호자금 별도관리 권장 구조, protected fund ledger, daily reconciliation 설계 | 없음 |
+| **Stage 3-L KYC/Tax/Terms Data Model Design** | cash-out 전 KYC/account verification, withholding-ready, payment statement, terms/ad consent log 설계 | 없음 |
+| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보. 전제는 registration completed가 아니라 threshold monitoring implemented + exemption limits verified + explicit owner approval | 별도 명시 승인 전 보류 |
+| Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation. KYC/tax/terms design 이후 별도 승인 필요 | 별도 승인 필요 |
+| Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation. 보수적 정산/세무 구조 설계 후 별도 승인 필요 | 별도 Stage까지 미구현 |
 | Auto bank transfer API | 자동 계좌이체 연동 | MVP 제외 또는 파일럿 검증 이후 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 | Auth parity | prod Google provider 정리 | 없음 |
@@ -83,8 +87,10 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 6. **Stage 3-G-Partner-Settlement-Manual-Approval-Design** — 정산 수동 승인 구조를 설계·marker·verify로 고정(actual processing=false)
 7. **Stage 3-H-Legal-Tax-Payment-Compliance-Review** — Legal / Tax / Payment Compliance Review를 documentation/preflight only로 고정(no mutation, no migration) 완료
 8. **Stage 3-H-R-External-Review-Package** — 외부 검토 패키지와 attestation template 준비만 수행(no mutation, no migration)
-9. **Stage 3-E-Controlled-Open-Execution** — Stage 3-H-R 및 external review 이후 별도 명시 승인 문장 없이는 진입 금지
-10. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
+9. **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** — threshold 기반 미등록 초기 운영 가정과 issuance block 조건을 policy/SSOT/preflight only로 고정(no mutation, no migration)
+10. **Stage 3-J/K/L** — threshold monitoring, protected fund reconciliation, KYC/tax/terms data model을 설계 후보로 분리
+11. **Stage 3-E-Controlled-Open-Execution** — threshold monitoring implemented + exemption limits verified + 기술사님 명시 승인 전 진입 금지
+12. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -117,7 +123,11 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (policy only; partner_settlements mutation=false) |
 | **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | ✅ 완료 인정 (design only; partner settlement actual processing=false) |
 | **Stage 3-H-Legal-Tax-Payment-Compliance-Review** | ✅ 완료 인정 (documentation/preflight only; no mutation; no migration) |
-| **Stage 3-H-R-External-Review-Package** | 현재 진행 단계 (external review package and attestation prep only; external review completed=false; actual open blocked) |
+| **Stage 3-H-R-External-Review-Package** | ✅ 완료 인정 (external review package and attestation prep only; external review completed=false; actual open blocked) |
+| **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** | ✅ 완료 인정 후보 (policy/SSOT/preflight only; no DB migration; no mutation) |
+| **Stage 3-J Prepaid Threshold Monitoring Architecture Design** | 다음 후보 |
+| **Stage 3-K Protected Fund Reconciliation Design** | 다음 후보 |
+| **Stage 3-L KYC/Tax/Terms Data Model Design** | 다음 후보 |
 | **Stage 3-E-Controlled-Open-Execution** | 명시 승인 전 보류 |
 | **Cash-out actual processing** | 별도 승인 필요 |
 | **Partner settlement actual generation** | 별도 승인 필요 |
@@ -144,6 +154,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-G-Partner-Settlement-Manual-Approval-Design: `verify:stage3g-partner-settlement-design`
 - Stage 3-H-Legal-Tax-Payment-Compliance-Review: `verify:stage3h-compliance-review`
 - Stage 3-H-R-External-Review-Package: `verify:stage3hr-external-review-package`
+- Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption: `verify:stage3i-threshold-based-prepaid-exemption-assumption`
 
 ---
 
@@ -168,6 +179,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-g-partner-settlement-manual-approval-design.md](./stage-3-g-partner-settlement-manual-approval-design.md)
 - [stage-3-h-legal-tax-payment-compliance-review.md](./stage-3-h-legal-tax-payment-compliance-review.md)
 - [stage-3-h-r-external-review-package.md](./stage-3-h-r-external-review-package.md)
+- [stage-3-i-threshold-based-prepaid-exemption-assumption.md](./stage-3-i-threshold-based-prepaid-exemption-assumption.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

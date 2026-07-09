@@ -1,6 +1,7 @@
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
 import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
+import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 export default function CompliancePreflightPage() {
   const compliance = getStage3HLegalTaxPaymentComplianceState();
   const externalReviewPackage = getStage3HRExternalReviewPackageState();
+  const prepaidExemptionAssumption =
+    getStage3IThresholdBasedPrepaidExemptionAssumptionState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -41,6 +44,42 @@ export default function CompliancePreflightPage() {
           Reward preflight 상세 →
         </Link>
       </p>
+
+      <section
+        aria-label="Stage 3-I threshold based prepaid exemption assumption markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-500 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Threshold-Based Prepaid Registration Exemption Assumption
+        </p>
+        <p className="font-sans text-sm">
+          Threshold-based prepaid registration exemption assumption is locked
+        </p>
+        <p className="font-sans text-sm">
+          Initial operation assumes no prepaid business registration while
+          exemption thresholds remain satisfied
+        </p>
+        <p className="font-sans text-sm">
+          Quarter-end outstanding balance limit is 3,000,000,000 KRW
+        </p>
+        <p className="font-sans text-sm">
+          Annual total issued limit is 50,000,000,000 KRW
+        </p>
+        <p className="font-sans text-sm">Threshold unknown blocks issuance</p>
+        <p className="font-sans text-sm">
+          Threshold exceeded switches to registration track
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        <p className="font-sans text-sm">No production reward mutation</p>
+        <p className="font-sans text-sm">No DB migration in Stage 3-I</p>
+        {Object.entries(prepaidExemptionAssumption).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-H-R external legal tax review package markers"

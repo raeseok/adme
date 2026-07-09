@@ -11,6 +11,7 @@ import {
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
 import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
+import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
@@ -109,6 +110,8 @@ export default async function DiagnosticsPage() {
   const stage3GPartnerSettlement = getStage3GPartnerSettlementManualApprovalState();
   const stage3HCompliance = getStage3HLegalTaxPaymentComplianceState();
   const stage3HRExternalReviewPackage = getStage3HRExternalReviewPackageState();
+  const stage3IPrepaidExemptionAssumption =
+    getStage3IThresholdBasedPrepaidExemptionAssumptionState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -123,6 +126,43 @@ export default async function DiagnosticsPage() {
           Stage 3-D reward preflight 상세 →
         </Link>
       </p>
+      <section
+        aria-label="Stage 3-I threshold based prepaid exemption assumption markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-rose-500 bg-rose-50 px-3 py-3 font-mono text-xs text-rose-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Threshold-Based Prepaid Registration Exemption Assumption
+        </p>
+        <p className="font-sans text-sm">
+          Threshold-based prepaid registration exemption assumption is locked
+        </p>
+        <p className="font-sans text-sm">
+          Initial operation assumes no prepaid business registration while
+          exemption thresholds remain satisfied
+        </p>
+        <p className="font-sans text-sm">
+          Quarter-end outstanding balance limit is 3,000,000,000 KRW
+        </p>
+        <p className="font-sans text-sm">
+          Annual total issued limit is 50,000,000,000 KRW
+        </p>
+        <p className="font-sans text-sm">Threshold unknown blocks issuance</p>
+        <p className="font-sans text-sm">
+          Threshold exceeded switches to registration track
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        <p className="font-sans text-sm">No production reward mutation</p>
+        <p className="font-sans text-sm">No DB migration in Stage 3-I</p>
+        {Object.entries(stage3IPrepaidExemptionAssumption).map(
+          ([key, value]) => (
+            <p key={key}>
+              {key}={String(value)}
+            </p>
+          ),
+        )}
+      </section>
       <section
         aria-label="Stage 3-H-R external legal tax review package markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-orange-500 bg-orange-50 px-3 py-3 font-mono text-xs text-orange-950"

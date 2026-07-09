@@ -392,3 +392,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-H-R external review package, legal counsel questionnaire, tax accountant questionnaire, attestation template, admin compliance/diagnostics marker, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-H-R-External-Review-Package |
 | **Related files** | docs/adme/stage-3-h-r-external-review-package.md, docs/adme/external-review/legal-counsel-questionnaire.md, docs/adme/external-review/tax-accountant-questionnaire.md, docs/adme/external-review/external-counsel-attestation-template.md, apps/web/src/lib/compliance/stage3hr-external-review-package.ts |
+
+---
+
+## ADME-DECISION-20260709-014
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Threshold-Based Prepaid Registration Exemption Assumption |
+| **Status** | accepted |
+| **Decision** | 외부 법무검토 비용을 당장 투입하지 않고, 초기에는 등록 면제 기준 충족을 전제로 미등록 운영을 가정한다. 등록 면제 기준은 내부 개발상 분기말 발행잔액 30억 원 미만 및 연간 총발행액 500억 원 미만으로 고정한다. 두 조건 중 하나라도 초과하거나, 초과가 임박하거나, 집계가 불가능하면 point issuance와 actual open을 차단한다. 포인트 발행 실적에 따라 중도에 선불업 등록 track으로 전환할 수 있도록 한다. 세무, 개인정보, 광고성 정보, 약관, 파트너 정산은 최대한 보수적으로 준비한다. 이 결정은 법률 자문 결과가 아니라 내부 개발상 위험회피 기준이다. |
+| **Reason** | 초기 운영의 법무비용과 속도를 고려하되, 발행잔액/연간총발행액 threshold를 monitoring/preflight/policy gate로 고정해 초과 또는 불명확 상태의 point issuance를 차단하기 위함 |
+| **Impact** | Stage 3-I threshold-based prepaid exemption assumption SSOT, admin compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption |
+| **Related files** | docs/adme/stage-3-i-threshold-based-prepaid-exemption-assumption.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption.ts |
