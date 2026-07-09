@@ -87,16 +87,16 @@ async function verifyProductionUi() {
     const page = await browser.newPage();
     const sample = "Unable to exchange external code: SAMPLE_EXTERNAL_CODE_VALUE_REDACT_TEST";
 
-    const probeUrl =
+    // Safe query-only probe (no raw description in URL)
+    const safeUrl =
       `${BASE}/auth/login?oauth_error=server_error` +
       `&oauth_error_code=unexpected_failure` +
       `&oauth_error_summary=external_code_exchange_failed` +
-      `&callback_code_missing=true` +
-      `&oauth_error_description=${encodeURIComponent(sample)}`;
+      `&callback_code_missing=true`;
 
-    await page.goto(probeUrl, { waitUntil: "networkidle" });
-    const body = await page.locator("body").innerText();
-    const html = await page.content();
+    await page.goto(safeUrl, { waitUntil: "networkidle" });
+    let body = await page.locator("body").innerText();
+    let html = await page.content();
 
     assert(body.includes("소셜 로그인 처리 중 오류가 발생했습니다"), "user message visible");
     assert(body.includes("oauthError=server_error"), "oauthError visible");
@@ -106,18 +106,24 @@ async function verifyProductionUi() {
       "oauthErrorSummaryVisible=true",
     );
     assert(body.includes("callbackCodeMissing=true"), "callbackCodeMissing visible");
-
-    assertNotContains(body, "SAMPLE_EXTERNAL_CODE", "externalCodeExposed=false body");
-    assertNotContains(body, "Unable to exchange external code", "raw description not in body");
     for (const needle of FORBIDDEN_DISPLAY_PATTERNS) {
       assertNotContains(body, needle, `forbidden pattern body ${needle}`);
       assertNotContains(html, needle, `forbidden pattern html ${needle}`);
     }
-    // Visible UI must not show the sample; RSC may briefly include request URL in payload,
-    // so body is the authoritative exposure check for opaque code values.
+
+    // Intentional unsafe description query: visible body must stay redacted
+    const unsafeUrl =
+      `${safeUrl}&oauth_error_description=${encodeURIComponent(sample)}`;
+    await page.goto(unsafeUrl, { waitUntil: "networkidle" });
+    await page.waitForTimeout(500);
+    body = await page.locator("body").innerText();
+    const finalUrl = page.url();
+    assertNotContains(body, "SAMPLE_EXTERNAL_CODE", "externalCodeExposed=false body");
+    assertNotContains(body, "Unable to exchange external code", "raw description not in body");
+    assertNotContains(body, "oauthErrorDescription=", "description key not in body");
     assert(
-      !body.toLowerCase().includes("sample_external_code"),
-      "externalCodeExposed=false visible",
+      !finalUrl.includes("oauth_error_description") && !finalUrl.includes("SAMPLE_EXTERNAL"),
+      "unsafe description stripped from browser URL",
     );
 
     await page.goto(
@@ -135,6 +141,10 @@ async function verifyProductionUi() {
     );
     assertNotContains(after, "SAMPLE_EXTERNAL_CODE", "hash path externalCodeExposed=false");
     assertNotContains(after, "Unable to exchange external code", "hash path raw description hidden");
+    assert(
+      !afterUrl.includes("error_description") && !afterUrl.includes("SAMPLE_EXTERNAL"),
+      "hash path does not put raw description in login URL",
+    );
 
     console.log("RESULT: externalCodeExposed=false");
     console.log("RESULT: authorizationCodeExposed=false");
