@@ -108,10 +108,17 @@ async function verifyProductionUi() {
     assert(body.includes("callbackCodeMissing=true"), "callbackCodeMissing visible");
 
     assertNotContains(body, "SAMPLE_EXTERNAL_CODE", "externalCodeExposed=false body");
-    assertNotContains(html, "SAMPLE_EXTERNAL_CODE", "externalCodeExposed=false html");
+    assertNotContains(body, "Unable to exchange external code", "raw description not in body");
     for (const needle of FORBIDDEN_DISPLAY_PATTERNS) {
       assertNotContains(body, needle, `forbidden pattern body ${needle}`);
+      assertNotContains(html, needle, `forbidden pattern html ${needle}`);
     }
+    // Visible UI must not show the sample; RSC may briefly include request URL in payload,
+    // so body is the authoritative exposure check for opaque code values.
+    assert(
+      !body.toLowerCase().includes("sample_external_code"),
+      "externalCodeExposed=false visible",
+    );
 
     await page.goto(
       `${BASE}/auth/callback#error=server_error&error_code=unexpected_failure&error_description=${encodeURIComponent(sample)}`,

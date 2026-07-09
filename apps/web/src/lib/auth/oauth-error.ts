@@ -247,10 +247,15 @@ export function pickOAuthErrorFromLoginSearchParams(
   const fromOAuthParams: OAuthErrorDetails = {
     error: sanitizeOAuthErrorCode(get("oauth_error")),
     errorCode: sanitizeOAuthErrorCode(get("oauth_error_code")),
-    errorSummary:
-      sanitizeOAuthSummaryValue(get("oauth_error_summary")) ??
-      summarizeOAuthErrorDescription(get("oauth_error_description")),
+    errorSummary: sanitizeOAuthSummaryValue(get("oauth_error_summary")),
   };
+
+  // Never trust oauth_error_description for display — only derive a safe summary if needed.
+  if (!fromOAuthParams.errorSummary) {
+    fromOAuthParams.errorSummary = summarizeOAuthErrorDescription(
+      get("oauth_error_description"),
+    );
+  }
 
   if (hasOAuthError(fromOAuthParams)) {
     return {

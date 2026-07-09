@@ -28,6 +28,34 @@ function readHashOAuthError(): OAuthErrorDetails | null {
   return parsed;
 }
 
+function stripUnsafeOAuthQueryParams(): void {
+  if (typeof window === "undefined" || !window.history.replaceState) {
+    return;
+  }
+  const url = new URL(window.location.href);
+  const unsafeKeys = [
+    "oauth_error_description",
+    "error_description",
+    "code",
+    "access_token",
+    "refresh_token",
+    "id_token",
+    "provider_token",
+    "provider_refresh_token",
+    "client_secret",
+  ];
+  let changed = false;
+  for (const key of unsafeKeys) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (changed) {
+    window.history.replaceState(null, "", url.toString());
+  }
+}
+
 export function LoginForm({
   session,
   initialError,
@@ -40,7 +68,10 @@ export function LoginForm({
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [hashError] = useState(readHashOAuthError);
+  const [hashError] = useState(() => {
+    stripUnsafeOAuthQueryParams();
+    return readHashOAuthError();
+  });
   const [message, setMessage] = useState<string | null>(() => {
     if (hashError) {
       return getOAuthUserMessage(hashError);
