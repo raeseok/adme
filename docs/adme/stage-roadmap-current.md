@@ -34,6 +34,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-E-Preflight-R** | runtime fraud engine + controlled open approval preflight 완료 인정 (actual open=false; mutation=false) |
 | **Stage 3-E-Controlled-Open-Approval** | controlled open 실행 전 approval package 완료 인정 (actual open=false; mutation=false) |
 | **Stage 3-E-Controlled-Open-Approval-R** | approval marker/guard 보강 완료 인정 (reward open flag=false; kill switch=true; allowlist active=false) |
+| **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (`advertisers.partner_id`; monthly close; mutation=false) |
 
 ---
 
@@ -56,7 +57,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 |---|---|---|
 | **Stage 3-F-Cash-out-Manual-Approval-Design** | reward actual open 전 cash-out(=`cash_redemption_requests` + `cash_redemption`/`admin_adjustment`) 수동 승인·수동 이체·실패 복구·감사 추적 설계 및 marker/verify 고정 | 없음 |
 | **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보 | 별도 명시 승인 전 보류 |
-| Partner settlement manual approval design | partner settlement 수동 승인·정산 운영 설계 후보 | Stage 3-F 이후 후보 |
+| Partner settlement manual approval design | `advertisers.partner_id` 귀속 고정 정책을 전제로 partner settlement 수동 승인·정산 운영 설계 후보 | Stage 3-F 이후 후보 |
+| Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation | 별도 Stage까지 미구현 |
 | Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation | 별도 승인 필요 |
 | Auto bank transfer API | 자동 계좌이체 연동 | MVP 제외 또는 파일럿 검증 이후 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
@@ -76,8 +78,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 2. **Stage 3-E-Preflight-R** — runtime fraud engine, allowlist, kill switch, idempotency, budget atomicity, rollback 기준 검증 완료 인정
 3. **Stage 3-E-Controlled-Open-Approval** — actual open이 아니라 승인 조건 확정 및 검증 패키지 작성
 4. **Stage 3-F-Cash-out-Manual-Approval-Design** — reward actual open 전 cash-out 운영 리스크를 설계·marker·verify로 고정
-5. **Stage 3-E-Controlled-Open-Execution** — 별도 명시 승인 문장 없이는 진입 금지
-6. 이후 **Partner settlement manual approval design** 또는 **Cash-out actual processing** 별도 승인 Stage
+5. **Stage 3-F-R Addendum** — Partner Settlement Manual Approval Design 전 attribution policy lock (`advertisers.partner_id`; partner_settlements mutation=false)
+6. **Stage 3-E-Controlled-Open-Execution** — 별도 명시 승인 문장 없이는 진입 금지
+7. 이후 **Partner settlement manual approval design** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -107,6 +110,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-E-Controlled-Open-Approval** | ✅ 완료 인정 (approval only; actual open=false; mutation=false) |
 | **Stage 3-E-Controlled-Open-Approval-R** | ✅ 완료 인정 (marker/guard 보강; reward open=false) |
 | **Stage 3-F-Cash-out-Manual-Approval-Design** | 진행/완료 후보 (design only; cash-out actual processing=false) |
+| **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (policy only; partner_settlements mutation=false) |
 | **Stage 3-E-Controlled-Open-Execution** | 명시 승인 전 보류 |
 | **Cash-out actual processing** | 별도 승인 필요 |
 | **Auto bank transfer API** | MVP 제외 또는 파일럿 검증 이후 |
@@ -149,6 +153,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-e-controlled-open-approval.md](./stage-3-e-controlled-open-approval.md)
 - [stage-3-e-controlled-open-runbook.md](./stage-3-e-controlled-open-runbook.md)
 - [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md)
+- [stage-3-g-partner-settlement-attribution-policy.md](./stage-3-g-partner-settlement-attribution-policy.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

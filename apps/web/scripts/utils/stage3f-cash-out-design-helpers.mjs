@@ -95,6 +95,9 @@ export function verifyStage3FSourceContract() {
   );
   const roadmap = readText(join(REPO_ROOT, "docs/adme/stage-roadmap-current.md"));
   const decisionLog = readText(join(REPO_ROOT, "docs/adme/adme-decision-log.md"));
+  const partnerPolicy = readText(
+    join(REPO_ROOT, "docs/adme/stage-3-g-partner-settlement-attribution-policy.md"),
+  );
 
   assertContains(state, 'import "server-only"', "Stage 3-F SSOT server-only");
   assertContains(
@@ -215,4 +218,66 @@ export function verifyStage3FSourceContract() {
     "신규 `cash_out` 테이블",
     "decision log no new cash_out table",
   );
+
+  assertContains(
+    roadmap,
+    "Partner settlement attribution policy locked",
+    "roadmap partner policy lock",
+  );
+  assertContains(
+    roadmap,
+    "partner_settlements mutation=false",
+    "roadmap partner mutation remains false",
+  );
+  assertContains(
+    roadmap,
+    "Partner settlement manual approval design",
+    "roadmap partner manual approval candidate",
+  );
+  assertContains(
+    designDoc,
+    "ADME-DECISION-20260709-010",
+    "Stage 3-F partner policy cross-reference",
+  );
+  assertContains(
+    designDoc,
+    "partner_settlements` mutation은 false",
+    "Stage 3-F partner mutation false cross-reference",
+  );
+
+  const partnerPolicySources = [
+    ["product policy", productPolicy],
+    ["decision log", decisionLog],
+    ["Stage 3-G partner policy", partnerPolicy],
+  ];
+  for (const [label, text] of partnerPolicySources) {
+    assertContains(text, "advertisers.partner_id", `${label} partner attribution`);
+    assertContains(text, "partner_id immutable", `${label} partner immutable`);
+    assertContains(text, "monthly close", `${label} monthly close`);
+    assertContains(text, "partner_settlements", `${label} partner settlements`);
+    assertContains(
+      text,
+      "settlement_share_rate_snapshot",
+      `${label} share rate snapshot`,
+    );
+    assertContains(
+      text,
+      "(partner_id, settlement_month)",
+      `${label} settlement idempotency unique`,
+    );
+    assertContains(
+      text,
+      "pending -> confirmed -> paid",
+      `${label} settlement state machine`,
+    );
+    assertContains(text, "paid update blocked", `${label} paid update block`);
+    assertContains(text, "chargeback next month", `${label} chargeback next month`);
+    assertContains(text, "partners.status", `${label} partner status`);
+    assertContains(text, "terminated", `${label} terminated partner`);
+    assertContains(
+      text,
+      "do not null advertiser partner_id",
+      `${label} no null advertiser partner`,
+    );
+  }
 }

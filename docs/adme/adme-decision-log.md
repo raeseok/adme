@@ -332,3 +332,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-F design 문서, product policy, roadmap, admin marker, public marker guard, verify script; Production reward open=false 및 cash-out actual processing=false 유지 |
 | **Implementation Stage** | Stage 3-F-Cash-out-Manual-Approval-Design |
 | **Related files** | docs/adme/stage-3-f-cash-out-manual-approval-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/rewards/stage3f-cash-out-manual-approval.ts |
+
+---
+
+## ADME-DECISION-20260709-010
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Partner Settlement Attribution Locked to Advertiser |
+| **Status** | accepted |
+| **Decision** | 파트너 귀속 기준은 `advertisers.partner_id`로 고정한다. 캠페인·광고 노출·퀴즈 통과·정산 시점에 partner를 동적으로 재탐색하지 않는다. 광고주 등록 이후 `partner_id immutable` 원칙을 적용한다. 정산은 퀴즈 통과 시점이 아니라 `monthly close` 후 확정 거래 기준으로 생성한다. `partner_settlements`는 `settlement_share_rate_snapshot` 등 배분율 snapshot을 저장한다. `(partner_id, settlement_month)` UNIQUE로 batch idempotency를 보장한다. 상태는 `pending -> confirmed -> paid`로 관리한다. `paid update blocked` 원칙에 따라 paid 상태는 직접 UPDATE 차단 대상이다. 마감 후 부정행위 취소는 `chargeback next month`로 반영한다. 계약 해지 시 `advertisers.partner_id`를 NULL로 변경하지 않고 `partners.status='terminated'`로 관리한다. `do not null advertiser partner_id`를 policy contract로 고정한다. |
+| **Reason** | 정산 시점에 “이 광고비가 누구 몫인지” 역추적하지 않고, 과거 정산 근거를 보존하며, 환불·부정행위 취소·파트너 이탈 상황에서 회계 안정성을 확보하기 위함. batch 중복 실행에 따른 중복 정산을 방지하고 paid settlement의 불변성을 확보한다. |
+| **Impact** | product policy, roadmap, Stage 3-F cross-reference, Stage 3-G policy document, verify source/doc contract. Production partner_settlements mutation=false 유지 |
+| **Implementation Stage** | Stage 3-F-R Addendum / Stage 3-G policy lock only |
+| **Related files** | docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, docs/adme/stage-3-f-cash-out-manual-approval-design.md, docs/adme/stage-3-g-partner-settlement-attribution-policy.md |

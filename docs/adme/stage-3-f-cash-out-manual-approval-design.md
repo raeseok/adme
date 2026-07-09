@@ -198,6 +198,17 @@ idempotency key는 같은 request에 대해 동일 이벤트가 중복 처리되
 
 ---
 
+## Partner settlement와의 관계
+
+- Cash-out manual approval과 partner settlement는 별도 흐름이다.
+- 다만 둘 다 실제 현금 지급과 관련되므로 manual approval, immutable ledger, adjustment/chargeback 원칙을 공유한다.
+- Partner settlement attribution policy는 [product-policy-current.md](./product-policy-current.md)의 Partner Settlement Attribution Policy 및 `ADME-DECISION-20260709-010`을 기준으로 한다.
+- 세부 정책 lock 문서는 [stage-3-g-partner-settlement-attribution-policy.md](./stage-3-g-partner-settlement-attribution-policy.md)를 따른다.
+- Stage 3-F에서는 partner settlement actual processing을 구현하지 않는다.
+- Production `partner_settlements` mutation은 false로 유지한다.
+
+---
+
 ## Stage 3-F marker
 
 Admin-only route(`/admin/diagnostics`, `/admin/reward-preflight`, `/admin/cash-out-preflight`)에만 노출한다.
