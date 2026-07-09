@@ -5,9 +5,9 @@
 Production reward open: **false** (Stage 3-E 별도 승인 전 금지)
 
 시작 HEAD: `cf8b102` (Stage 3-D-R 기준)  
-최종 HEAD: (배포 후 갱신)  
+최종 HEAD: `8eea924`  
 Production URL: https://web-ashen-xi-52.vercel.app  
-Production deploy commit: (배포 후 갱신)
+Production deploy commit: `8eea924` (repo HEAD 일치)
 
 ---
 
