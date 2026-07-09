@@ -14,6 +14,7 @@ import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr
 import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption";
 import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture";
 import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review";
+import { getStage3KProtectedFundReconciliationDesignState } from "@/lib/compliance/stage3k-protected-fund-reconciliation-design";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
@@ -118,6 +119,8 @@ export default async function DiagnosticsPage() {
     getStage3JPrepaidThresholdMonitoringArchitectureState();
   const stage3JRThresholdDbMigrationDesignReview =
     getStage3JRPrepaidThresholdDbMigrationDesignReviewState();
+  const stage3KProtectedFundReconciliation =
+    getStage3KProtectedFundReconciliationDesignState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -140,6 +143,41 @@ export default async function DiagnosticsPage() {
           Stage 3-J prepaid threshold preflight 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/protected-fund-preflight"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-K protected fund preflight 상세 →
+        </Link>
+      </p>
+      <section
+        aria-label="Stage 3-K protected fund reconciliation design markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Protected Fund Reconciliation Design
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-K protected fund reconciliation is designed
+        </p>
+        <p className="font-sans text-sm">
+          Runtime protected fund reconciliation is not implemented
+        </p>
+        <p className="font-sans text-sm">
+          Actual protected fund balance is not available
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        {Object.entries(stage3KProtectedFundReconciliation).map(
+          ([key, value]) => (
+            <p key={key}>
+              {key}={String(value)}
+            </p>
+          ),
+        )}
+      </section>
       <section
         aria-label="Stage 3-J-R prepaid threshold DB migration design review markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-500 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"

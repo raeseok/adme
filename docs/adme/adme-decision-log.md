@@ -437,3 +437,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-J-R design review SSOT, DB design review document, admin prepaid-threshold/compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-J-R-Prepaid-Threshold-DB-Migration-Design-Review |
 | **Related files** | docs/adme/stage-3-j-r-prepaid-threshold-db-migration-design-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review.ts |
+
+---
+
+## ADME-DECISION-20260709-017
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Protected Fund Reconciliation Design Before Cash-Out and Reward Open |
+| **Status** | accepted |
+| **Decision** | threshold monitoring 설계 이후 실제 reward open 또는 cash-out 전에 protected fund reconciliation 설계를 별도 단계로 분리한다. 소비자 미전환 포인트 부채는 보호자금 또는 리워드 재원으로 커버되어야 한다는 보수적 원칙을 채택한다. coverage unknown 또는 deficit 상태에서는 cash-out 및 reward open을 차단하는 설계를 채택한다. Stage 3-K에서는 실제 DB migration, Supabase db push, 은행 API 연동, Production mutation을 금지한다. protected fund runtime reconciliation과 actual protected fund values는 후속 Stage에서 별도 승인 후 구현한다. |
+| **Reason** | 선불 threshold monitoring은 등록면제 기준 gate이고, 소비자 현금전환 가능 포인트 부채 coverage는 별도 재무/운영 gate이므로 실제 발행·현금전환 전에 대사 구조를 먼저 고정하기 위함 |
+| **Impact** | Stage 3-K protected fund reconciliation design SSOT, pure evaluator, admin protected-fund/compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-K-Protected-Fund-Reconciliation-Design |
+| **Related files** | docs/adme/stage-3-k-protected-fund-reconciliation-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3k-protected-fund-reconciliation-design.ts, apps/web/src/lib/compliance/protected-fund-reconciliation-evaluator.ts |

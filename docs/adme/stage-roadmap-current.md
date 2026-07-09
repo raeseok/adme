@@ -40,7 +40,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-H-R-External-Review-Package** | 완료 인정: external legal/tax review package and attestation prep only(external review completed=false; actual open blocked; mutation=false; DB migration=false) |
 | **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** | policy/SSOT/preflight only, no DB migration, no mutation. 초기에는 등록 면제 기준 충족을 전제로 미등록 운영, threshold unknown/exceeded 시 issuance blocked |
 | **Stage 3-J-Prepaid-Threshold-Monitoring-Architecture-Design** | 완료: architecture + read-only preflight + evaluator only, no DB migration, no mutation. runtime monitoring implemented=false, actual reward open blocked |
-| **Stage 3-J-R Prepaid Threshold DB Migration Design Review** | 현재 단계: DB migration design review only, no migration, no db push, no mutation |
+| **Stage 3-J-R Prepaid Threshold DB Migration Design Review** | 완료: DB migration design review only, no migration, no db push, no mutation |
+| **Stage 3-K Protected Fund Reconciliation Design** | 현재 단계: protected fund reconciliation design only, no migration, no db push, no mutation |
 
 ---
 
@@ -61,10 +62,11 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | prepaid threshold DB migration actual implementation 후보. Stage 3-J-R 설계 검토 후 별도 명시 승인 전 금지 | 별도 명시 승인 전 금지 |
-| **Stage 3-K Protected Fund Reconciliation Design** | 보호자금 별도관리 권장 구조, protected fund ledger, daily reconciliation 설계 | 없음 |
+| **Stage 3-K-R Protected Fund DB Migration Design Review** | protected fund DB schema/RLS/RPC/audit/admin preflight design review only. actual migration은 아님 | 없음 |
 | **Stage 3-L KYC/Tax/Terms Data Model Design** | cash-out 전 KYC/account verification, withholding-ready, payment statement, terms/ad consent log 설계 | 없음 |
+| **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | prepaid threshold DB migration actual implementation 후보. Stage 3-J-R 완료 후에도 기술사님 별도 명시 승인 전 금지 | 별도 명시 승인 전 금지 |
 | **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보. 전제는 registration completed가 아니라 threshold runtime monitoring implemented + exemption limits verified + explicit owner approval | 별도 명시 승인 전 보류 |
+| Protected fund actual DB migration implementation | Stage 3-K-R design review 이후에도 기술사님 별도 명시 승인 전 금지 | 별도 명시 승인 전 금지 |
 | Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation. KYC/tax/terms design 이후 별도 승인 필요 | 별도 승인 필요 |
 | Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation. 보수적 정산/세무 구조 설계 후 별도 승인 필요 | 별도 Stage까지 미구현 |
 | Auto bank transfer API | 자동 계좌이체 연동 | MVP 제외 또는 파일럿 검증 이후 |
@@ -92,9 +94,10 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 9. **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** — threshold 기반 미등록 초기 운영 가정과 issuance block 조건을 policy/SSOT/preflight only로 고정(no mutation, no migration)
 10. **Stage 3-J-Prepaid-Threshold-Monitoring-Architecture-Design** — architecture + read-only preflight + evaluator only, no DB migration, no mutation
 11. **Stage 3-J-R** — threshold DB migration design review only, no migration, no db push, no mutation
-12. **Stage 3-J-M / 3-K / 3-L** — threshold DB migration implementation 후보는 별도 명시 승인 전 금지, protected fund reconciliation과 KYC/tax/terms data model은 별도 설계 후보로 분리
-13. **Stage 3-E-Controlled-Open-Execution** — threshold runtime monitoring implemented + exemption limits verified + 기술사님 명시 승인 전 계속 금지
-14. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
+12. **Stage 3-K Protected Fund Reconciliation Design** — protected fund reconciliation design only, no migration, no db push, no mutation
+13. **Stage 3-K-R / 3-L / 3-J-M** — Stage 3-K-R은 design review only, Stage 3-L은 KYC/tax/terms 설계, Stage 3-J-M과 protected fund actual DB migration implementation은 기술사님 별도 명시 승인 전 금지
+14. **Stage 3-E-Controlled-Open-Execution** — threshold runtime monitoring implemented + runtime protected fund reconciliation completed + exemption limits verified + 기술사님 명시 승인 전 계속 금지
+15. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -130,11 +133,13 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-H-R-External-Review-Package** | ✅ 완료 인정 (external review package and attestation prep only; external review completed=false; actual open blocked) |
 | **Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption** | ✅ 완료 |
 | **Stage 3-J Prepaid Threshold Monitoring Architecture Design** | ✅ 완료 (architecture + read-only preflight + evaluator only; no DB migration; no mutation) |
-| **Stage 3-J-R Prepaid Threshold DB Migration Design Review** | ✅ 완료 예정 (DB migration design review only; no migration; no db push; no mutation) |
+| **Stage 3-J-R Prepaid Threshold DB Migration Design Review** | ✅ 완료 (DB migration design review only; no migration; no db push; no mutation) |
+| **Stage 3-K Protected Fund Reconciliation Design** | 현재 단계 (protected fund reconciliation design only; no migration; no db push; no mutation) |
+| **Stage 3-K-R Protected Fund DB Migration Design Review** | 다음 후보 (design review only; actual migration 아님) |
 | **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | 별도 명시 승인 전 금지 |
-| **Stage 3-K Protected Fund Reconciliation Design** | 다음 후보 |
 | **Stage 3-L KYC/Tax/Terms Data Model Design** | 다음 후보 |
 | **Stage 3-E-Controlled-Open-Execution** | 명시 승인 전 보류 |
+| **Protected fund actual DB migration implementation** | 별도 명시 승인 전 금지 |
 | **Cash-out actual processing** | 별도 승인 필요 |
 | **Partner settlement actual generation** | 별도 승인 필요 |
 | **Auto bank transfer API** | MVP 제외 또는 파일럿 검증 이후 |
@@ -163,6 +168,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption: `verify:stage3i-threshold-based-prepaid-exemption-assumption`
 - Stage 3-J-Prepaid-Threshold-Monitoring-Architecture-Design: `verify:stage3j-prepaid-threshold-monitoring-architecture`
 - Stage 3-J-R-Prepaid-Threshold-DB-Migration-Design-Review: `verify:stage3jr-prepaid-threshold-db-migration-design-review`
+- Stage 3-K-Protected-Fund-Reconciliation-Design: `verify:stage3k-protected-fund-reconciliation-design`
 
 ---
 
@@ -190,6 +196,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-i-threshold-based-prepaid-exemption-assumption.md](./stage-3-i-threshold-based-prepaid-exemption-assumption.md)
 - [stage-3-j-prepaid-threshold-monitoring-architecture.md](./stage-3-j-prepaid-threshold-monitoring-architecture.md)
 - [stage-3-j-r-prepaid-threshold-db-migration-design-review.md](./stage-3-j-r-prepaid-threshold-db-migration-design-review.md)
+- [stage-3-k-protected-fund-reconciliation-design.md](./stage-3-k-protected-fund-reconciliation-design.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)
