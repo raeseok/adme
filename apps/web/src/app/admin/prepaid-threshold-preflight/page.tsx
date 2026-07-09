@@ -1,5 +1,6 @@
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture";
+import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +8,8 @@ export const dynamic = "force-dynamic";
 export default function PrepaidThresholdPreflightPage() {
   const thresholdArchitecture =
     getStage3JPrepaidThresholdMonitoringArchitectureState();
+  const dbMigrationDesignReview =
+    getStage3JRPrepaidThresholdDbMigrationDesignReviewState();
 
   return (
     <ShellCard title="Prepaid Threshold Monitoring Architecture">
@@ -74,6 +77,31 @@ export default function PrepaidThresholdPreflightPage() {
             {String(thresholdArchitecture.stage3JThresholdDbMigrationImplemented)}
           </p>
         </div>
+      </section>
+
+      <section
+        aria-label="Stage 3-J-R prepaid threshold DB migration design review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-500 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Prepaid Threshold DB Migration Design Review
+        </p>
+        <p className="font-sans text-sm">DB migration design is reviewed</p>
+        <p className="font-sans text-sm">
+          Actual DB migration is not implemented
+        </p>
+        <p className="font-sans text-sm">Supabase db push is not executed</p>
+        <p className="font-sans text-sm">
+          Runtime threshold monitoring is not implemented
+        </p>
+        <p className="font-sans text-sm">
+          This is read-only design review only
+        </p>
+        {Object.entries(dbMigrationDesignReview).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
       </section>
 
       <section

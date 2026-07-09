@@ -422,3 +422,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-J prepaid threshold monitoring architecture SSOT, pure evaluator, admin threshold preflight, compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-J-Prepaid-Threshold-Monitoring-Architecture-Design |
 | **Related files** | docs/adme/stage-3-j-prepaid-threshold-monitoring-architecture.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture.ts, apps/web/src/lib/compliance/prepaid-threshold-evaluator.ts |
+
+---
+
+## ADME-DECISION-20260709-016
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Prepaid Threshold DB Migration Design Review Before Migration |
+| **Status** | accepted |
+| **Decision** | Stage 3-J 이후 실제 threshold DB migration으로 바로 들어가지 않고 migration design review 단계를 분리한다. Stage 3-J-R에서는 추천 테이블, RLS, RPC, index, audit log, admin preflight 설계를 문서화한다. Stage 3-J-R에서는 실제 DB migration, Supabase db push, Production mutation을 금지한다. runtime threshold monitoring과 actual threshold values는 후속 Stage에서 별도 승인 후 구현한다. |
+| **Reason** | 분기말 발행잔액 30억 원 미만 및 연간 총발행액 500억 원 미만 기준을 실제 DB 구조로 구현하기 전에 point_ledger, advertiser prepaid charge, campaign budget, cash-out, refund, expire, breakage와 threshold 산정값의 관계를 보수적으로 검토하기 위함 |
+| **Impact** | Stage 3-J-R design review SSOT, DB design review document, admin prepaid-threshold/compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-J-R-Prepaid-Threshold-DB-Migration-Design-Review |
+| **Related files** | docs/adme/stage-3-j-r-prepaid-threshold-db-migration-design-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review.ts |

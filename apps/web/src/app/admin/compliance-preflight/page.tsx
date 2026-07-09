@@ -3,6 +3,7 @@ import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage
 import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
 import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption";
 import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture";
+import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,8 @@ export default function CompliancePreflightPage() {
     getStage3IThresholdBasedPrepaidExemptionAssumptionState();
   const thresholdMonitoringArchitecture =
     getStage3JPrepaidThresholdMonitoringArchitectureState();
+  const thresholdDbMigrationDesignReview =
+    getStage3JRPrepaidThresholdDbMigrationDesignReviewState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -55,6 +58,30 @@ export default function CompliancePreflightPage() {
           Prepaid threshold preflight 상세 →
         </Link>
       </p>
+
+      <section
+        aria-label="Stage 3-J-R prepaid threshold DB migration design review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-500 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Prepaid Threshold DB Migration Design Review
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-J-R prepaid threshold DB migration design is reviewed
+        </p>
+        <p className="font-sans text-sm">
+          Actual DB migration is not implemented
+        </p>
+        <p className="font-sans text-sm">Supabase db push is not executed</p>
+        <p className="font-sans text-sm">
+          Runtime threshold monitoring remains blocked
+        </p>
+        {Object.entries(thresholdDbMigrationDesignReview).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-J prepaid threshold monitoring architecture markers"
