@@ -4,7 +4,8 @@
 상태: **preflight only — Production reward mutation = false**
 
 관련:
-- [stage-3-d-kakao-secret-rotation-preflight.md](./stage-3-d-kakao-secret-rotation-preflight.md)
+- [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md)
+- [stage-3-d-kakao-secret-rotation-preflight.md](./stage-3-d-kakao-secret-rotation-preflight.md) (superseded)
 - [stage-3-d-production-reward-allowlist-policy.md](./stage-3-d-production-reward-allowlist-policy.md)
 - [stage-3-d-abuse-fraud-preflight-policy.md](./stage-3-d-abuse-fraud-preflight-policy.md)
 - [stage-3-d-reward-kill-switch-and-rollback.md](./stage-3-d-reward-kill-switch-and-rollback.md)
@@ -24,8 +25,8 @@ Production 리워드 **실제 적립을 즉시 열지 않는다**.
 - Stage 3-B RPC Production block **유지** (`STAGE3B_PRODUCTION_BLOCKED`)
 - Stage 3-C server action Production reward block **유지** (`STAGE3C_PRODUCTION_REWARD_BLOCKED`)
 - Production `point_ledger` / campaign budget / users balance / `ad_views` reward result **변경 금지**
-- Kakao OAuth E2E 성공 유지 + Client Secret rotation preflight를 **첫 gate**로 둔다
-- 실제 open은 Stage 3-D 완료 후 **별도 명시 승인** 단계에서만
+- Kakao OAuth E2E 성공 유지 + **Kakao OAuth Secret Safety Attestation**을 gate로 둔다 (노출 의심 없으면 rotation 불필요)
+- 실제 open은 Stage 3-D/3-D-R 완료 후 **별도 명시 승인**(Stage 3-E) 단계에서만
 
 ## Release flags (설계)
 
@@ -55,5 +56,5 @@ Production 리워드 **실제 적립을 즉시 열지 않는다**.
 
 ## 다음 Stage 후보
 
-- **Stage 3-D-R**: 보류 해소 (Kakao rotation attestation, balance/budget inconsistency 등)
-- **Stage 3-E**: Production reward controlled open approval
+- **Stage 3-D-R**: Kakao OAuth Secret Safety Attestation으로 보류 해소 (완료)
+- **Stage 3-E**: Production reward controlled open approval (자동 진입 금지)

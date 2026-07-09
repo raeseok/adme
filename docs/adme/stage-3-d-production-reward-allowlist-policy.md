@@ -14,7 +14,7 @@
 
 ## 활성화 전 필수 조건
 
-1. Kakao secret rotation confirmed
+1. Kakao OAuth Secret Safety Attestation confirmed (rotation only if exposure suspected)
 2. prod OAuth E2E verified
 3. point_ledger append-only verified
 4. users balance cache consistency verified

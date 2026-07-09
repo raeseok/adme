@@ -72,6 +72,7 @@
     "verify:stage3d-production-reward-blocked": "node scripts/verify-stage3d-production-reward-blocked.mjs",
     "verify:stage3d-release-flags": "node scripts/verify-stage3d-release-flags.mjs",
     "verify:stage3d-kakao-secret-redaction": "node scripts/verify-stage3d-kakao-secret-redaction.mjs",
+    "verify:stage3d-kakao-oauth-secret-safety-attestation": "node scripts/verify-stage3d-kakao-oauth-secret-safety-attestation.mjs",
     "verify:stage3d-quiz-answer-non-exposure": "node scripts/verify-stage3d-quiz-answer-non-exposure.mjs",
     "verify:stage3d-point-ledger-append-only": "node scripts/verify-stage3d-point-ledger-append-only.mjs",
     "verify:stage3d-balance-cache-consistency-readonly": "node scripts/verify-stage3d-balance-cache-consistency-readonly.mjs",

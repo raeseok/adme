@@ -1,25 +1,35 @@
 # Stage 3-D — Production Reward Preflight Result
 
 작성일: 2026-07-09  
-상태: **실행 결과 기록 (검증 후 갱신)**
+상태: **Stage 3-D-R 보류 해소 (Kakao OAuth Secret Safety Attestation)**  
+Production reward open: **false** (Stage 3-E 별도 승인 전 금지)
 
-시작 HEAD: `dc025a0`  
-최종 HEAD: `34ce3fe`  
+시작 HEAD: `cf8b102` (Stage 3-D-R 기준)  
+최종 HEAD: (배포 후 갱신)  
 Production URL: https://web-ashen-xi-52.vercel.app  
-Production deploy commit: `34ce3fe` (success)
+Production deploy commit: (배포 후 갱신)
 
 ---
 
-## Kakao Client Secret rotation
+## Stage 3-D-R — Kakao OAuth Secret Safety Attestation
 
 | 항목 | 결과 |
 |---|---|
-| 재발급 | **운영자 attestation 대기** (`stage3DKakaoSecretRotationConfirmed=false`) |
-| dev 반영 | false (attestation 대기) |
-| prod 반영 | false (attestation 대기) |
-| prod OAuth E2E 재확인 | false (attestation 대기; K3 E2E 성공 이력은 유지) |
-| raw secret 기록 | false |
-| code/token 기록 | false |
+| safety attestation confirmed | **true** |
+| exposure suspected | **false** |
+| rotation required | **false** |
+| rotation performed | **false** |
+| dev Supabase Kakao provider configured | **true** |
+| prod Supabase Kakao provider configured | **true** |
+| dev authorize reverified | **true** |
+| prod authorize reverified | **true** |
+| prod OAuth E2E reverified | **true** |
+| raw secret recorded | **false** |
+| partial/hash/digest recorded | **false** |
+| code/token recorded | **false** |
+
+정정: Kakao Client Secret 재발급은 필수 조건이 아니다.  
+노출 의심이 없으면 safety attestation으로 Stage 3-D-R blocker를 해소한다.
 
 ## Production mutation blocks
 
@@ -52,8 +62,15 @@ Production deploy commit: `34ce3fe` (success)
 | allowlistActive | false |
 | openReady | false |
 
+## Stage 3-E 진입 전제
+
+- runtime fraud engine ready (현재 false)
+- controlled open approval 명시 기록
+- Production reward open은 자동 진입 금지
+
 ## Scripts
 
+- `verify:stage3d-kakao-oauth-secret-safety-attestation`
 - `verify:stage3d-production-reward-blocked`
 - `verify:stage3d-release-flags`
 - `verify:stage3d-kakao-secret-redaction`
@@ -65,4 +82,4 @@ Production deploy commit: `34ce3fe` (success)
 - `verify:stage3d-public-marker-guard`
 - `smoke:stage3d-reward-preflight-ui`
 
-실행 결과는 완료보고 §10에 기록한다.
+실행 결과는 Stage 3-D-R 완료보고에 기록한다.

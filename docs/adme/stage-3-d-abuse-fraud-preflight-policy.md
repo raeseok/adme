@@ -33,4 +33,4 @@ Production reward open 전 최소 abuse guard 항목을 문서화하고 readines
 - `stage3DAbuseFraudRuntimeEngineReady=false`
 - `stage3DProductionRewardOpenReady=false`
 
-openReady는 runtime engine·rotation attestation·원장 정합성이 모두 충족되고 **별도 승인**이 있을 때만 재평가한다.
+openReady는 runtime engine·Kakao OAuth Secret Safety Attestation·원장 정합성이 모두 충족되고 **별도 승인**이 있을 때만 재평가한다.

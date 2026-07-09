@@ -94,24 +94,53 @@ export default function RewardPreflightPage() {
           {String(s.stage3DControlledProductionAllowlistMutationEnabled)}
         </p>
         <p>
-          stage3DKakaoSecretRotationRequired=
-          {String(s.stage3DKakaoSecretRotationRequired)}
+          stage3DKakaoSecretSafetyAttestationRequired=
+          {String(s.stage3DKakaoSecretSafetyAttestationRequired)}
         </p>
         <p>
-          stage3DKakaoSecretRotationConfirmed=
-          {String(s.stage3DKakaoSecretRotationConfirmed)}
+          stage3DKakaoSecretSafetyAttestationConfirmed=
+          {String(s.stage3DKakaoSecretSafetyAttestationConfirmed)}
+        </p>
+        <p>stage3DKakaoSecretAttestedAt={s.stage3DKakaoSecretAttestedAt}</p>
+        <p>
+          stage3DKakaoSecretExposureSuspected=
+          {String(s.stage3DKakaoSecretExposureSuspected)}
         </p>
         <p>
-          stage3DKakaoSecretDevReapplied=
-          {String(s.stage3DKakaoSecretDevReapplied)}
+          stage3DKakaoSecretRawRecorded=
+          {String(s.stage3DKakaoSecretRawRecorded)}
         </p>
         <p>
-          stage3DKakaoSecretProdReapplied=
-          {String(s.stage3DKakaoSecretProdReapplied)}
+          stage3DKakaoSecretPartialHashDigestRecorded=
+          {String(s.stage3DKakaoSecretPartialHashDigestRecorded)}
+        </p>
+        <p>
+          stage3DKakaoSecretDevProviderConfigured=
+          {String(s.stage3DKakaoSecretDevProviderConfigured)}
+        </p>
+        <p>
+          stage3DKakaoSecretProdProviderConfigured=
+          {String(s.stage3DKakaoSecretProdProviderConfigured)}
+        </p>
+        <p>
+          stage3DKakaoOauthDevAuthorizeReverified=
+          {String(s.stage3DKakaoOauthDevAuthorizeReverified)}
+        </p>
+        <p>
+          stage3DKakaoOauthProdAuthorizeReverified=
+          {String(s.stage3DKakaoOauthProdAuthorizeReverified)}
         </p>
         <p>
           stage3DKakaoOauthProdE2EReverified=
           {String(s.stage3DKakaoOauthProdE2EReverified)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationRequired=
+          {String(s.stage3DKakaoSecretRotationRequired)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationPerformed=
+          {String(s.stage3DKakaoSecretRotationPerformed)}
         </p>
         <p>
           stage3DKakaoSecretRawExposed=
@@ -122,8 +151,8 @@ export default function RewardPreflightPage() {
           {String(s.stage3DOAuthCodeTokenExposed)}
         </p>
         <p>
-          stage3DKakaoSecretRotationPreflightComplete=
-          {String(s.stage3DKakaoSecretRotationPreflightComplete)}
+          stage3DKakaoSecretSafetyAttestationComplete=
+          {String(s.stage3DKakaoSecretSafetyAttestationComplete)}
         </p>
         <p>
           stage3DCampaignBudgetSafetyCheckReady=

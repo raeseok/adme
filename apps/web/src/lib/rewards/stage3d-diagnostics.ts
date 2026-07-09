@@ -3,8 +3,8 @@ import "server-only";
 import { getDeployCommit } from "@/lib/deploy-info";
 import { extractSupabaseProjectRef } from "@/lib/stage3/readiness";
 import {
-  getKakaoSecretRotationAttestation,
-  isKakaoSecretRotationPreflightComplete,
+  getKakaoOauthSecretSafetyAttestation,
+  isKakaoOauthSecretSafetyAttestationComplete,
 } from "./kakao-secret-attestation";
 import {
   getRewardReleaseFlags,
@@ -37,14 +37,22 @@ export type Stage3DDiagnosticsState = {
   stage3DControlledProductionAllowlistDesigned: true;
   stage3DControlledProductionAllowlistActive: boolean;
   stage3DControlledProductionAllowlistMutationEnabled: false;
-  stage3DKakaoSecretRotationRequired: boolean;
-  stage3DKakaoSecretRotationConfirmed: boolean;
-  stage3DKakaoSecretDevReapplied: boolean;
-  stage3DKakaoSecretProdReapplied: boolean;
+  stage3DKakaoSecretSafetyAttestationRequired: boolean;
+  stage3DKakaoSecretSafetyAttestationConfirmed: boolean;
+  stage3DKakaoSecretAttestedAt: string;
+  stage3DKakaoSecretExposureSuspected: boolean;
+  stage3DKakaoSecretRawRecorded: boolean;
+  stage3DKakaoSecretPartialHashDigestRecorded: boolean;
+  stage3DKakaoSecretDevProviderConfigured: boolean;
+  stage3DKakaoSecretProdProviderConfigured: boolean;
+  stage3DKakaoOauthDevAuthorizeReverified: boolean;
+  stage3DKakaoOauthProdAuthorizeReverified: boolean;
   stage3DKakaoOauthProdE2EReverified: boolean;
+  stage3DKakaoSecretRotationRequired: boolean;
+  stage3DKakaoSecretRotationPerformed: boolean;
   stage3DKakaoSecretRawExposed: false;
   stage3DOAuthCodeTokenExposed: false;
-  stage3DKakaoSecretRotationPreflightComplete: boolean;
+  stage3DKakaoSecretSafetyAttestationComplete: boolean;
   stage3DCampaignBudgetSafetyCheckReady: true;
   stage3DCampaignBudgetReadOnly: true;
   stage3DPointLedgerAppendOnly: true;
@@ -88,7 +96,7 @@ export type Stage3DDiagnosticsState = {
 
 export function getStage3DDiagnosticsState(): Stage3DDiagnosticsState {
   const flags = getRewardReleaseFlags();
-  const kakao = getKakaoSecretRotationAttestation();
+  const kakao = getKakaoOauthSecretSafetyAttestation();
   const allowlistActive = isAllowlistActive(flags);
 
   return {
@@ -110,15 +118,28 @@ export function getStage3DDiagnosticsState(): Stage3DDiagnosticsState {
     stage3DControlledProductionAllowlistDesigned: true,
     stage3DControlledProductionAllowlistActive: allowlistActive,
     stage3DControlledProductionAllowlistMutationEnabled: false,
-    stage3DKakaoSecretRotationRequired: kakao.rotationRequired,
-    stage3DKakaoSecretRotationConfirmed: kakao.rotationConfirmed,
-    stage3DKakaoSecretDevReapplied: kakao.devReapplied,
-    stage3DKakaoSecretProdReapplied: kakao.prodReapplied,
+    stage3DKakaoSecretSafetyAttestationRequired:
+      kakao.safetyAttestationRequired,
+    stage3DKakaoSecretSafetyAttestationConfirmed:
+      kakao.safetyAttestationConfirmed,
+    stage3DKakaoSecretAttestedAt: kakao.attestedAt ?? "unset",
+    stage3DKakaoSecretExposureSuspected: kakao.exposureSuspected,
+    stage3DKakaoSecretRawRecorded: kakao.rawRecorded,
+    stage3DKakaoSecretPartialHashDigestRecorded:
+      kakao.partialHashDigestRecorded,
+    stage3DKakaoSecretDevProviderConfigured: kakao.devProviderConfigured,
+    stage3DKakaoSecretProdProviderConfigured: kakao.prodProviderConfigured,
+    stage3DKakaoOauthDevAuthorizeReverified:
+      kakao.oauthDevAuthorizeReverified,
+    stage3DKakaoOauthProdAuthorizeReverified:
+      kakao.oauthProdAuthorizeReverified,
     stage3DKakaoOauthProdE2EReverified: kakao.oauthProdE2EReverified,
+    stage3DKakaoSecretRotationRequired: kakao.rotationRequired,
+    stage3DKakaoSecretRotationPerformed: kakao.rotationPerformed,
     stage3DKakaoSecretRawExposed: false,
     stage3DOAuthCodeTokenExposed: false,
-    stage3DKakaoSecretRotationPreflightComplete:
-      isKakaoSecretRotationPreflightComplete(kakao),
+    stage3DKakaoSecretSafetyAttestationComplete:
+      isKakaoOauthSecretSafetyAttestationComplete(kakao),
     stage3DCampaignBudgetSafetyCheckReady: true,
     stage3DCampaignBudgetReadOnly: true,
     stage3DPointLedgerAppendOnly: true,

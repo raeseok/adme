@@ -171,24 +171,56 @@ export default async function DiagnosticsPage() {
           {String(stage3D.stage3DControlledProductionAllowlistActive)}
         </p>
         <p>
-          stage3DKakaoSecretRotationRequired=
-          {String(stage3D.stage3DKakaoSecretRotationRequired)}
+          stage3DKakaoSecretSafetyAttestationRequired=
+          {String(stage3D.stage3DKakaoSecretSafetyAttestationRequired)}
         </p>
         <p>
-          stage3DKakaoSecretRotationConfirmed=
-          {String(stage3D.stage3DKakaoSecretRotationConfirmed)}
+          stage3DKakaoSecretSafetyAttestationConfirmed=
+          {String(stage3D.stage3DKakaoSecretSafetyAttestationConfirmed)}
         </p>
         <p>
-          stage3DKakaoSecretDevReapplied=
-          {String(stage3D.stage3DKakaoSecretDevReapplied)}
+          stage3DKakaoSecretAttestedAt=
+          {stage3D.stage3DKakaoSecretAttestedAt}
         </p>
         <p>
-          stage3DKakaoSecretProdReapplied=
-          {String(stage3D.stage3DKakaoSecretProdReapplied)}
+          stage3DKakaoSecretExposureSuspected=
+          {String(stage3D.stage3DKakaoSecretExposureSuspected)}
+        </p>
+        <p>
+          stage3DKakaoSecretRawRecorded=
+          {String(stage3D.stage3DKakaoSecretRawRecorded)}
+        </p>
+        <p>
+          stage3DKakaoSecretPartialHashDigestRecorded=
+          {String(stage3D.stage3DKakaoSecretPartialHashDigestRecorded)}
+        </p>
+        <p>
+          stage3DKakaoSecretDevProviderConfigured=
+          {String(stage3D.stage3DKakaoSecretDevProviderConfigured)}
+        </p>
+        <p>
+          stage3DKakaoSecretProdProviderConfigured=
+          {String(stage3D.stage3DKakaoSecretProdProviderConfigured)}
+        </p>
+        <p>
+          stage3DKakaoOauthDevAuthorizeReverified=
+          {String(stage3D.stage3DKakaoOauthDevAuthorizeReverified)}
+        </p>
+        <p>
+          stage3DKakaoOauthProdAuthorizeReverified=
+          {String(stage3D.stage3DKakaoOauthProdAuthorizeReverified)}
         </p>
         <p>
           stage3DKakaoOauthProdE2EReverified=
           {String(stage3D.stage3DKakaoOauthProdE2EReverified)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationRequired=
+          {String(stage3D.stage3DKakaoSecretRotationRequired)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationPerformed=
+          {String(stage3D.stage3DKakaoSecretRotationPerformed)}
         </p>
         <p>
           stage3DKakaoSecretRawExposed=

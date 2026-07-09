@@ -274,3 +274,16 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-D docs/scripts/diagnostics, product-policy, roadmap; Production reward openReady=false 유지 |
 | **Implementation Stage** | Stage 3-D |
 | **Related files** | docs/adme/stage-3-d-production-reward-open-preflight.md, docs/adme/stage-3-d-kakao-secret-rotation-preflight.md, apps/web/src/lib/rewards/release-flags.ts |
+
+## ADME-DECISION-20260709-006
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Kakao Client Secret 재발급은 필수 조건이 아니며, 노출 의심이 없으면 safety attestation으로 Stage 3-D-R 보류 해소 |
+| **Status** | accepted |
+| **Decision** | Kakao Client Secret 재발급(rotation)은 노출 증거·합리적 의심이 있을 때만 수행한다. 노출 의심이 없으면 `rotationRequired=false`, `rotationPerformed=false`가 정상이다. Stage 3-D-R blocker는 Kakao OAuth Secret Safety Attestation으로 해소한다: secret 원문/일부/hash/digest 미기록, dev/prod Supabase Kakao provider 정상 설정 확인, authorize·prod OAuth E2E 재확인. Production reward open은 계속 금지하며 Stage 3-E controlled open approval로 분리한다. |
+| **Reason** | 과거 rotation-first gate는 과도했다. 단순 로그인 설정 문제와 현재 E2E 성공이 확인되면 불필요한 재발급 없이 보안 상태를 attestation으로 기록하는 것이 운영 리스크를 줄인다. |
+| **Impact** | kakao-secret-attestation.ts, admin markers, Stage 3-D-R docs/scripts, Vercel attestation env (boolean/date only); openReady=false 유지 |
+| **Implementation Stage** | Stage 3-D-R |
+| **Related files** | docs/adme/stage-3-d-kakao-oauth-secret-safety-attestation.md, docs/adme/stage-3-d-kakao-secret-rotation-preflight.md, apps/web/src/lib/rewards/kakao-secret-attestation.ts |

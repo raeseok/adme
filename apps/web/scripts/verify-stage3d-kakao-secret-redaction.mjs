@@ -32,7 +32,7 @@ function verifyAttestationSource() {
   }
   for (const bad of [
     "createHash",
-    "digest",
+    "digest(",
     "client_secret",
     "CLIENT_SECRET",
     "access_token",
@@ -53,6 +53,16 @@ function verifyAttestationSource() {
     diagnostics,
     "stage3DOAuthCodeTokenExposed: false",
     "diagnostics oauth type",
+  );
+  assertContains(
+    diagnostics,
+    "stage3DKakaoSecretRawRecorded",
+    "diagnostics raw recorded field",
+  );
+  assertContains(
+    diagnostics,
+    "stage3DKakaoSecretPartialHashDigestRecorded",
+    "diagnostics partial/hash/digest field",
   );
 
   for (const pattern of SECRET_EXPOSURE_PATTERNS) {
@@ -81,6 +91,12 @@ async function verifyProductionUi() {
       if (route.startsWith("/admin")) {
         assertContains(body, "stage3DKakaoSecretRawExposed=false", route);
         assertContains(body, "stage3DOAuthCodeTokenExposed=false", route);
+        assertContains(body, "stage3DKakaoSecretRawRecorded=false", route);
+        assertContains(
+          body,
+          "stage3DKakaoSecretPartialHashDigestRecorded=false",
+          route,
+        );
       }
     }
 
@@ -105,6 +121,8 @@ async function main() {
   await verifyProductionUi();
   console.log("RESULT: kakaoSecretRawExposed=false");
   console.log("RESULT: oauthCodeTokenExposed=false");
+  console.log("RESULT: rawRecorded=false");
+  console.log("RESULT: partialHashDigestRecorded=false");
   console.log("PASS: verify:stage3d-kakao-secret-redaction");
 }
 

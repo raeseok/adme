@@ -84,7 +84,8 @@ function verifyClientBundleNoRawEnv() {
   const forbidden = [
     "ADME_REWARD_KILL_SWITCH=",
     "ADME_PRODUCTION_REWARD_OPEN=",
-    "ADME_KAKAO_SECRET_ROTATION_CONFIRMED=",
+    "ADME_KAKAO_SECRET_SAFETY_ATTESTATION_CONFIRMED=",
+    "ADME_KAKAO_SECRET_ROTATION_REQUIRED=",
     "SUPABASE_SERVICE_ROLE_KEY",
   ];
   const staticFiles = walkJs(join(nextDir, "static"));

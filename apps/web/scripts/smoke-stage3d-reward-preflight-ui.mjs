@@ -23,6 +23,10 @@ async function checkViewport(page, width, height, label) {
     "stage3DProductionRewardOpenReady=false",
     "stage3DProductionRewardMutation=false",
     "stage3DMutationBlockedByFlags=true",
+    "stage3DKakaoSecretSafetyAttestationConfirmed=true",
+    "stage3DKakaoSecretExposureSuspected=false",
+    "stage3DKakaoSecretRotationRequired=false",
+    "stage3DKakaoSecretRotationPerformed=false",
     "stage3DKakaoSecretRawExposed=false",
   ]) {
     assertContains(body, marker, `${label} reward-preflight`);

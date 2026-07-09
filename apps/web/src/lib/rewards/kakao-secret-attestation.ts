@@ -1,8 +1,11 @@
 import "server-only";
 
 /**
- * Stage 3-D — Kakao Client Secret rotation attestation (booleans/dates only).
+ * Stage 3-D-R — Kakao OAuth Secret Safety Attestation (booleans/dates only).
  * NEVER reads, validates, hashes, or displays Client Secret material.
+ *
+ * Rotation is NOT required unless exposure is suspected.
+ * Safety attestation resolves the Stage 3-D-R blocker without reissuing secrets.
  */
 
 function parseBool(raw: string | undefined, defaultValue: boolean): boolean {
@@ -20,40 +23,78 @@ function parseDateOnly(raw: string | undefined): string | null {
   return trimmed;
 }
 
-export type KakaoSecretRotationAttestation = {
-  rotationRequired: boolean;
-  rotatedAt: string | null;
-  rotationConfirmed: boolean;
-  devReapplied: boolean;
-  prodReapplied: boolean;
+export type KakaoOauthSecretSafetyAttestation = {
+  safetyAttestationRequired: boolean;
+  safetyAttestationConfirmed: boolean;
+  attestedAt: string | null;
+  exposureSuspected: boolean;
+  rawRecorded: boolean;
+  partialHashDigestRecorded: boolean;
+  devProviderConfigured: boolean;
+  prodProviderConfigured: boolean;
+  oauthDevAuthorizeReverified: boolean;
+  oauthProdAuthorizeReverified: boolean;
   oauthProdE2EReverified: boolean;
+  rotationRequired: boolean;
+  rotationPerformed: boolean;
   /** Always false — attestation never carries secret material. */
   rawSecretExposed: false;
   /** Always false — attestation never carries OAuth code/token. */
   oauthCodeTokenExposed: false;
 };
 
-export function getKakaoSecretRotationAttestation(): KakaoSecretRotationAttestation {
+/** @deprecated Use KakaoOauthSecretSafetyAttestation */
+export type KakaoSecretRotationAttestation = KakaoOauthSecretSafetyAttestation;
+
+export function getKakaoOauthSecretSafetyAttestation(): KakaoOauthSecretSafetyAttestation {
   return {
-    rotationRequired: parseBool(
-      process.env.ADME_KAKAO_SECRET_ROTATION_REQUIRED,
+    safetyAttestationRequired: parseBool(
+      process.env.ADME_KAKAO_SECRET_SAFETY_ATTESTATION_REQUIRED,
       true,
     ),
-    rotatedAt: parseDateOnly(process.env.ADME_KAKAO_SECRET_ROTATED_AT),
-    rotationConfirmed: parseBool(
-      process.env.ADME_KAKAO_SECRET_ROTATION_CONFIRMED,
+    safetyAttestationConfirmed: parseBool(
+      process.env.ADME_KAKAO_SECRET_SAFETY_ATTESTATION_CONFIRMED,
       false,
     ),
-    devReapplied: parseBool(
-      process.env.ADME_KAKAO_SECRET_DEV_REAPPLIED,
+    attestedAt: parseDateOnly(process.env.ADME_KAKAO_SECRET_ATTESTED_AT),
+    exposureSuspected: parseBool(
+      process.env.ADME_KAKAO_SECRET_EXPOSURE_SUSPECTED,
       false,
     ),
-    prodReapplied: parseBool(
-      process.env.ADME_KAKAO_SECRET_PROD_REAPPLIED,
+    rawRecorded: parseBool(
+      process.env.ADME_KAKAO_SECRET_RAW_RECORDED,
+      false,
+    ),
+    partialHashDigestRecorded: parseBool(
+      process.env.ADME_KAKAO_SECRET_PARTIAL_HASH_DIGEST_RECORDED,
+      false,
+    ),
+    devProviderConfigured: parseBool(
+      process.env.ADME_KAKAO_SECRET_DEV_PROVIDER_CONFIGURED,
+      false,
+    ),
+    prodProviderConfigured: parseBool(
+      process.env.ADME_KAKAO_SECRET_PROD_PROVIDER_CONFIGURED,
+      false,
+    ),
+    oauthDevAuthorizeReverified: parseBool(
+      process.env.ADME_KAKAO_OAUTH_DEV_AUTHORIZE_REVERIFIED,
+      false,
+    ),
+    oauthProdAuthorizeReverified: parseBool(
+      process.env.ADME_KAKAO_OAUTH_PROD_AUTHORIZE_REVERIFIED,
       false,
     ),
     oauthProdE2EReverified: parseBool(
       process.env.ADME_KAKAO_OAUTH_PROD_E2E_REVERIFIED,
+      false,
+    ),
+    rotationRequired: parseBool(
+      process.env.ADME_KAKAO_SECRET_ROTATION_REQUIRED,
+      false,
+    ),
+    rotationPerformed: parseBool(
+      process.env.ADME_KAKAO_SECRET_ROTATION_PERFORMED,
       false,
     ),
     rawSecretExposed: false,
@@ -61,14 +102,34 @@ export function getKakaoSecretRotationAttestation(): KakaoSecretRotationAttestat
   };
 }
 
-export function isKakaoSecretRotationPreflightComplete(
-  attestation: KakaoSecretRotationAttestation = getKakaoSecretRotationAttestation(),
+/** @deprecated Use getKakaoOauthSecretSafetyAttestation */
+export function getKakaoSecretRotationAttestation(): KakaoOauthSecretSafetyAttestation {
+  return getKakaoOauthSecretSafetyAttestation();
+}
+
+export function isKakaoOauthSecretSafetyAttestationComplete(
+  attestation: KakaoOauthSecretSafetyAttestation = getKakaoOauthSecretSafetyAttestation(),
 ): boolean {
-  if (!attestation.rotationRequired) return true;
+  if (attestation.exposureSuspected) return false;
+  if (attestation.rotationRequired) return false;
+  if (attestation.rawRecorded || attestation.partialHashDigestRecorded) {
+    return false;
+  }
+  if (!attestation.safetyAttestationRequired) return true;
   return (
-    attestation.rotationConfirmed &&
-    attestation.devReapplied &&
-    attestation.prodReapplied &&
-    attestation.oauthProdE2EReverified
+    attestation.safetyAttestationConfirmed &&
+    attestation.devProviderConfigured &&
+    attestation.prodProviderConfigured &&
+    attestation.oauthDevAuthorizeReverified &&
+    attestation.oauthProdAuthorizeReverified &&
+    attestation.oauthProdE2EReverified &&
+    !attestation.rotationPerformed
   );
+}
+
+/** @deprecated Use isKakaoOauthSecretSafetyAttestationComplete */
+export function isKakaoSecretRotationPreflightComplete(
+  attestation: KakaoOauthSecretSafetyAttestation = getKakaoOauthSecretSafetyAttestation(),
+): boolean {
+  return isKakaoOauthSecretSafetyAttestationComplete(attestation);
 }
