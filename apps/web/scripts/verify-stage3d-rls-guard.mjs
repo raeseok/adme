@@ -44,11 +44,15 @@ function verifyMigrations() {
   if (!rls.includes("REVOKE ALL ON TABLE public.quizzes FROM anon, authenticated")) {
     throw new Error("quizzes raw revoke missing");
   }
-  if (!rls.includes("quizzes_public")) {
-    throw new Error("quizzes_public view missing");
+  // quizzes_public SELECT list must omit quiz_answer (comment may mention it)
+  const viewMatch = rls.match(
+    /CREATE OR REPLACE VIEW public\.quizzes_public[\s\S]*?FROM public\.quizzes;/i,
+  );
+  if (!viewMatch) {
+    throw new Error("quizzes_public view definition missing");
   }
-  if (rls.includes("quiz_answer") && /quizzes_public[\s\S]{0,400}quiz_answer/.test(rls)) {
-    throw new Error("quizzes_public must not include quiz_answer");
+  if (/\bquiz_answer\b/i.test(viewMatch[0])) {
+    throw new Error("quizzes_public SELECT must not include quiz_answer");
   }
   console.log("PASS: migration RLS / quizzes_public guards");
 
