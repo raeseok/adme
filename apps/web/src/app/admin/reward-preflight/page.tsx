@@ -1,5 +1,6 @@
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
+import { getStage3FCashOutManualApprovalState } from "@/lib/rewards/stage3f-cash-out-manual-approval";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import Link from "next/link";
@@ -10,6 +11,7 @@ export default function RewardPreflightPage() {
   const s = getStage3DDiagnosticsState();
   const e = getStage3EDiagnosticsState();
   const approval = getStage3EControlledOpenApprovalState();
+  const cashOut = getStage3FCashOutManualApprovalState();
 
   return (
     <ShellCard title="AdMe Stage 3-D reward preflight">
@@ -33,6 +35,20 @@ export default function RewardPreflightPage() {
           Stage 3-E Controlled Open Approval
         </p>
         {Object.entries(approval).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+
+      <section
+        aria-label="Stage 3-F cash-out manual approval design markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-F Cash-out Manual Approval Design
+        </p>
+        {Object.entries(cashOut).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

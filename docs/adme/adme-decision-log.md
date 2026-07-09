@@ -317,3 +317,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | approval 문서, 운영 runbook, admin marker, verify scripts, product-policy, roadmap; Production reward open=false 및 kill switch=true 유지 |
 | **Implementation Stage** | Stage 3-E-Controlled-Open-Approval |
 | **Related files** | docs/adme/stage-3-e-controlled-open-approval.md, docs/adme/stage-3-e-controlled-open-runbook.md, apps/web/src/lib/rewards/stage3e-controlled-open-approval.ts |
+
+---
+
+## ADME-DECISION-20260709-009
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-E Approval 이후 reward execution 전 cash-out manual approval design 선행 |
+| **Status** | accepted |
+| **Decision** | Stage 3-E Approval 완료 후 바로 controlled open execution에 진입하지 않는다. 실제 reward mutation 전 cash-out manual approval design을 선행한다. 사용자·사업 용어 cash-out은 기존 DB의 `cash_redemption_requests` 및 ledger type `cash_redemption`/`admin_adjustment`에 매핑한다. 신규 `cash_out` 테이블 또는 임의 `cash_out` ledger type은 만들지 않는다. cash-out은 수동 승인·수동 이체로 설계하고, 실패 복구는 point_ledger DELETE rollback이 아니라 reason 필수 adjust/reversal ledger append 방식으로 한다. 계좌정보·실명정보·이메일 전체값은 marker·문서·로그에 기록하지 않는다. Stage 3-E Execution은 기술사님의 별도 명시 승인 전까지 금지한다. |
+| **Reason** | Production reward actual mutation이 열리기 전에 현금 전환 신청·승인·수동 이체·실패 복구·감사 추적·개인정보 노출 리스크를 먼저 고정하기 위함 |
+| **Impact** | Stage 3-F design 문서, product policy, roadmap, admin marker, public marker guard, verify script; Production reward open=false 및 cash-out actual processing=false 유지 |
+| **Implementation Stage** | Stage 3-F-Cash-out-Manual-Approval-Design |
+| **Related files** | docs/adme/stage-3-f-cash-out-manual-approval-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/rewards/stage3f-cash-out-manual-approval.ts |

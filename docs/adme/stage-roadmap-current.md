@@ -32,6 +32,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-C-K / K2 / K3** | Production Kakao OAuth 보류 해소 → 진단 보강 → E2E 성공 + diagnostic redaction |
 | **Stage 3-D** | Production reward open **preflight** (mutation=false; kill switch/release flag/allowlist/audit 설계) |
 | **Stage 3-E-Preflight-R** | runtime fraud engine + controlled open approval preflight 완료 인정 (actual open=false; mutation=false) |
+| **Stage 3-E-Controlled-Open-Approval** | controlled open 실행 전 approval package 완료 인정 (actual open=false; mutation=false) |
+| **Stage 3-E-Controlled-Open-Approval-R** | approval marker/guard 보강 완료 인정 (reward open flag=false; kill switch=true; allowlist active=false) |
 
 ---
 
@@ -52,8 +54,11 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-E-Controlled-Open-Approval** | controlled open 실행 전 승인 조건·allowlist 계약·예산 상한·중단 절차 확정 (actual open 아님) | 없음 |
-| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보 | 별도 명시 승인 후에만 |
+| **Stage 3-F-Cash-out-Manual-Approval-Design** | reward actual open 전 cash-out(=`cash_redemption_requests` + `cash_redemption`/`admin_adjustment`) 수동 승인·수동 이체·실패 복구·감사 추적 설계 및 marker/verify 고정 | 없음 |
+| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보 | 별도 명시 승인 전 보류 |
+| Partner settlement manual approval design | partner settlement 수동 승인·정산 운영 설계 후보 | Stage 3-F 이후 후보 |
+| Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation | 별도 승인 필요 |
+| Auto bank transfer API | 자동 계좌이체 연동 | MVP 제외 또는 파일럿 검증 이후 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 | Auth parity | prod Google provider 정리 | 없음 |
 
@@ -70,8 +75,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 1. **Stage 3-D / 3-D-R** — preflight + Kakao OAuth Secret Safety Attestation **resolved** (reward open=false 유지)
 2. **Stage 3-E-Preflight-R** — runtime fraud engine, allowlist, kill switch, idempotency, budget atomicity, rollback 기준 검증 완료 인정
 3. **Stage 3-E-Controlled-Open-Approval** — actual open이 아니라 승인 조건 확정 및 검증 패키지 작성
-4. **Stage 3-E-Controlled-Open-Execution** — 별도 명시 승인 문장 없이는 진입 금지
-5. 이후 **Stage 1-H** 또는 advertiser campaign authoring / cash_out 별도 Stage
+4. **Stage 3-F-Cash-out-Manual-Approval-Design** — reward actual open 전 cash-out 운영 리스크를 설계·marker·verify로 고정
+5. **Stage 3-E-Controlled-Open-Execution** — 별도 명시 승인 문장 없이는 진입 금지
+6. 이후 **Partner settlement manual approval design** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -98,8 +104,12 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-D** | ✅ 완료 (preflight; mutation=false) |
 | **Stage 3-D-R** | ✅ Kakao OAuth Secret Safety Attestation resolved (rotationRequired=false; reward open=false) |
 | **Stage 3-E-Preflight-R** | ✅ 완료 인정 (actual open=false; mutation=false) |
-| **Stage 3-E-Controlled-Open-Approval** | 진행/완료 후보 (approval only; actual open=false; mutation=false) |
-| **Stage 3-E-Controlled-Open-Execution** | 별도 승인 필요 |
+| **Stage 3-E-Controlled-Open-Approval** | ✅ 완료 인정 (approval only; actual open=false; mutation=false) |
+| **Stage 3-E-Controlled-Open-Approval-R** | ✅ 완료 인정 (marker/guard 보강; reward open=false) |
+| **Stage 3-F-Cash-out-Manual-Approval-Design** | 진행/완료 후보 (design only; cash-out actual processing=false) |
+| **Stage 3-E-Controlled-Open-Execution** | 명시 승인 전 보류 |
+| **Cash-out actual processing** | 별도 승인 필요 |
+| **Auto bank transfer API** | MVP 제외 또는 파일럿 검증 이후 |
 
 ---
 
@@ -118,6 +128,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-D / 3-D-R: `verify:stage3d-kakao-oauth-secret-safety-attestation`, `verify:stage3d-production-reward-blocked`, `verify:stage3d-release-flags`, `verify:stage3d-kakao-secret-redaction`, `verify:stage3d-quiz-answer-non-exposure`, `verify:stage3d-point-ledger-append-only`, `verify:stage3d-balance-cache-consistency-readonly`, `verify:stage3d-production-budget-safety-readonly`, `verify:stage3d-rls-guard`, `verify:stage3d-public-marker-guard`, `smoke:stage3d-reward-preflight-ui`
 - Stage 3-E-Preflight-R: `verify:stage3e-preflight`, `verify:stage3e-kill-switch`, `verify:stage3e-fraud-engine`, `verify:stage3e-idempotency`, `verify:stage3e-budget-atomicity`, `verify:stage3e-production-blocked`, `verify:stage3e-public-marker-guard`
 - Stage 3-E-Controlled-Open-Approval: `verify:stage3e-controlled-open-approval`, `verify:stage3e-controlled-open-production-blocked`, `verify:stage3e-controlled-open-public-marker-guard`, `verify:stage3e-controlled-open-no-mutation`, `verify:stage3e-controlled-open-redaction`, `verify:stage3e-controlled-open-limits`
+- Stage 3-F-Cash-out-Manual-Approval-Design: `verify:stage3f-cash-out-design`
 
 ---
 
@@ -137,6 +148,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-e-runtime-fraud-engine-controlled-open-preflight.md](./stage-3-e-runtime-fraud-engine-controlled-open-preflight.md)
 - [stage-3-e-controlled-open-approval.md](./stage-3-e-controlled-open-approval.md)
 - [stage-3-e-controlled-open-runbook.md](./stage-3-e-controlled-open-runbook.md)
+- [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

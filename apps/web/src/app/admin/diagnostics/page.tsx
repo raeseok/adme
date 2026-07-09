@@ -15,6 +15,7 @@ import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
 import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
 import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
+import { getStage3FCashOutManualApprovalState } from "@/lib/rewards/stage3f-cash-out-manual-approval";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -101,6 +102,7 @@ export default async function DiagnosticsPage() {
   const stage3D = getStage3DDiagnosticsState();
   const stage3E = getStage3EDiagnosticsState();
   const stage3EApproval = getStage3EControlledOpenApprovalState();
+  const stage3FCashOut = getStage3FCashOutManualApprovalState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -123,6 +125,19 @@ export default async function DiagnosticsPage() {
           Stage 3-E Controlled Open Approval
         </p>
         {Object.entries(stage3EApproval).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 3-F cash-out manual approval design markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-F Cash-out Manual Approval Design
+        </p>
+        {Object.entries(stage3FCashOut).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

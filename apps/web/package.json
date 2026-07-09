@@ -93,6 +93,7 @@
     "verify:stage3e-controlled-open-no-mutation": "node scripts/verify-stage3e-controlled-open-no-mutation.mjs",
     "verify:stage3e-controlled-open-redaction": "node scripts/verify-stage3e-controlled-open-redaction.mjs",
     "verify:stage3e-controlled-open-limits": "node scripts/verify-stage3e-controlled-open-limits.mjs",
+    "verify:stage3f-cash-out-design": "node scripts/verify-stage3f-cash-out-manual-approval-design.mjs",
     "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",
     "verify:oauth-redaction-guard": "node scripts/verify-oauth-redaction-guard.mjs",
     "verify:doc-0-current-docs": "node scripts/verify-doc-0-current-docs.mjs",
