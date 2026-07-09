@@ -371,15 +371,19 @@ function verifySourceContract() {
     assertContains(ssot, key, `Stage 3-M SSOT marker key ${key}`);
   }
 
-  for (const status of [
-    ...IDENTITY_STATUSES,
-    ...BANK_STATUSES,
-    ...TAX_STATUSES,
-    ...TERMS_STATUSES,
-    ...MARKETING_STATUSES,
-    ...GATE_STATUSES,
+  for (const taxonomyImport of [
+    "IDENTITY_VERIFICATION_STATUSES",
+    "BANK_ACCOUNT_VERIFICATION_STATUSES",
+    "TAX_PROFILE_STATUSES",
+    "TERMS_ACCEPTANCE_STATUSES",
+    "MARKETING_CONSENT_STATUSES",
+    "CASH_OUT_GATE_DESIGN_STATUSES",
   ]) {
-    assertContains(ssot, status, `Stage 3-M Stage 3-L taxonomy ${status}`);
+    assertContains(
+      ssot,
+      taxonomyImport,
+      `Stage 3-M imports Stage 3-L taxonomy ${taxonomyImport}`,
+    );
   }
 
   for (const required of REQUIRED_DOC_STRINGS) {
