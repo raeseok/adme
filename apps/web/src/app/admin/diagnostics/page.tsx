@@ -170,6 +170,10 @@ export default async function DiagnosticsPage() {
         <p className="font-sans text-sm">
           Actual reward open remains blocked
         </p>
+        <p>stage3KProtectedFundStatusTaxonomyAligned=true</p>
+        <p>
+          stage3KProtectedFundStatusSet=unknown_blocked,deficit_blocked,minimum_covered_warning,covered_below_target_buffer,target_buffer_ok,no_liability_observed
+        </p>
         {Object.entries(stage3KProtectedFundReconciliation).map(
           ([key, value]) => (
             <p key={key}>

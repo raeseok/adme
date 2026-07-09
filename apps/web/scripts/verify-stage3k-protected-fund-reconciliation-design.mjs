@@ -34,23 +34,37 @@ const REQUIRED_FILES = [
 ];
 
 const REQUIRED_MARKERS = [
+  "stage3KProtectedFundPreflight=true",
   "stage3KProtectedFundReconciliationDesign=true",
   "stage3KProtectedFundReconciliationDesigned=true",
+  "stage3KProtectedFundStatusTaxonomyAligned=true",
+  "stage3KProtectedFundStatusUnknown=unknown_blocked",
+  "stage3KProtectedFundStatusDeficit=deficit_blocked",
+  "stage3KProtectedFundStatusMinimumCovered=minimum_covered_warning",
+  "stage3KProtectedFundStatusBelowTargetBuffer=covered_below_target_buffer",
+  "stage3KProtectedFundStatusTargetBufferOk=target_buffer_ok",
+  "stage3KProtectedFundStatusNoLiability=no_liability_observed",
   "stage3KProtectedFundRuntimeReconciliationImplemented=false",
+  "stage3KRuntimeReconciliationImplemented=false",
   "stage3KProtectedFundDbMigrationImplemented=false",
+  "stage3KSupabaseDbPushExecuted=false",
   "stage3KProtectedFundBankApiIntegrated=false",
   "stage3KActualProtectedFundBalanceAvailable=false",
   "stage3KProtectedFundCalculationSourceFinalized=false",
+  "stage3KCalculationSourceFinalized=false",
   "stage3KReadOnlyDesignOnly=true",
   "stage3KCoverageUnknownBlocksCashOut=true",
   "stage3KCoverageDeficitBlocksCashOut=true",
   "stage3KCoverageUnknownBlocksRewardOpen=true",
   "stage3KCoverageDeficitBlocksRewardOpen=true",
   "stage3KActualRewardOpenAllowed=false",
+  "stage3KRewardOpenAllowed=false",
   "stage3KControlledOpenExecutionAllowed=false",
   "stage3KCashOutActualImplementationAllowed=false",
+  "stage3KCashOutActualProcessingAllowed=false",
   "stage3KPartnerSettlementActualImplementationAllowed=false",
   "stage3KDbMigrationAllowed=false",
+  "stage3KProductionMutation=false",
   "stage3KProductionRewardMutation=false",
   "stage3KProductionPointLedgerMutation=false",
   "stage3KProductionCashRedemptionRequestsMutation=false",
@@ -63,6 +77,10 @@ const FULL_ADMIN_MARKERS = [
   "stage3KCoverageMinimumRatio=1",
   "stage3KCoverageWarningRatio=1.05",
   "stage3KCoverageTargetBufferRatio=1.1",
+  "stage3KMinimumCoverageRatioBps=10000",
+  "stage3KWarningCoverageRatioBps=10500",
+  "stage3KTargetBufferCoverageRatioBps=11000",
+  "stage3KProtectedFundStatusSet=unknown_blocked,deficit_blocked,minimum_covered_warning,covered_below_target_buffer,target_buffer_ok,no_liability_observed",
   "stage3KDailyReconciliationRequired=true",
   "stage3KManualReconciliationRequiredBeforeCashOut=true",
   "stage3KManualReconciliationRequiredBeforeRewardOpen=true",
@@ -92,6 +110,17 @@ const PROTECTED_FUND_PREFLIGHT_VISIBLE_STRINGS = [
   "Actual reward open remains blocked",
   "No production mutation",
   "No DB migration in Stage 3-K",
+  "stage3KProtectedFundStatusTaxonomyAligned=true",
+  "stage3KProtectedFundStatusUnknown=unknown_blocked",
+  "stage3KProtectedFundStatusDeficit=deficit_blocked",
+  "stage3KProtectedFundStatusMinimumCovered=minimum_covered_warning",
+  "stage3KProtectedFundStatusBelowTargetBuffer=covered_below_target_buffer",
+  "stage3KProtectedFundStatusTargetBufferOk=target_buffer_ok",
+  "stage3KProtectedFundStatusNoLiability=no_liability_observed",
+  "0/0 =&gt; no_liability_observed",
+  "10000/10000 =&gt; minimum_covered_warning",
+  "10000/10500 =&gt; covered_below_target_buffer",
+  "10000/11000 =&gt; target_buffer_ok",
 ];
 
 const SUMMARY_VISIBLE_STRINGS = [
@@ -99,6 +128,8 @@ const SUMMARY_VISIBLE_STRINGS = [
   "Runtime protected fund reconciliation is not implemented",
   "Actual protected fund balance is not available",
   "Actual reward open remains blocked",
+  "stage3KProtectedFundStatusTaxonomyAligned=true",
+  "stage3KProtectedFundStatusSet=unknown_blocked,deficit_blocked,minimum_covered_warning,covered_below_target_buffer,target_buffer_ok,no_liability_observed",
 ];
 
 const REQUIRED_DOCUMENT_STRINGS = [
@@ -109,6 +140,7 @@ const REQUIRED_DOCUMENT_STRINGS = [
   "runtime protected fund reconciliation is not implemented",
   "actual protected fund balance is not available",
   "calculation source is not finalized",
+  "Stage 3-K-R Protected Fund Status Taxonomy Alignment",
   "coverage unknown blocks cash-out",
   "coverage deficit blocks cash-out",
   "coverage unknown blocks reward open",
@@ -124,9 +156,11 @@ const REQUIRED_DESIGN_STRINGS = [
   "protected_fund_audit_logs",
   "protected_fund_adjustment_requests",
   "unknown_blocked",
-  "normal",
-  "warning",
   "deficit_blocked",
+  "minimum_covered_warning",
+  "covered_below_target_buffer",
+  "target_buffer_ok",
+  "no_liability_observed",
   "admin read-only",
   "SECURITY DEFINER",
   "source_digest",
@@ -140,14 +174,17 @@ const DANGEROUS_STRINGS = [
   "stage3KActualProtectedFundBalanceAvailable=true",
   "stage3KProtectedFundCalculationSourceFinalized=true",
   "stage3KActualRewardOpenAllowed=true",
+  "stage3KRewardOpenAllowed=true",
   "stage3KDbMigrationAllowed=true",
   "stage3KProductionRewardMutation=true",
-  "protected fund runtime reconciliation implemented",
-  "protected fund DB migration implemented",
-  "bank API integrated",
+  "stage3KProductionMutation=true",
+  "stage3KCashOutActualProcessingAllowed=true",
+  "protected fund runtime reconciliation implemented=true",
+  "protected fund DB migration implemented=true",
+  "bank API integrated=true",
   "actual protected fund balance verified",
-  "cash-out allowed",
-  "actual reward open allowed",
+  "cash-out actual processing allowed=true",
+  "actual reward open allowed=true",
   "production mutation enabled",
 ];
 
@@ -242,7 +279,11 @@ function verifySourceContract() {
 
   for (const marker of FULL_ADMIN_MARKERS) {
     const [key, value] = marker.split("=");
-    assertContains(ssot, `${key}: ${value}`, `Stage 3-K SSOT ${key}`);
+    const sourceValue =
+      value === "true" || value === "false" || /^\d+(\.\d+)?$/.test(value)
+        ? value
+        : `"${value}"`;
+    assertContains(ssot, `${key}: ${sourceValue}`, `Stage 3-K SSOT ${key}`);
   }
 
   assertContains(
@@ -252,16 +293,37 @@ function verifySourceContract() {
   );
   for (const required of [
     "unknown_blocked",
-    "normal",
-    "warning",
     "deficit_blocked",
-    "COVERAGE_MINIMUM_RATIO = 1",
-    "COVERAGE_WARNING_RATIO = 1.05",
-    "COVERAGE_TARGET_BUFFER_RATIO = 1.1",
+    "minimum_covered_warning",
+    "covered_below_target_buffer",
+    "target_buffer_ok",
+    "no_liability_observed",
+    "coverageRatioBps",
+    "COVERAGE_MINIMUM_RATIO_BPS = 10000",
+    "COVERAGE_WARNING_RATIO_BPS = 10500",
+    "COVERAGE_TARGET_BUFFER_RATIO_BPS = 11000",
+    "BigInt(protectedFundAvailableWon)",
     "coverageGateAllowsCashOut",
     "coverageGateAllowsRewardOpen",
   ]) {
     assertContains(evaluator, required, "Stage 3-K evaluator source contract");
+  }
+
+  for (const forbidden of [
+    '| "normal"',
+    '| "warning"',
+    'status: "normal"',
+    'status: "warning"',
+    'buildEvaluation(input, "normal"',
+    'buildEvaluation(input, "warning"',
+    'return { status: "normal"',
+    'return { status: "warning"',
+  ]) {
+    assertNotContains(
+      evaluator,
+      forbidden,
+      "Stage 3-K evaluator machine-readable status guard",
+    );
   }
 
   for (const required of REQUIRED_DOCUMENT_STRINGS) {
@@ -316,67 +378,88 @@ function verifySourceContract() {
 
 function evaluateProtectedFundReconciliationGate(input) {
   const {
-    consumerRedeemablePointLiabilityKrw,
-    protectedFundBalanceKrw,
+    liabilitySourceAvailable = true,
+    protectedFundBalanceAvailable = true,
+    calculationSourceFinalized = true,
+    consumerUnconvertedPointsLiabilityWon,
+    protectedFundAvailableWon,
   } = input;
+  const liability = consumerUnconvertedPointsLiabilityWon;
+  const available = protectedFundAvailableWon;
 
   if (
-    consumerRedeemablePointLiabilityKrw === null ||
-    protectedFundBalanceKrw === null
+    liabilitySourceAvailable === false ||
+    protectedFundBalanceAvailable === false ||
+    calculationSourceFinalized === false
   ) {
-    return { status: "unknown_blocked", coverageRatio: null };
+    return { status: "unknown_blocked", coverageRatioBps: null };
   }
 
   if (
-    consumerRedeemablePointLiabilityKrw < 0 ||
-    protectedFundBalanceKrw < 0
+    liability === null ||
+    available === null
   ) {
-    return { status: "unknown_blocked", coverageRatio: null };
+    return { status: "unknown_blocked", coverageRatioBps: null };
   }
 
-  if (consumerRedeemablePointLiabilityKrw === 0) {
-    return { status: "normal", coverageRatio: null };
+  if (
+    liability < 0 ||
+    available < 0
+  ) {
+    return { status: "unknown_blocked", coverageRatioBps: null };
   }
 
-  if (protectedFundBalanceKrw < consumerRedeemablePointLiabilityKrw) {
+  if (liability === 0) {
+    return { status: "no_liability_observed", coverageRatioBps: null };
+  }
+
+  const coverageRatioBps = Number((BigInt(available) * 10000n) / BigInt(liability));
+
+  if (available < liability) {
     return {
       status: "deficit_blocked",
-      coverageRatio:
-        protectedFundBalanceKrw / consumerRedeemablePointLiabilityKrw,
+      coverageRatioBps,
     };
   }
 
-  const coverageRatio =
-    protectedFundBalanceKrw / consumerRedeemablePointLiabilityKrw;
-
-  if (coverageRatio < 1) {
-    return { status: "deficit_blocked", coverageRatio };
+  if (coverageRatioBps < 10000) {
+    return { status: "deficit_blocked", coverageRatioBps };
   }
 
-  if (coverageRatio < 1.05) {
-    return { status: "warning", coverageRatio };
+  if (coverageRatioBps < 10500) {
+    return { status: "minimum_covered_warning", coverageRatioBps };
   }
 
-  return { status: "normal", coverageRatio };
+  if (coverageRatioBps < 11000) {
+    return { status: "covered_below_target_buffer", coverageRatioBps };
+  }
+
+  return { status: "target_buffer_ok", coverageRatioBps };
 }
 
 function verifyEvaluatorCases() {
   const cases = [
     ["null/null", null, null, "unknown_blocked"],
-    ["0/0", 0, 0, "normal"],
+    ["0/0", 0, 0, "no_liability_observed"],
     ["10000/null", 10000, null, "unknown_blocked"],
     ["10000/9000", 10000, 9000, "deficit_blocked"],
-    ["10000/10000", 10000, 10000, "warning"],
-    ["10000/10499", 10000, 10499, "warning"],
-    ["10000/10500", 10000, 10500, "normal"],
-    ["10000/11000", 10000, 11000, "normal"],
+    ["10000/10000", 10000, 10000, "minimum_covered_warning"],
+    ["10000/10499", 10000, 10499, "minimum_covered_warning"],
+    ["10000/10500", 10000, 10500, "covered_below_target_buffer"],
+    ["10000/10999", 10000, 10999, "covered_below_target_buffer"],
+    ["10000/11000", 10000, 11000, "target_buffer_ok"],
+    ["10000/12000", 10000, 12000, "target_buffer_ok"],
     ["-1/10000", -1, 10000, "unknown_blocked"],
+    ["10000/-1", 10000, -1, "unknown_blocked"],
   ];
 
   for (const [label, liability, balance, expected] of cases) {
     const result = evaluateProtectedFundReconciliationGate({
-      consumerRedeemablePointLiabilityKrw: liability,
-      protectedFundBalanceKrw: balance,
+      liabilitySourceAvailable: true,
+      protectedFundBalanceAvailable: true,
+      calculationSourceFinalized: true,
+      consumerUnconvertedPointsLiabilityWon: liability,
+      protectedFundAvailableWon: balance,
     });
     if (result.status !== expected) {
       throw new Error(

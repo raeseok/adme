@@ -452,3 +452,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-K protected fund reconciliation design SSOT, pure evaluator, admin protected-fund/compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-K-Protected-Fund-Reconciliation-Design |
 | **Related files** | docs/adme/stage-3-k-protected-fund-reconciliation-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3k-protected-fund-reconciliation-design.ts, apps/web/src/lib/compliance/protected-fund-reconciliation-evaluator.ts |
+
+---
+
+## ADME-DECISION-20260709-018
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Protected Fund Coverage Status Taxonomy Alignment |
+| **Status** | accepted |
+| **Decision** | protected fund coverage status는 운영 판단을 위해 `unknown_blocked`, `deficit_blocked`, `minimum_covered_warning`, `covered_below_target_buffer`, `target_buffer_ok`, `no_liability_observed` 6개로 구분한다. `normal`과 `warning` 축약 status는 machine-readable evaluator status, visible marker, verify contract에서 사용하지 않는다. 100% 이상 105% 미만은 `minimum_covered_warning`, 105% 이상 110% 미만은 `covered_below_target_buffer`, 110% 이상은 `target_buffer_ok`, liability=0이며 source 확정/가용인 경우는 `no_liability_observed`로 판정한다. |
+| **Reason** | 105% 이상 110% 미만 상태와 110% 이상 상태를 모두 정상 상태로 뭉개면 target buffer 운영 판단이 불명확하고, liability가 0인 상태를 별도 식별할 수 없기 때문이다. |
+| **Impact** | Stage 3-K evaluator, admin protected-fund/compliance/diagnostics marker, Stage 3-K document, product policy, roadmap, verify script. protected fund runtime reconciliation implemented=false, DB migration=false, Supabase db push=false, actual protected fund balance available=false, calculation source finalized=false, reward open allowed=false, cash-out actual processing=false 유지 |
+| **Implementation Stage** | Stage 3-K-R-Protected-Fund-Status-Taxonomy-Alignment |
+| **Related files** | docs/adme/stage-3-k-protected-fund-reconciliation-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/protected-fund-reconciliation-evaluator.ts, apps/web/src/app/admin/protected-fund-preflight/page.tsx, apps/web/scripts/verify-stage3k-protected-fund-reconciliation-design.mjs |

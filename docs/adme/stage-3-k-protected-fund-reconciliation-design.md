@@ -71,18 +71,24 @@ coverage unknown blocks cash-out. coverage deficit blocks cash-out. coverage unk
 ## 6. protected fund reconciliation status
 
 - `unknown_blocked`: liability 또는 protected fund balance가 null, 음수, stale, source_digest missing, review pending인 상태다.
-- `normal`: coverage ratio가 1.05 이상이고 coverage gate 기준을 충족한 상태다.
-- `warning`: coverage ratio가 1.00 이상 1.05 미만인 상태다. target buffer에는 미달하므로 운영 검토가 필요하다.
 - `deficit_blocked`: protected fund balance가 consumer redeemable point liability보다 작은 상태다.
+- `minimum_covered_warning`: liability가 0보다 크고 coverage가 100% 이상 105% 미만인 상태다.
+- `covered_below_target_buffer`: liability가 0보다 크고 coverage가 105% 이상 110% 미만인 상태다.
+- `target_buffer_ok`: liability가 0보다 크고 coverage가 110% 이상인 상태다.
+- `no_liability_observed`: liability가 0이고 source가 available/finalized인 상태다.
+
+Stage 3-K-R Protected Fund Status Taxonomy Alignment 이후 machine-readable status는 위 6개만 사용한다. `normal`과 `warning` 축약 status는 evaluator, visible marker, verify contract에서 사용하지 않는다.
 
 ---
 
 ## 7. coverage ratio 정책
 
-- minimum 100%: coverage ratio는 최소 1.0 이상이어야 한다.
-- warning below 105%: coverage ratio가 1.05 미만이면 warning으로 표시한다.
-- target buffer 110%: coverage ratio 1.10은 권장 buffer다.
-- target buffer는 권장값이며, warning 기준은 1.05로 둔다.
+- minimum 100%: coverage ratio bps 10000 이상이어야 한다.
+- 100% 이상 105% 미만: `minimum_covered_warning`.
+- 105% 이상 110% 미만: `covered_below_target_buffer`.
+- 110% 이상: `target_buffer_ok`.
+- liability=0이며 source 확정/가용인 경우: `no_liability_observed`.
+- 내부 계산은 integer basis points를 사용한다. 100% = 10000, 105% = 10500, 110% = 11000이다.
 
 ---
 
@@ -237,8 +243,11 @@ coverage unknown blocks cash-out. coverage deficit blocks cash-out. coverage unk
 - No production mutation
 - No DB migration in Stage 3-K
 - coverage minimum ratio 1.0
-- coverage warning ratio 1.05
-- coverage target buffer ratio 1.10
+- coverage minimum ratio bps 10000
+- coverage warning ratio bps 10500
+- coverage target buffer ratio bps 11000
+- stage3KProtectedFundStatusTaxonomyAligned=true
+- status set: `unknown_blocked,deficit_blocked,minimum_covered_warning,covered_below_target_buffer,target_buffer_ok,no_liability_observed`
 
 ---
 
@@ -316,7 +325,7 @@ Stage 3-G 기준을 유지한다:
 ## 18. 완료 기준
 
 - Stage 3-K SSOT가 protected fund reconciliation designed=true, read-only design only=true, runtime/DB/API/balance/source/mutation flags=false를 반환한다.
-- protected fund reconciliation evaluator가 `unknown_blocked`, `normal`, `warning`, `deficit_blocked`를 순수 함수로 판정한다.
+- protected fund reconciliation evaluator가 `unknown_blocked`, `deficit_blocked`, `minimum_covered_warning`, `covered_below_target_buffer`, `target_buffer_ok`, `no_liability_observed`를 순수 함수로 판정한다.
 - `/admin/protected-fund-preflight`, `/admin/compliance-preflight`, `/admin/diagnostics`에 admin-only marker가 노출된다.
 - public route에는 `stage3K` 또는 Protected Fund Reconciliation Design 문구가 노출되지 않는다.
 - no DB migration, no Supabase db push, no Production mutation 상태가 검증된다.
