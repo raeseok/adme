@@ -98,6 +98,7 @@
     "verify:stage3h-compliance-review": "node scripts/verify-stage3h-compliance-review.mjs",
     "verify:stage3hr-external-review-package": "node scripts/verify-stage3hr-external-review-package.mjs",
     "verify:stage3i-threshold-based-prepaid-exemption-assumption": "node scripts/verify-stage3i-threshold-based-prepaid-exemption-assumption.mjs",
+    "verify:stage3j-prepaid-threshold-monitoring-architecture": "node scripts/verify-stage3j-prepaid-threshold-monitoring-architecture.mjs",
     "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",
     "verify:oauth-redaction-guard": "node scripts/verify-oauth-redaction-guard.mjs",
     "verify:doc-0-current-docs": "node scripts/verify-doc-0-current-docs.mjs",

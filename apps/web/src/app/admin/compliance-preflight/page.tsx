@@ -2,6 +2,7 @@ import { ShellCard } from "@/components/ShellCard";
 import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
 import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
 import { getStage3IThresholdBasedPrepaidExemptionAssumptionState } from "@/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption";
+import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export default function CompliancePreflightPage() {
   const externalReviewPackage = getStage3HRExternalReviewPackageState();
   const prepaidExemptionAssumption =
     getStage3IThresholdBasedPrepaidExemptionAssumptionState();
+  const thresholdMonitoringArchitecture =
+    getStage3JPrepaidThresholdMonitoringArchitectureState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -44,6 +47,37 @@ export default function CompliancePreflightPage() {
           Reward preflight 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/prepaid-threshold-preflight"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Prepaid threshold preflight 상세 →
+        </Link>
+      </p>
+
+      <section
+        aria-label="Stage 3-J prepaid threshold monitoring architecture markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-blue-500 bg-blue-50 px-3 py-3 font-mono text-xs text-blue-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Prepaid Threshold Monitoring Architecture
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-J prepaid threshold monitoring architecture is designed
+        </p>
+        <p className="font-sans text-sm">
+          Runtime monitoring is not implemented
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        {Object.entries(thresholdMonitoringArchitecture).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-I threshold based prepaid exemption assumption markers"

@@ -407,3 +407,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-I threshold-based prepaid exemption assumption SSOT, admin compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-I-Threshold-Based-Prepaid-Registration-Exemption-Assumption |
 | **Related files** | docs/adme/stage-3-i-threshold-based-prepaid-exemption-assumption.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3i-threshold-based-prepaid-exemption-assumption.ts |
+
+---
+
+## ADME-DECISION-20260709-015
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Prepaid Threshold Monitoring Architecture Before Actual Issuance |
+| **Status** | accepted |
+| **Decision** | Stage 3-I의 threshold-based exemption assumption 이후 actual point issuance 전 threshold monitoring architecture를 별도 단계로 설계한다. Stage 3-J에서는 실제 DB migration이나 Production mutation 없이 threshold evaluator, read-only preflight, 문서, SSOT만 추가한다. threshold unknown, hard stop, exceeded 상태에서는 issuance를 차단하는 설계를 채택한다. actual production threshold values와 calculation source는 Stage 3-J에서 finalized하지 않는다. runtime monitoring과 DB migration은 후속 단계에서 별도 승인 후 진행한다. |
+| **Reason** | 선불업 등록 면제 기준을 내부 개발 기준으로 두더라도 실제 발행 전 분기말 발행잔액과 연간 총발행액을 보수적으로 확인할 architecture contract가 필요하기 때문이다. |
+| **Impact** | Stage 3-J prepaid threshold monitoring architecture SSOT, pure evaluator, admin threshold preflight, compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-J-Prepaid-Threshold-Monitoring-Architecture-Design |
+| **Related files** | docs/adme/stage-3-j-prepaid-threshold-monitoring-architecture.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3j-prepaid-threshold-monitoring-architecture.ts, apps/web/src/lib/compliance/prepaid-threshold-evaluator.ts |
