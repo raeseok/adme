@@ -347,3 +347,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | product policy, roadmap, Stage 3-F cross-reference, Stage 3-G policy document, verify source/doc contract. Production partner_settlements mutation=false 유지 |
 | **Implementation Stage** | Stage 3-F-R Addendum / Stage 3-G policy lock only |
 | **Related files** | docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, docs/adme/stage-3-f-cash-out-manual-approval-design.md, docs/adme/stage-3-g-partner-settlement-attribution-policy.md |
+
+---
+
+## ADME-DECISION-20260709-011
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Partner Settlement Manual Approval Design을 Stage 3-G로 분리 |
+| **Status** | accepted |
+| **Decision** | Partner Settlement Manual Approval Design을 Stage 3-G로 분리하고, 실제 `partner_settlements` 생성·확정·지급은 별도 승인 전까지 금지한다. Stage 3-G에서는 SSOT, admin marker, 문서, verify contract만 구축한다. monthly close batch, paid update trigger, chargeback mutation, partner payout action은 후속 Stage로 분리한다. `advertisers.partner_id` attribution lock, dynamic partner lookup 금지, quiz pass partner share calculation 금지, share rate snapshot, `(partner_id, settlement_month)` idempotency unique key, `pending -> confirmed -> paid` status machine, paid immutability, next-month chargeback, `partners.status='terminated'`, `do not null advertiser partner_id` 원칙은 유지한다. |
+| **Reason** | 정산 실제 구현 전 회계·운영·멱등성·불변성 기준을 code marker와 verify contract로 먼저 고정하고, Production mutation 및 DB migration 사고를 방지하기 위함 |
+| **Impact** | Stage 3-G design 문서, product policy, roadmap, admin marker, public marker guard, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, `partner_settlements` mutation=false 유지 |
+| **Implementation Stage** | Stage 3-G-Partner-Settlement-Manual-Approval-Design |
+| **Related files** | docs/adme/stage-3-g-partner-settlement-manual-approval-design.md, docs/adme/stage-3-g-partner-settlement-attribution-policy.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/rewards/stage3g-partner-settlement-manual-approval.ts |

@@ -16,6 +16,7 @@ import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transactio
 import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
 import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
 import { getStage3FCashOutManualApprovalState } from "@/lib/rewards/stage3f-cash-out-manual-approval";
+import { getStage3GPartnerSettlementManualApprovalState } from "@/lib/rewards/stage3g-partner-settlement-manual-approval";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -103,6 +104,7 @@ export default async function DiagnosticsPage() {
   const stage3E = getStage3EDiagnosticsState();
   const stage3EApproval = getStage3EControlledOpenApprovalState();
   const stage3FCashOut = getStage3FCashOutManualApprovalState();
+  const stage3GPartnerSettlement = getStage3GPartnerSettlementManualApprovalState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -138,6 +140,29 @@ export default async function DiagnosticsPage() {
           Stage 3-F Cash-out Manual Approval Design
         </p>
         {Object.entries(stage3FCashOut).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 3-G partner settlement manual approval design markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-cyan-500 bg-cyan-50 px-3 py-3 font-mono text-xs text-cyan-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Partner Settlement Manual Approval Design
+        </p>
+        <p className="font-sans text-sm">
+          Actual partner settlement processing is blocked
+        </p>
+        <p className="font-sans text-sm">Monthly close batch is not implemented</p>
+        <p className="font-sans text-sm">
+          Partner payout action is not implemented
+        </p>
+        <p className="font-sans text-sm">
+          advertisers.partner_id attribution is locked
+        </p>
+        {Object.entries(stage3GPartnerSettlement).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

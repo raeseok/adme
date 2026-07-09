@@ -3,7 +3,7 @@
 작성일: 2026-07-09  
 상태: **policy lock only** — partner_settlements actual mutation=false
 
-관련: [product-policy-current.md](./product-policy-current.md) · [adme-decision-log.md](./adme-decision-log.md) · [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md)
+관련: [product-policy-current.md](./product-policy-current.md) · [adme-decision-log.md](./adme-decision-log.md) · [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md) · [stage-3-g-partner-settlement-manual-approval-design.md](./stage-3-g-partner-settlement-manual-approval-design.md)
 
 ---
 
@@ -12,6 +12,8 @@
 Stage 3-G Partner Settlement Attribution Policy는 Partner Settlement Manual Approval Design 또는 actual settlement implementation 전에 흔들리면 안 되는 귀속·마감·스냅샷·멱등성 원칙을 고정한다.
 
 이번 문서는 actual implementation이 아니다. `partner_settlements` INSERT/UPDATE/DELETE, monthly close batch, paid trigger, settlement payout action, chargeback actual mutation은 모두 false다.
+
+Stage 3-G Partner Settlement Manual Approval Design은 이 policy lock을 구현 전 계약으로 받아 SSOT, admin marker, 문서, verify contract만 추가한다. actual processing, monthly close batch, payout action, DB migration은 별도 승인 전까지 계속 금지한다.
 
 ---
 
@@ -89,6 +91,7 @@ Stage 3-G Partner Settlement Attribution Policy는 Partner Settlement Manual App
 - monthly close RPC
 - chargeback settlement line item
 - admin confirmation UI
+- partner payout action
 
 ---
 
@@ -102,3 +105,4 @@ Stage 3-G Partner Settlement Attribution Policy는 Partner Settlement Manual App
 - partner settlement admin approval UI
 - `advertisers.partner_id`를 NULL로 바꾸는 코드
 - quiz pass 시점 partner share 계산·기록 로직
+- Stage 3-G manual approval design에서의 DB migration

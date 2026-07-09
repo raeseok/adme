@@ -18,6 +18,12 @@ export default function AdminPage() {
         >
           Stage 3-D reward preflight →
         </Link>
+        <Link
+          href="/admin/partner-settlement-preflight"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-G partner settlement preflight →
+        </Link>
       </div>
     </ShellCard>
   );
