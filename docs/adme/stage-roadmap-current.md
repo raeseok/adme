@@ -91,7 +91,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-C-K** | ✅ 완료 (prod Kakao provider backend sync) |
 | **Stage 3-C-K2** | ✅ 완료 (OAuth diagnostic 보강 배포) |
 | **Stage 3-C-K3** | ✅ 완료 (Kakao E2E 성공 기록 + diagnostic redaction) |
-| **Stage 3-D** | 🔄 preflight 구현 (Production mutation=false; openReady=false) |
+| **Stage 3-D** | 🟡 조건부 완료 후보 (preflight 배포·검증 PASS; Kakao rotation attestation 대기) |
 
 ---
 

@@ -4,7 +4,9 @@
 상태: **실행 결과 기록 (검증 후 갱신)**
 
 시작 HEAD: `dc025a0`  
-Production URL: https://web-ashen-xi-52.vercel.app
+최종 HEAD: `34ce3fe`  
+Production URL: https://web-ashen-xi-52.vercel.app  
+Production deploy commit: `34ce3fe` (success)
 
 ---
 
@@ -12,10 +14,10 @@ Production URL: https://web-ashen-xi-52.vercel.app
 
 | 항목 | 결과 |
 |---|---|
-| 재발급 | **운영자 attestation 대기** (`ADME_KAKAO_SECRET_ROTATION_CONFIRMED` 기본 false) |
-| dev 반영 | attestation 대기 |
-| prod 반영 | attestation 대기 |
-| prod OAuth E2E 재확인 | attestation 대기 (K3 E2E 성공은 유지; Stage 3-D rotation 재확인은 별도) |
+| 재발급 | **운영자 attestation 대기** (`stage3DKakaoSecretRotationConfirmed=false`) |
+| dev 반영 | false (attestation 대기) |
+| prod 반영 | false (attestation 대기) |
+| prod OAuth E2E 재확인 | false (attestation 대기; K3 E2E 성공 이력은 유지) |
 | raw secret 기록 | false |
 | code/token 기록 | false |
 
