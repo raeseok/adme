@@ -259,3 +259,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | oauth-error redaction, verify:oauth-redaction-guard, stage-3-c-k3 문서, Stage 3-D 착수 전제 |
 | **Implementation Stage** | Stage 3-C-K3 |
 | **Related files** | docs/adme/stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md, apps/web/src/lib/auth/oauth-error.ts, apps/web/scripts/verify-oauth-redaction-guard.mjs |
+
+---
+
+## ADME-DECISION-20260709-005
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Production reward open은 Stage 3-D에서 실행하지 않고 preflight·kill switch·release flag·secret rotation·audit·guard 검증 후 별도 승인 단계로 분리 |
+| **Status** | accepted |
+| **Decision** | Production reward actual mutation은 Stage 3-D에서 열지 않는다. Stage 3-D는 Kakao Client Secret rotation attestation, release flag/kill switch 설계, controlled allowlist 설계, 원장·budget·RLS·정답 비노출·idempotency/duplicate/min-view guard 검증, abuse/fraud preflight 정책, audit log contract, rollback 절차를 확정한다. Stage 3-B RPC Production block과 Stage 3-C Production reward block은 제거하지 않는다. 실제 open은 별도 명시 승인(Stage 3-E 후보)에서만 다룬다. |
+| **Reason** | Auth E2E 성공과 금전성 mutation open을 분리해 재무·보안 리스크를 통제한다. 과거 Client Secret 이미지 노출 이력으로 rotation이 선행 gate다. |
+| **Impact** | Stage 3-D docs/scripts/diagnostics, product-policy, roadmap; Production reward openReady=false 유지 |
+| **Implementation Stage** | Stage 3-D |
+| **Related files** | docs/adme/stage-3-d-production-reward-open-preflight.md, docs/adme/stage-3-d-kakao-secret-rotation-preflight.md, apps/web/src/lib/rewards/release-flags.ts |

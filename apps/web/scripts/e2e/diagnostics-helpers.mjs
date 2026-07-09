@@ -23,6 +23,7 @@ export async function loadDiagnosticsFromHttp(baseUrl, options = {}) {
     const html = normalizeDiagnosticsText(await response.text());
     const coverage = extractMarkerValue(html, "stage1FRegionSeedCoverage");
     const stage30Build = extractMarkerValue(html, "stage30Build");
+    const stage3DBuild = extractMarkerValue(html, "stage3DBuild");
     const sources = {
       combined: html,
       textContent: html,
@@ -30,7 +31,12 @@ export async function loadDiagnosticsFromHttp(baseUrl, options = {}) {
       html,
     };
 
-    if (coverage === "full" || coverage === "adequate" || stage30Build.includes("stage3-0")) {
+    if (
+      coverage === "full" ||
+      coverage === "adequate" ||
+      stage30Build.includes("stage3-0") ||
+      stage3DBuild.includes("stage3d")
+    ) {
       if (attempt > 1) {
         console.log(`INFO: diagnostics HTTP markers ready on attempt ${attempt}`);
       }
@@ -38,7 +44,7 @@ export async function loadDiagnosticsFromHttp(baseUrl, options = {}) {
     }
 
     console.log(
-      `INFO: diagnostics HTTP coverage=${coverage || "missing"}, retry ${attempt}`,
+      `INFO: diagnostics HTTP coverage=${coverage || "missing"} stage3D=${stage3DBuild || "missing"}, retry ${attempt}`,
     );
     await new Promise((resolve) => setTimeout(resolve, 2500));
   }

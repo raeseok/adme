@@ -14,7 +14,9 @@ import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
 import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
+import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -94,12 +96,166 @@ export default async function DiagnosticsPage() {
   const stage3A = getStage3ADiagnosticsState();
   const stage3B = getStage3BDiagnosticsState();
   const stage3C = getStage3CDiagnosticsState();
+  const stage3D = getStage3DDiagnosticsState();
 
   return (
     <ShellCard title="AdMe diagnostics">
       <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
         Stage 0.5-R diagnostics verified
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/reward-preflight"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-D reward preflight 상세 →
+        </Link>
+      </p>
+      <section
+        aria-label="Stage 3-D production reward open preflight summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-sky-500 bg-sky-50 px-3 py-3 font-mono text-xs text-sky-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-D Production Reward Open Preflight (summary)
+        </p>
+        <p>stage3DBuild={stage3D.stage3DBuild}</p>
+        <p>
+          stage3DProductionRewardOpenPreflight=
+          {String(stage3D.stage3DProductionRewardOpenPreflight)}
+        </p>
+        <p>
+          stage3DProductionRewardOpenReady=
+          {String(stage3D.stage3DProductionRewardOpenReady)}
+        </p>
+        <p>
+          stage3DProductionRewardMutation=
+          {String(stage3D.stage3DProductionRewardMutation)}
+        </p>
+        <p>
+          stage3DProductionPointLedgerMutation=
+          {String(stage3D.stage3DProductionPointLedgerMutation)}
+        </p>
+        <p>
+          stage3DProductionCampaignBudgetMutation=
+          {String(stage3D.stage3DProductionCampaignBudgetMutation)}
+        </p>
+        <p>
+          stage3DProductionUsersBalanceMutation=
+          {String(stage3D.stage3DProductionUsersBalanceMutation)}
+        </p>
+        <p>
+          stage3DProductionAdViewsMutation=
+          {String(stage3D.stage3DProductionAdViewsMutation)}
+        </p>
+        <p>
+          stage3DReleaseFlagDesigned=
+          {String(stage3D.stage3DReleaseFlagDesigned)}
+        </p>
+        <p>
+          stage3DProductionRewardOpenFlag=
+          {String(stage3D.stage3DProductionRewardOpenFlag)}
+        </p>
+        <p>
+          stage3DRewardKillSwitchDefaultOn=
+          {String(stage3D.stage3DRewardKillSwitchDefaultOn)}
+        </p>
+        <p>
+          stage3DRewardKillSwitch={String(stage3D.stage3DRewardKillSwitch)}
+        </p>
+        <p>
+          stage3DControlledProductionAllowlistDesigned=
+          {String(stage3D.stage3DControlledProductionAllowlistDesigned)}
+        </p>
+        <p>
+          stage3DControlledProductionAllowlistActive=
+          {String(stage3D.stage3DControlledProductionAllowlistActive)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationRequired=
+          {String(stage3D.stage3DKakaoSecretRotationRequired)}
+        </p>
+        <p>
+          stage3DKakaoSecretRotationConfirmed=
+          {String(stage3D.stage3DKakaoSecretRotationConfirmed)}
+        </p>
+        <p>
+          stage3DKakaoSecretDevReapplied=
+          {String(stage3D.stage3DKakaoSecretDevReapplied)}
+        </p>
+        <p>
+          stage3DKakaoSecretProdReapplied=
+          {String(stage3D.stage3DKakaoSecretProdReapplied)}
+        </p>
+        <p>
+          stage3DKakaoOauthProdE2EReverified=
+          {String(stage3D.stage3DKakaoOauthProdE2EReverified)}
+        </p>
+        <p>
+          stage3DKakaoSecretRawExposed=
+          {String(stage3D.stage3DKakaoSecretRawExposed)}
+        </p>
+        <p>
+          stage3DOAuthCodeTokenExposed=
+          {String(stage3D.stage3DOAuthCodeTokenExposed)}
+        </p>
+        <p>
+          stage3DPointLedgerAppendOnly=
+          {String(stage3D.stage3DPointLedgerAppendOnly)}
+        </p>
+        <p>
+          stage3DUsersBalanceCacheConsistencyChecked=
+          {String(stage3D.stage3DUsersBalanceCacheConsistencyChecked)}
+        </p>
+        <p>
+          stage3DIdempotencyReplayGuard=
+          {String(stage3D.stage3DIdempotencyReplayGuard)}
+        </p>
+        <p>
+          stage3DDuplicateSubmitGuard=
+          {String(stage3D.stage3DDuplicateSubmitGuard)}
+        </p>
+        <p>stage3DMinViewGuard={String(stage3D.stage3DMinViewGuard)}</p>
+        <p>
+          stage3DQuizAnswerExposure=
+          {String(stage3D.stage3DQuizAnswerExposure)}
+        </p>
+        <p>
+          stage3DAnswerHintExposure=
+          {String(stage3D.stage3DAnswerHintExposure)}
+        </p>
+        <p>stage3DRlsRelaxed={String(stage3D.stage3DRlsRelaxed)}</p>
+        <p>
+          stage3DServiceRoleClientExposure=
+          {String(stage3D.stage3DServiceRoleClientExposure)}
+        </p>
+        <p>
+          stage3DPublicMarkerExposed=
+          {String(stage3D.stage3DPublicMarkerExposed)}
+        </p>
+        <p>
+          stage3DAuditLogContractReady=
+          {String(stage3D.stage3DAuditLogContractReady)}
+        </p>
+        <p>
+          stage3DRollbackPlanReady={String(stage3D.stage3DRollbackPlanReady)}
+        </p>
+        <p>
+          stage3DPartnerSettlementsOutOfScope=
+          {String(stage3D.stage3DPartnerSettlementsOutOfScope)}
+        </p>
+        <p>
+          stage3DCashOutOutOfScope={String(stage3D.stage3DCashOutOutOfScope)}
+        </p>
+        <p>
+          stage3DMutationBlockedByFlags=
+          {String(stage3D.stage3DMutationBlockedByFlags)}
+        </p>
+        <p>
+          stage3DCurrentSupabaseProjectRef=
+          {stage3D.stage3DCurrentSupabaseProjectRef}
+        </p>
+        <p>stage3DDeployCommit={stage3D.stage3DDeployCommit}</p>
+      </section>
       <section
         aria-label="Stage 3-C consumer quiz submit UI controlled integration markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-lime-500 bg-lime-50 px-3 py-3 font-mono text-xs text-lime-950"

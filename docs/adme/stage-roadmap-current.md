@@ -30,6 +30,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-B** | quiz_reward full transaction RPC **dev-only** (budget + ledger + ad_views) |
 | **Stage 3-C** | consumer quiz submit UI controlled integration (server action → Stage 3-B RPC) |
 | **Stage 3-C-K / K2 / K3** | Production Kakao OAuth 보류 해소 → 진단 보강 → E2E 성공 + diagnostic redaction |
+| **Stage 3-D** | Production reward open **preflight** (mutation=false; kill switch/release flag/allowlist/audit 설계) |
 
 ---
 
@@ -42,6 +43,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | Stage 1-G-R | 재보류 (329e73f vs fceb801) | **해소·완료** |
 | Stage 3-C-K | prod Kakao provider disabled | **해소** (authorize → Kakao) |
 | Stage 3-C-K2/K3 | unexpected_failure / invalid_client | **K3에서 E2E 성공·redaction 완료** |
+| Stage 3-D | — | **preflight 구현** — Kakao rotation attestation·open 승인은 후속 |
 
 ---
 
@@ -49,7 +51,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-D** | Production reward open **preflight** | 별도 승인 — Auth E2E는 충족, reward open은 별도 |
+| **Stage 3-D-R** | Stage 3-D 보류 해소 (Kakao secret rotation attestation, balance/budget inconsistency 등) | 없음 |
+| **Stage 3-E** | Production reward **controlled open approval** | 명시 승인 후에만 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 
 ### Stage 3-B 완료 기준
@@ -62,8 +65,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 ## 권장 순서
 
-1. **Stage 3-D** — Production reward open preflight (별도 승인)
-2. 이후 **Stage 1-H** 또는 advertiser campaign authoring
+1. **Stage 3-D** 완료 판정 → 필요 시 **Stage 3-D-R** (rotation attestation / 정합성 보류 해소)
+2. **Stage 3-E** — Production reward controlled open approval (명시 승인)
+3. 이후 **Stage 1-H** 또는 advertiser campaign authoring / cash_out 별도 Stage
 
 ---
 
@@ -87,6 +91,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-C-K** | ✅ 완료 (prod Kakao provider backend sync) |
 | **Stage 3-C-K2** | ✅ 완료 (OAuth diagnostic 보강 배포) |
 | **Stage 3-C-K3** | ✅ 완료 (Kakao E2E 성공 기록 + diagnostic redaction) |
+| **Stage 3-D** | 🔄 preflight 구현 (Production mutation=false; openReady=false) |
 
 ---
 
@@ -102,6 +107,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-B: `verify:stage3b-dev-full-transaction`, `verify:stage3b-production-blocked`, `verify:stage3b-quiz-answer-non-exposure`, `verify:stage3b-ledger-raw-access-guard`, `verify:stage3b-public-marker-guard`
 - Stage 3-C: `verify:stage3c-preflight-answer-hint-guard`, `verify:stage3c-client-direct-rpc-guard`, `verify:stage3c-quiz-answer-non-exposure`, `verify:stage3c-dev-ui-controlled-submit`, `verify:stage3c-production-reward-blocked`, `verify:stage3c-public-marker-guard`
 - Stage 3-C-K/K3: `verify:prod-kakao-oauth-authorize`, `verify:oauth-redaction-guard`
+- Stage 3-D: `verify:stage3d-production-reward-blocked`, `verify:stage3d-release-flags`, `verify:stage3d-kakao-secret-redaction`, `verify:stage3d-quiz-answer-non-exposure`, `verify:stage3d-point-ledger-append-only`, `verify:stage3d-balance-cache-consistency-readonly`, `verify:stage3d-production-budget-safety-readonly`, `verify:stage3d-rls-guard`, `verify:stage3d-public-marker-guard`, `smoke:stage3d-reward-preflight-ui`
 
 ---
 
@@ -114,6 +120,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md)
 - [stage-3-c-k-prod-kakao-oauth-fix-result.md](./stage-3-c-k-prod-kakao-oauth-fix-result.md)
 - [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md)
+- [stage-3-d-production-reward-open-preflight.md](./stage-3-d-production-reward-open-preflight.md)
+- [stage-3-d-kakao-secret-rotation-preflight.md](./stage-3-d-kakao-secret-rotation-preflight.md)
+- [stage-3-d-production-reward-preflight-result.md](./stage-3-d-production-reward-preflight-result.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)
