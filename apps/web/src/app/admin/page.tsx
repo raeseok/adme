@@ -24,6 +24,12 @@ export default function AdminPage() {
         >
           Stage 3-G partner settlement preflight →
         </Link>
+        <Link
+          href="/admin/kyc-tax-terms-db-migration-review"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-M KYC / Tax / Terms DB migration review →
+        </Link>
       </div>
     </ShellCard>
   );

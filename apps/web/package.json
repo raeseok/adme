@@ -102,6 +102,7 @@
     "verify:stage3jr-prepaid-threshold-db-migration-design-review": "node scripts/verify-stage3jr-prepaid-threshold-db-migration-design-review.mjs",
     "verify:stage3k-protected-fund-reconciliation-design": "node scripts/verify-stage3k-protected-fund-reconciliation-design.mjs",
     "verify:stage3l-kyc-tax-terms-data-model-design": "node scripts/verify-stage3l-kyc-tax-terms-data-model-design.mjs",
+    "verify:stage3m-kyc-tax-terms-db-migration-design-review": "node scripts/verify-stage3m-kyc-tax-terms-db-migration-design-review.mjs",
     "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",
     "verify:oauth-redaction-guard": "node scripts/verify-oauth-redaction-guard.mjs",
     "verify:doc-0-current-docs": "node scripts/verify-doc-0-current-docs.mjs",

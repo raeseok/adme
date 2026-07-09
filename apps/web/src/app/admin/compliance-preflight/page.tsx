@@ -6,6 +6,7 @@ import { getStage3JPrepaidThresholdMonitoringArchitectureState } from "@/lib/com
 import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/compliance/stage3jr-prepaid-threshold-db-migration-design-review";
 import { getStage3KProtectedFundReconciliationDesignState } from "@/lib/compliance/stage3k-protected-fund-reconciliation-design";
 import { getStage3LKycTaxTermsDesignState } from "@/lib/compliance/stage3l-kyc-tax-terms-design";
+import { getStage3MKycTaxTermsDbMigrationDesignReviewState } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,8 @@ export default function CompliancePreflightPage() {
   const protectedFundReconciliation =
     getStage3KProtectedFundReconciliationDesignState();
   const kycTaxTermsDesign = getStage3LKycTaxTermsDesignState();
+  const kycTaxTermsDbMigrationDesignReview =
+    getStage3MKycTaxTermsDbMigrationDesignReviewState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -79,6 +82,45 @@ export default function CompliancePreflightPage() {
           KYC / Tax / Terms preflight 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/kyc-tax-terms-db-migration-review"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          KYC / Tax / Terms DB migration design review 상세 →
+        </Link>
+      </p>
+
+      <section
+        aria-label="Stage 3-M KYC tax terms DB migration design review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-slate-500 bg-slate-50 px-3 py-3 font-mono text-xs text-slate-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          KYC / Tax / Terms DB Migration Design Review
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-M KYC tax terms DB migration design review is complete
+        </p>
+        <p className="font-sans text-sm">
+          Actual migration is not implemented
+        </p>
+        <p className="font-sans text-sm">Supabase db push is not executed</p>
+        <p className="font-sans text-sm">
+          Actual cash-out processing remains disabled
+        </p>
+        <p>stage3MDesignReviewComplete=true</p>
+        <p>stage3MMigrationImplemented=false</p>
+        <p>stage3MSupabaseDbPushExecuted=false</p>
+        <p>stage3MActualCashOutProcessingAllowed=false</p>
+        <p>stage3MLegalConclusionDeclared=false</p>
+        {Object.entries(kycTaxTermsDbMigrationDesignReview).map(
+          ([key, value]) => (
+            <p key={key}>
+              {key}={String(value)}
+            </p>
+          ),
+        )}
+      </section>
 
       <section
         aria-label="Stage 3-L KYC tax terms data model design markers"

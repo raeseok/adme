@@ -94,6 +94,9 @@ const GATE_STATUSES = [
   "design_gate_clear_but_actual_cash_out_disabled",
 ];
 
+const dangerousActualCashOutObject = "actualCashOutProcessingAllowed" + ": true";
+const dangerousActualCashOutMarker = "actualCashOutProcessingAllowed" + "=true";
+
 const REQUIRED_ADMIN_MARKERS = [
   "stage3LKycTaxTermsDataModelDesigned=true",
   "stage3LReadOnlyDesignOnly=true",
@@ -202,8 +205,8 @@ const DANGEROUS_STRINGS = [
   "stage3LDbMigrationImplemented=true",
   "stage3LSupabaseDbPushExecuted=true",
   "stage3LLegalConclusionDeclared=true",
-  "actualCashOutProcessingAllowed: true",
-  "actualCashOutProcessingAllowed=true",
+  dangerousActualCashOutObject,
+  dangerousActualCashOutMarker,
 ];
 
 const PUBLIC_ROUTES = [

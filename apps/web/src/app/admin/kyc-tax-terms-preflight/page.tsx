@@ -7,6 +7,7 @@ import {
   type TaxProfileStatus,
   type TermsAcceptanceStatus,
 } from "@/lib/compliance/stage3l-kyc-tax-terms-design";
+import { getStage3MKycTaxTermsDbMigrationDesignReviewState } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
 import type { ProtectedFundReconciliationStatus } from "@/lib/compliance/protected-fund-reconciliation-evaluator";
 import Link from "next/link";
 
@@ -79,6 +80,8 @@ const gateCases = {
 
 export default function KycTaxTermsPreflightPage() {
   const design = getStage3LKycTaxTermsDesignState();
+  const migrationDesignReview =
+    getStage3MKycTaxTermsDbMigrationDesignReviewState();
 
   return (
     <ShellCard title="KYC / Tax / Terms Data Model Design">
@@ -98,6 +101,43 @@ export default function KycTaxTermsPreflightPage() {
           Compliance preflight 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/kyc-tax-terms-db-migration-review"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          DB migration design review 상세 →
+        </Link>
+      </p>
+
+      <section
+        aria-label="Stage 3-M KYC tax terms DB migration design review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-slate-500 bg-slate-50 px-3 py-3 font-mono text-xs text-slate-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          KYC / Tax / Terms DB Migration Design Review
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-M design review is complete
+        </p>
+        <p className="font-sans text-sm">
+          Actual migration is not implemented
+        </p>
+        <p className="font-sans text-sm">Supabase db push is not executed</p>
+        <p className="font-sans text-sm">
+          Actual cash-out processing remains disabled
+        </p>
+        <p>stage3MDesignReviewComplete=true</p>
+        <p>stage3MMigrationImplemented=false</p>
+        <p>stage3MSupabaseDbPushExecuted=false</p>
+        <p>stage3MActualCashOutProcessingAllowed=false</p>
+        <p>stage3MLegalConclusionDeclared=false</p>
+        {Object.entries(migrationDesignReview).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section className="mt-4 grid gap-3 text-sm md:grid-cols-2">
         <div className="rounded-lg border border-zinc-200 bg-white px-3 py-3">

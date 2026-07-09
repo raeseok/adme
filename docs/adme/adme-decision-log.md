@@ -482,3 +482,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-L KYC/Tax/Terms SSOT, pure cash-out gate evaluator, proposed data model document, admin KYC/tax/terms preflight, compliance/diagnostics marker, product policy, roadmap, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, actual personal data collection=false, bank API integrated=false, tax filing=false, withholding calculation=false, cash-out actual processing=false, DB migration=false, Supabase db push=false, Production mutation=false 유지 |
 | **Implementation Stage** | Stage 3-L-KYC-Tax-Terms-Data-Model-Design |
 | **Related files** | docs/adme/stage-3-l-kyc-tax-terms-data-model-design.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3l-kyc-tax-terms-design.ts, apps/web/src/lib/compliance/kyc-tax-terms-gate-evaluator.ts, apps/web/src/app/admin/kyc-tax-terms-preflight/page.tsx, apps/web/scripts/verify-stage3l-kyc-tax-terms-data-model-design.mjs |
+
+---
+
+## ADME-DECISION-20260710-019
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-10 |
+| **Title** | KYC / Tax / Terms DB Migration Design Review Before Supabase Migration |
+| **Status** | accepted |
+| **Decision** | Stage 3-L의 KYC/Tax/Terms proposed data model을 실제 Supabase migration으로 구현하기 전에 Stage 3-M 설계 검토 단계를 분리한다. Stage 3-M은 proposed DB objects, sensitive data boundary, status storage strategy, legal document versioning, marketing consent history, cash redemption request linkage, RLS matrix, SECURITY DEFINER write path, append-only audit, idempotency, retention/deletion unresolved items, migration dependency/order를 문서와 SSOT/admin marker/verify로 고정한다. 실제 migration 파일 생성, Supabase db push, 개인정보 수집, identity/bank provider 연동, 세무 신고, 원천징수 계산, actual cash-out processing은 수행하지 않는다. |
+| **Reason** | 민감정보·금융·세무·약관 데이터를 실제 DB 구조로 만들기 전에 PostgreSQL/Supabase 보안 경계, RLS, server-only mutation path, audit 불변성, 보존/삭제 미확정 사항을 먼저 검토해 migration 사고와 개인정보 노출 리스크를 줄이기 위함 |
+| **Impact** | Stage 3-M design review SSOT, DB design review document, admin KYC/tax/terms DB migration review page, compliance/diagnostics/KYC preflight marker, product policy, roadmap, verify script. DB migration implemented=false, migration file created=false, Supabase db push executed=false, actual personal data collection=false, identity provider integrated=false, bank API integrated=false, tax filing=false, withholding calculation=false, actual cash-out processing allowed=false, Production mutation=false, legal conclusion declared=false, external legal/tax review still required=true 유지 |
+| **Implementation Stage** | Stage 3-M-KYC-Tax-Terms-DB-Migration-Design-Review |
+| **Related files** | docs/adme/stage-3-m-kyc-tax-terms-db-migration-design-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review.ts, apps/web/src/app/admin/kyc-tax-terms-db-migration-review/page.tsx, apps/web/scripts/verify-stage3m-kyc-tax-terms-db-migration-design-review.mjs |
