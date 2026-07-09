@@ -209,7 +209,9 @@ export function containsSecretMaterial(value: string): boolean {
   if (/external code\s*:\s*\S+/i.test(value)) {
     return true;
   }
-  if (/[A-Za-z0-9_-]{24,}/.test(value)) {
+  // Opaque token-like runs (exclude lowercase snake_case summary keys)
+  const opaqueRuns = value.match(/[A-Za-z0-9_-]{24,}/g) ?? [];
+  if (opaqueRuns.some((run) => !/^[a-z0-9_]+$/.test(run))) {
     return true;
   }
   if (
