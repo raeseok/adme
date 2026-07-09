@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import type { SessionSnapshot } from "@/lib/auth/session";
 import {
@@ -19,11 +19,6 @@ function readHashOAuthError(): OAuthErrorDetails | null {
   const parsed = parseOAuthErrorFromHash(window.location.hash);
   if (!hasOAuthError(parsed)) {
     return null;
-  }
-  if (window.history.replaceState) {
-    const url = new URL(window.location.href);
-    url.hash = "";
-    window.history.replaceState(null, "", url.toString());
   }
   return parsed;
 }
@@ -51,6 +46,10 @@ function stripUnsafeOAuthQueryParams(): void {
       changed = true;
     }
   }
+  if (url.hash) {
+    url.hash = "";
+    changed = true;
+  }
   if (changed) {
     window.history.replaceState(null, "", url.toString());
   }
@@ -68,10 +67,7 @@ export function LoginForm({
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [hashError] = useState(() => {
-    stripUnsafeOAuthQueryParams();
-    return readHashOAuthError();
-  });
+  const [hashError] = useState(readHashOAuthError);
   const [message, setMessage] = useState<string | null>(() => {
     if (hashError) {
       return getOAuthUserMessage(hashError);
@@ -91,6 +87,10 @@ export function LoginForm({
   });
   const [isPending, startTransition] = useTransition();
   const [oauthPending, startOAuthTransition] = useTransition();
+
+  useEffect(() => {
+    stripUnsafeOAuthQueryParams();
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

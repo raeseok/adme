@@ -115,7 +115,11 @@ async function verifyProductionUi() {
     const unsafeUrl =
       `${safeUrl}&oauth_error_description=${encodeURIComponent(sample)}`;
     await page.goto(unsafeUrl, { waitUntil: "networkidle" });
-    await page.waitForTimeout(500);
+    await page.waitForFunction(
+      () => !window.location.search.includes("oauth_error_description"),
+      null,
+      { timeout: 5000 },
+    );
     body = await page.locator("body").innerText();
     const finalUrl = page.url();
     assertNotContains(body, "SAMPLE_EXTERNAL_CODE", "externalCodeExposed=false body");
@@ -130,7 +134,14 @@ async function verifyProductionUi() {
       `${BASE}/auth/callback#error=server_error&error_code=unexpected_failure&error_description=${encodeURIComponent(sample)}`,
       { waitUntil: "networkidle" },
     );
-    await page.waitForTimeout(1500);
+    await page.waitForURL(/\/auth\/login/, { timeout: 5000 });
+    await page.waitForFunction(
+      () =>
+        !window.location.search.includes("error_description") &&
+        !window.location.hash.includes("error_description"),
+      null,
+      { timeout: 5000 },
+    );
     const after = await page.locator("body").innerText();
     const afterUrl = page.url();
     assert(afterUrl.includes("/auth/login"), "hash capture redirects to login");
