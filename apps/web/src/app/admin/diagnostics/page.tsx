@@ -14,6 +14,7 @@ import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
 import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
+import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -99,6 +100,7 @@ export default async function DiagnosticsPage() {
   const stage3C = getStage3CDiagnosticsState();
   const stage3D = getStage3DDiagnosticsState();
   const stage3E = getStage3EDiagnosticsState();
+  const stage3EApproval = getStage3EControlledOpenApprovalState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -113,6 +115,19 @@ export default async function DiagnosticsPage() {
           Stage 3-D reward preflight 상세 →
         </Link>
       </p>
+      <section
+        aria-label="Stage 3-E controlled open approval markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-fuchsia-500 bg-fuchsia-50 px-3 py-3 font-mono text-xs text-fuchsia-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-E Controlled Open Approval
+        </p>
+        {Object.entries(stage3EApproval).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
       <section
         aria-label="Stage 3-D production reward open preflight summary markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-sky-500 bg-sky-50 px-3 py-3 font-mono text-xs text-sky-950"

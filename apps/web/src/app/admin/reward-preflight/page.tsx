@@ -1,4 +1,5 @@
 import { ShellCard } from "@/components/ShellCard";
+import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import Link from "next/link";
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default function RewardPreflightPage() {
   const s = getStage3DDiagnosticsState();
   const e = getStage3EDiagnosticsState();
+  const approval = getStage3EControlledOpenApprovalState();
 
   return (
     <ShellCard title="AdMe Stage 3-D reward preflight">
@@ -22,6 +24,20 @@ export default function RewardPreflightPage() {
           ← diagnostics 요약
         </Link>
       </p>
+
+      <section
+        aria-label="Stage 3-E controlled open approval markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-fuchsia-500 bg-fuchsia-50 px-3 py-3 font-mono text-xs text-fuchsia-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-E Controlled Open Approval
+        </p>
+        {Object.entries(approval).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-D production reward open preflight markers"

@@ -4,11 +4,13 @@
 Production actual reward open: **금지**  
 Production mutation: **false**  
 Production URL: `https://web-ashen-xi-52.vercel.app`  
-기준 HEAD / Production deploy commit: `8cd1b80`
+기준 HEAD / Production deploy commit: `cb85c1d`
 
 ## 목적
 
 Stage 3-E-Preflight는 Production full reward open이 아니다. 실제 리워드 지급을 열기 전에 runtime fraud engine, controlled allowlist, kill switch, mutation guard, budget guard, point_ledger idempotency, monitoring, rollback 기준을 검증해 controlled reward open 승인 가능 조건을 준비한다.
+
+Stage 3-E-Preflight-R 완료 이후 후속 단계로 [Stage 3-E-Controlled-Open-Approval](./stage-3-e-controlled-open-approval.md)이 추가되었다. Approval 단계도 actual open이 아니며, Production reward actual mutation을 실행하지 않는다. 실제 controlled open 실행은 별도 `Stage 3-E-Controlled-Open-Execution` 승인 문장 없이는 금지한다.
 
 명시 승인 전까지 다음은 모두 금지한다.
 

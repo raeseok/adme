@@ -302,3 +302,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-E diagnostics, fraud engine, verify scripts, product-policy, roadmap; Production reward open=false 및 kill switch=true 유지 |
 | **Implementation Stage** | Stage 3-E-Preflight |
 | **Related files** | docs/adme/stage-3-e-runtime-fraud-engine-controlled-open-preflight.md, apps/web/src/lib/rewards/fraud-engine.ts, apps/web/src/lib/rewards/reward-guards.ts |
+
+---
+
+## ADME-DECISION-20260709-008
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-E controlled open은 actual execution이 아니라 approval 단계로 분리 |
+| **Status** | accepted |
+| **Decision** | Stage 3-E controlled open은 바로 실행하지 않고 approval 단계로 분리한다. controlled open 초깃값은 최대 2명, 최대 1개 campaign, 1인 1회, 1인 500P, 전체 1,000P로 제한한다. kill switch는 기본 true를 유지하고, reward open flag는 false를 유지하며, allowlist active는 false를 유지한다. cash_out 및 partner_settlement actual processing은 제외한다. point_ledger delete rollback은 금지한다. actual open은 별도 Stage 3-E-Controlled-Open-Execution 승인 문장 없이는 금지한다. |
+| **Reason** | Production reward actual mutation 전 금전·개인정보·보안 리스크를 controlled open 조건, 예산 상한, allowlist 계약, 즉시 중단 절차로 고정하기 위함 |
+| **Impact** | approval 문서, 운영 runbook, admin marker, verify scripts, product-policy, roadmap; Production reward open=false 및 kill switch=true 유지 |
+| **Implementation Stage** | Stage 3-E-Controlled-Open-Approval |
+| **Related files** | docs/adme/stage-3-e-controlled-open-approval.md, docs/adme/stage-3-e-controlled-open-runbook.md, apps/web/src/lib/rewards/stage3e-controlled-open-approval.ts |
