@@ -34,7 +34,15 @@ export type RewardReleaseFlags = {
   productionRewardOpen: boolean;
   productionRewardPreflightOnly: boolean;
   allowlistEnabled: boolean;
+  allowlistUserIds: string[];
   allowlistCampaignIds: string[];
+  controlledMaxRewardCount: number | null;
+  controlledMaxRewardAmountPerUser: number | null;
+  controlledMaxTotalRewardAmount: number | null;
+  controlledMaxCampaignSpend: number | null;
+  controlledWindowStart: string | null;
+  controlledWindowEnd: string | null;
+  controlledOperatorApprovalRef: string | null;
   maxPointsPerUserPerDay: number | null;
   maxCampaignDailyBudget: number | null;
 };
@@ -61,9 +69,30 @@ export function getRewardReleaseFlags(): RewardReleaseFlags {
       process.env.ADME_PRODUCTION_REWARD_ALLOWLIST_ENABLED,
       false,
     ),
+    allowlistUserIds: parseAllowlistIds(
+      process.env.ADME_PRODUCTION_REWARD_ALLOWLIST_USER_IDS,
+    ),
     allowlistCampaignIds: parseAllowlistIds(
       process.env.ADME_PRODUCTION_REWARD_ALLOWLIST_CAMPAIGN_IDS,
     ),
+    controlledMaxRewardCount: parseOptionalPositiveInt(
+      process.env.ADME_CONTROLLED_REWARD_MAX_REWARD_COUNT,
+    ),
+    controlledMaxRewardAmountPerUser: parseOptionalPositiveInt(
+      process.env.ADME_CONTROLLED_REWARD_MAX_AMOUNT_PER_USER,
+    ),
+    controlledMaxTotalRewardAmount: parseOptionalPositiveInt(
+      process.env.ADME_CONTROLLED_REWARD_MAX_TOTAL_AMOUNT,
+    ),
+    controlledMaxCampaignSpend: parseOptionalPositiveInt(
+      process.env.ADME_CONTROLLED_REWARD_MAX_CAMPAIGN_SPEND,
+    ),
+    controlledWindowStart:
+      process.env.ADME_CONTROLLED_REWARD_WINDOW_START?.trim() || null,
+    controlledWindowEnd:
+      process.env.ADME_CONTROLLED_REWARD_WINDOW_END?.trim() || null,
+    controlledOperatorApprovalRef:
+      process.env.ADME_CONTROLLED_REWARD_OPERATOR_APPROVAL_REF?.trim() || null,
     maxPointsPerUserPerDay: parseOptionalPositiveInt(
       process.env.ADME_PRODUCTION_REWARD_MAX_POINTS_PER_USER_PER_DAY,
     ),
@@ -88,6 +117,7 @@ export function isAllowlistActive(
 ): boolean {
   return (
     flags.allowlistEnabled &&
+    flags.allowlistUserIds.length > 0 &&
     flags.allowlistCampaignIds.length > 0 &&
     !isProductionRewardMutationBlockedByFlags(flags)
   );

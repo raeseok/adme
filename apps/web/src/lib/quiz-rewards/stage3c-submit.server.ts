@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { STAGE3B_RPC_NAME } from "@/lib/stage3/stage3b-full-transaction";
+import { evaluateStage3ERewardGuard } from "@/lib/rewards/reward-guards";
 import { isStage3CControlledCampaignId } from "./stage3c-controlled-campaigns";
 import { assertStage3CRewardMutationAllowed } from "./stage3c-env-gate";
 import {
@@ -146,6 +147,10 @@ export async function submitConsumerQuizForReward(params: {
   const productionBlocked = !envGate.allowed;
 
   if (productionBlocked) {
+    const fraudDecision = evaluateStage3ERewardGuard({
+      userId: params.userId,
+      campaignId: input.campaignId,
+    });
     const ux = mapStage3CResultToUx(
       "STAGE3C_PRODUCTION_REWARD_BLOCKED",
       null,
@@ -154,7 +159,7 @@ export async function submitConsumerQuizForReward(params: {
     return buildResult({
       accepted: false,
       resultCode: "STAGE3C_PRODUCTION_REWARD_BLOCKED",
-      message: ux.message,
+      message: fraudDecision.safe_message || ux.message,
       rewarded: false,
       rewardAmount: null,
       remainingAttempts: null,

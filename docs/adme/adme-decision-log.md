@@ -287,3 +287,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | kakao-secret-attestation.ts, admin markers, Stage 3-D-R docs/scripts, Vercel attestation env (boolean/date only); openReady=false 유지 |
 | **Implementation Stage** | Stage 3-D-R |
 | **Related files** | docs/adme/stage-3-d-kakao-oauth-secret-safety-attestation.md, docs/adme/stage-3-d-kakao-secret-rotation-preflight.md, apps/web/src/lib/rewards/kakao-secret-attestation.ts |
+
+---
+
+## ADME-DECISION-20260709-007
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-E는 Production full reward open이 아니라 controlled reward open approval preflight로 한정 |
+| **Status** | accepted |
+| **Decision** | Stage 3-E는 Production full reward open이 아니다. runtime fraud engine, controlled allowlist, kill switch, budget guard, ledger idempotency, monitoring, rollback 기준 충족 전 실제 reward open은 금지한다. cash_out과 partner_settlements actual processing은 Stage 3-E 범위에서 제외한다. |
+| **Reason** | 금전성 mutation을 열기 전 fraud/allowlist/budget/ledger/rollback 안전 기준을 먼저 코드·문서·검증 체계로 고정하기 위함 |
+| **Impact** | Stage 3-E diagnostics, fraud engine, verify scripts, product-policy, roadmap; Production reward open=false 및 kill switch=true 유지 |
+| **Implementation Stage** | Stage 3-E-Preflight |
+| **Related files** | docs/adme/stage-3-e-runtime-fraud-engine-controlled-open-preflight.md, apps/web/src/lib/rewards/fraud-engine.ts, apps/web/src/lib/rewards/reward-guards.ts |

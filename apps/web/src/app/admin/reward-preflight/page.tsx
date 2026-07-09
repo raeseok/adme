@@ -1,11 +1,13 @@
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
+import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default function RewardPreflightPage() {
   const s = getStage3DDiagnosticsState();
+  const e = getStage3EDiagnosticsState();
 
   return (
     <ShellCard title="AdMe Stage 3-D reward preflight">
@@ -288,6 +290,67 @@ export default function RewardPreflightPage() {
         <p>stage3DDevSupabaseRef={s.stage3DDevSupabaseRef}</p>
         <p>stage3DProdSupabaseRef={s.stage3DProdSupabaseRef}</p>
         <p>stage3DDeployCommit={s.stage3DDeployCommit}</p>
+      </section>
+      <section
+        aria-label="Stage 3-E runtime fraud engine controlled open preflight markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-purple-500 bg-purple-50 px-3 py-3 font-mono text-xs text-purple-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-E Runtime Fraud Engine Controlled Open Preflight
+        </p>
+        <p>stage3EBuild={e.stage3EBuild}</p>
+        <p>stage3EPreflightEnabled={String(e.stage3EPreflightEnabled)}</p>
+        <p>stage3EFraudEnginePresent={String(e.stage3EFraudEnginePresent)}</p>
+        <p>stage3EFraudEngineBuild={e.stage3EFraudEngineBuild}</p>
+        <p>stage3EFraudEngineServerOnly={String(e.stage3EFraudEngineServerOnly)}</p>
+        <p>stage3EFraudReasonCodeCount={e.stage3EFraudReasonCodeCount}</p>
+        <p>stage3EFraudReasonCodesDocumented={String(e.stage3EFraudReasonCodesDocumented)}</p>
+        <p>stage3EFraudDecisionShapeReady={String(e.stage3EFraudDecisionShapeReady)}</p>
+        <p>stage3EProductionRewardOpen={String(e.stage3EProductionRewardOpen)}</p>
+        <p>stage3EKillSwitch={String(e.stage3EKillSwitch)}</p>
+        <p>stage3EKillSwitchPriority={String(e.stage3EKillSwitchPriority)}</p>
+        <p>stage3EKillSwitchDecisionReason={e.stage3EKillSwitchDecisionReason}</p>
+        <p>stage3EControlledAllowlistDesigned={String(e.stage3EControlledAllowlistDesigned)}</p>
+        <p>stage3EControlledAllowlistActive={String(e.stage3EControlledAllowlistActive)}</p>
+        <p>stage3EControlledAllowlistRawExposed={String(e.stage3EControlledAllowlistRawExposed)}</p>
+        <p>stage3EControlledAllowlistUserCount={e.stage3EControlledAllowlistUserCount}</p>
+        <p>stage3EControlledAllowlistCampaignCount={e.stage3EControlledAllowlistCampaignCount}</p>
+        <p>stage3EControlledMaxRewardCountConfigured={String(e.stage3EControlledMaxRewardCountConfigured)}</p>
+        <p>stage3EControlledMaxRewardAmountPerUserConfigured={String(e.stage3EControlledMaxRewardAmountPerUserConfigured)}</p>
+        <p>stage3EControlledMaxTotalRewardAmountConfigured={String(e.stage3EControlledMaxTotalRewardAmountConfigured)}</p>
+        <p>stage3EControlledMaxCampaignSpendConfigured={String(e.stage3EControlledMaxCampaignSpendConfigured)}</p>
+        <p>stage3EControlledRewardWindowConfigured={String(e.stage3EControlledRewardWindowConfigured)}</p>
+        <p>stage3EControlledOperatorApprovalConfigured={String(e.stage3EControlledOperatorApprovalConfigured)}</p>
+        <p>stage3EProductionRewardPreflightOnly={String(e.stage3EProductionRewardPreflightOnly)}</p>
+        <p>stage3EProductionRewardMutation={String(e.stage3EProductionRewardMutation)}</p>
+        <p>stage3EProductionPointLedgerMutation={String(e.stage3EProductionPointLedgerMutation)}</p>
+        <p>stage3EProductionCampaignBudgetMutation={String(e.stage3EProductionCampaignBudgetMutation)}</p>
+        <p>stage3EProductionUsersBalanceMutation={String(e.stage3EProductionUsersBalanceMutation)}</p>
+        <p>stage3EProductionAdViewsMutation={String(e.stage3EProductionAdViewsMutation)}</p>
+        <p>stage3EProductionPartnerSettlementsMutation={String(e.stage3EProductionPartnerSettlementsMutation)}</p>
+        <p>stage3EProductionCashOutMutation={String(e.stage3EProductionCashOutMutation)}</p>
+        <p>stage3EStage3BProductionBlockMaintained={String(e.stage3EStage3BProductionBlockMaintained)}</p>
+        <p>stage3EStage3CProductionBlockMaintained={String(e.stage3EStage3CProductionBlockMaintained)}</p>
+        <p>stage3EPointLedgerIdempotencyGuard={String(e.stage3EPointLedgerIdempotencyGuard)}</p>
+        <p>stage3EPointLedgerDuplicateInsert={String(e.stage3EPointLedgerDuplicateInsert)}</p>
+        <p>stage3ECampaignBudgetAtomicityGuard={String(e.stage3ECampaignBudgetAtomicityGuard)}</p>
+        <p>stage3ECampaignBudgetNegativeAllowed={String(e.stage3ECampaignBudgetNegativeAllowed)}</p>
+        <p>stage3EUsersBalanceCacheConsistencyGuard={String(e.stage3EUsersBalanceCacheConsistencyGuard)}</p>
+        <p>stage3EAdViewsRewardMutationBlockedWhenFraudBlocked={String(e.stage3EAdViewsRewardMutationBlockedWhenFraudBlocked)}</p>
+        <p>stage3ECashOutOpen={String(e.stage3ECashOutOpen)}</p>
+        <p>stage3EPartnerSettlementsOpen={String(e.stage3EPartnerSettlementsOpen)}</p>
+        <p>stage3EQuizAnswerExposed={String(e.stage3EQuizAnswerExposed)}</p>
+        <p>stage3EAnswerHintExposed={String(e.stage3EAnswerHintExposed)}</p>
+        <p>stage3ERlsRelaxed={String(e.stage3ERlsRelaxed)}</p>
+        <p>stage3EServiceRoleExposed={String(e.stage3EServiceRoleExposed)}</p>
+        <p>stage3EPublicMarkerExposed={String(e.stage3EPublicMarkerExposed)}</p>
+        <p>stage3EOAuthCodeTokenExposed={String(e.stage3EOAuthCodeTokenExposed)}</p>
+        <p>stage3ESecretRawPartialHashDigestRecorded={String(e.stage3ESecretRawPartialHashDigestRecorded)}</p>
+        <p>stage3EMutationBlockedByFlags={String(e.stage3EMutationBlockedByFlags)}</p>
+        <p>stage3ECurrentSupabaseProjectRef={e.stage3ECurrentSupabaseProjectRef}</p>
+        <p>stage3EDevSupabaseRef={e.stage3EDevSupabaseRef}</p>
+        <p>stage3EProdSupabaseRef={e.stage3EProdSupabaseRef}</p>
+        <p>stage3EDeployCommit={e.stage3EDeployCommit}</p>
       </section>
     </ShellCard>
   );

@@ -15,6 +15,7 @@ import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
 import { getStage3BDiagnosticsState } from "@/lib/stage3/stage3b-full-transaction";
 import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnostics";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
+import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 
@@ -97,6 +98,7 @@ export default async function DiagnosticsPage() {
   const stage3B = getStage3BDiagnosticsState();
   const stage3C = getStage3CDiagnosticsState();
   const stage3D = getStage3DDiagnosticsState();
+  const stage3E = getStage3EDiagnosticsState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -287,6 +289,52 @@ export default async function DiagnosticsPage() {
           {stage3D.stage3DCurrentSupabaseProjectRef}
         </p>
         <p>stage3DDeployCommit={stage3D.stage3DDeployCommit}</p>
+      </section>
+      <section
+        aria-label="Stage 3-E runtime fraud engine controlled open preflight markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-purple-500 bg-purple-50 px-3 py-3 font-mono text-xs text-purple-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-E Runtime Fraud Engine · Controlled Open Preflight
+        </p>
+        <p>stage3EBuild={stage3E.stage3EBuild}</p>
+        <p>stage3EPreflightEnabled={String(stage3E.stage3EPreflightEnabled)}</p>
+        <p>stage3EFraudEnginePresent={String(stage3E.stage3EFraudEnginePresent)}</p>
+        <p>stage3EFraudEngineServerOnly={String(stage3E.stage3EFraudEngineServerOnly)}</p>
+        <p>stage3EFraudReasonCodesDocumented={String(stage3E.stage3EFraudReasonCodesDocumented)}</p>
+        <p>stage3EFraudDecisionShapeReady={String(stage3E.stage3EFraudDecisionShapeReady)}</p>
+        <p>stage3EProductionRewardOpen={String(stage3E.stage3EProductionRewardOpen)}</p>
+        <p>stage3EKillSwitch={String(stage3E.stage3EKillSwitch)}</p>
+        <p>stage3EKillSwitchPriority={String(stage3E.stage3EKillSwitchPriority)}</p>
+        <p>stage3EKillSwitchDecisionReason={stage3E.stage3EKillSwitchDecisionReason}</p>
+        <p>stage3EControlledAllowlistDesigned={String(stage3E.stage3EControlledAllowlistDesigned)}</p>
+        <p>stage3EControlledAllowlistActive={String(stage3E.stage3EControlledAllowlistActive)}</p>
+        <p>stage3EControlledAllowlistRawExposed={String(stage3E.stage3EControlledAllowlistRawExposed)}</p>
+        <p>stage3EProductionRewardMutation={String(stage3E.stage3EProductionRewardMutation)}</p>
+        <p>stage3EProductionPointLedgerMutation={String(stage3E.stage3EProductionPointLedgerMutation)}</p>
+        <p>stage3EProductionCampaignBudgetMutation={String(stage3E.stage3EProductionCampaignBudgetMutation)}</p>
+        <p>stage3EProductionUsersBalanceMutation={String(stage3E.stage3EProductionUsersBalanceMutation)}</p>
+        <p>stage3EProductionAdViewsMutation={String(stage3E.stage3EProductionAdViewsMutation)}</p>
+        <p>stage3EProductionPartnerSettlementsMutation={String(stage3E.stage3EProductionPartnerSettlementsMutation)}</p>
+        <p>stage3EProductionCashOutMutation={String(stage3E.stage3EProductionCashOutMutation)}</p>
+        <p>stage3EStage3BProductionBlockMaintained={String(stage3E.stage3EStage3BProductionBlockMaintained)}</p>
+        <p>stage3EStage3CProductionBlockMaintained={String(stage3E.stage3EStage3CProductionBlockMaintained)}</p>
+        <p>stage3EPointLedgerIdempotencyGuard={String(stage3E.stage3EPointLedgerIdempotencyGuard)}</p>
+        <p>stage3ECampaignBudgetAtomicityGuard={String(stage3E.stage3ECampaignBudgetAtomicityGuard)}</p>
+        <p>stage3ECashOutOpen={String(stage3E.stage3ECashOutOpen)}</p>
+        <p>stage3EPartnerSettlementsOpen={String(stage3E.stage3EPartnerSettlementsOpen)}</p>
+        <p>stage3EQuizAnswerExposed={String(stage3E.stage3EQuizAnswerExposed)}</p>
+        <p>stage3EAnswerHintExposed={String(stage3E.stage3EAnswerHintExposed)}</p>
+        <p>stage3ERlsRelaxed={String(stage3E.stage3ERlsRelaxed)}</p>
+        <p>stage3EServiceRoleExposed={String(stage3E.stage3EServiceRoleExposed)}</p>
+        <p>stage3EPublicMarkerExposed={String(stage3E.stage3EPublicMarkerExposed)}</p>
+        <p>stage3EOAuthCodeTokenExposed={String(stage3E.stage3EOAuthCodeTokenExposed)}</p>
+        <p>stage3ESecretRawPartialHashDigestRecorded={String(stage3E.stage3ESecretRawPartialHashDigestRecorded)}</p>
+        <p>stage3EMutationBlockedByFlags={String(stage3E.stage3EMutationBlockedByFlags)}</p>
+        <p>stage3ECurrentSupabaseProjectRef={stage3E.stage3ECurrentSupabaseProjectRef}</p>
+        <p>stage3EDevSupabaseRef={stage3E.stage3EDevSupabaseRef}</p>
+        <p>stage3EProdSupabaseRef={stage3E.stage3EProdSupabaseRef}</p>
+        <p>stage3EDeployCommit={stage3E.stage3EDeployCommit}</p>
       </section>
       <section
         aria-label="Stage 3-C consumer quiz submit UI controlled integration markers"

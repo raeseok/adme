@@ -31,6 +31,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-C** | consumer quiz submit UI controlled integration (server action → Stage 3-B RPC) |
 | **Stage 3-C-K / K2 / K3** | Production Kakao OAuth 보류 해소 → 진단 보강 → E2E 성공 + diagnostic redaction |
 | **Stage 3-D** | Production reward open **preflight** (mutation=false; kill switch/release flag/allowlist/audit 설계) |
+| **Stage 3-E-Preflight** | runtime fraud engine + controlled open approval preflight (actual open=false; mutation=false) |
 
 ---
 
@@ -51,7 +52,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-E** | Production reward **controlled open approval** (자동 진입 금지) | 명시 승인 후에만 |
+| **Stage 3-E-Controlled-Open** | Production reward **controlled open approval** (Stage 3-E-Preflight 완료·별도 명시 승인 후) | 명시 승인 후에만 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 | Auth parity | prod Google provider 정리 | 없음 |
 
@@ -66,8 +67,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 ## 권장 순서
 
 1. **Stage 3-D / 3-D-R** — preflight + Kakao OAuth Secret Safety Attestation **resolved** (reward open=false 유지)
-2. **Stage 3-E** — Production reward controlled open approval (명시 승인; 자동 진입 금지)
-3. 이후 **Stage 1-H** 또는 advertiser campaign authoring / cash_out 별도 Stage
+2. **Stage 3-E-Preflight** — runtime fraud engine, allowlist, kill switch, idempotency, budget atomicity, rollback 기준 검증
+3. **Stage 3-E-Controlled-Open** — Production reward controlled open approval (명시 승인; 자동 진입 금지)
+4. 이후 **Stage 1-H** 또는 advertiser campaign authoring / cash_out 별도 Stage
 
 ---
 
@@ -93,6 +95,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-C-K3** | ✅ 완료 (Kakao E2E 성공 기록 + diagnostic redaction) |
 | **Stage 3-D** | ✅ 완료 (preflight; mutation=false) |
 | **Stage 3-D-R** | ✅ Kakao OAuth Secret Safety Attestation resolved (rotationRequired=false; reward open=false) |
+| **Stage 3-E-Preflight** | 진행/검증 대상 (actual open=false; mutation=false) |
 
 ---
 
@@ -109,6 +112,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-C: `verify:stage3c-preflight-answer-hint-guard`, `verify:stage3c-client-direct-rpc-guard`, `verify:stage3c-quiz-answer-non-exposure`, `verify:stage3c-dev-ui-controlled-submit`, `verify:stage3c-production-reward-blocked`, `verify:stage3c-public-marker-guard`
 - Stage 3-C-K/K3: `verify:prod-kakao-oauth-authorize`, `verify:oauth-redaction-guard`
 - Stage 3-D / 3-D-R: `verify:stage3d-kakao-oauth-secret-safety-attestation`, `verify:stage3d-production-reward-blocked`, `verify:stage3d-release-flags`, `verify:stage3d-kakao-secret-redaction`, `verify:stage3d-quiz-answer-non-exposure`, `verify:stage3d-point-ledger-append-only`, `verify:stage3d-balance-cache-consistency-readonly`, `verify:stage3d-production-budget-safety-readonly`, `verify:stage3d-rls-guard`, `verify:stage3d-public-marker-guard`, `smoke:stage3d-reward-preflight-ui`
+- Stage 3-E-Preflight: `verify:stage3e-preflight`, `verify:stage3e-kill-switch`, `verify:stage3e-fraud-engine`, `verify:stage3e-idempotency`, `verify:stage3e-budget-atomicity`, `verify:stage3e-production-blocked`, `verify:stage3e-public-marker-guard`
 
 ---
 
@@ -125,6 +129,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md)
 - [stage-3-d-kakao-secret-rotation-preflight.md](./stage-3-d-kakao-secret-rotation-preflight.md) (superseded)
 - [stage-3-d-production-reward-preflight-result.md](./stage-3-d-production-reward-preflight-result.md)
+- [stage-3-e-runtime-fraud-engine-controlled-open-preflight.md](./stage-3-e-runtime-fraud-engine-controlled-open-preflight.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

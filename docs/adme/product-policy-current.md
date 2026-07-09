@@ -104,15 +104,16 @@ verify script는 **보조**이며, 화면 직접 점검을 대체하지 않는�
 - Stage 3-C-K3: Production Kakao OAuth E2E 성공 기록. Auth E2E 충족과 Production reward open은 분리 — reward open은 Stage 3-D preflight·별도 승인
 - Stage 3-D: Production reward open **preflight only**. `ADME_REWARD_KILL_SWITCH` 기본 ON, `ADME_PRODUCTION_REWARD_OPEN` 기본 false, controlled allowlist designed·active=false. partner_settlements / cash_out / PASS / 전자금융은 **비범위**
 - Stage 3-D-R: Kakao OAuth Secret Safety Attestation **완료**. 노출 의심 없으면 rotation 불필요(`rotationRequired=false`). secret 원문/일부/hash/digest 미기록. Production reward open 전제조건은 계속 유지(open=false)
+- Stage 3-E-Preflight: runtime fraud engine, controlled allowlist, kill switch priority, idempotency, budget atomicity, public marker guard를 준비·검증하는 approval preflight. **Production actual reward open은 아님**. open flag=false, kill switch=true, Production mutation=false 유지. cash_out / partner_settlements actual processing은 계속 비범위
 - advertiser/partner: consumer **raw** `point_ledger` row 직접 접근 금지 (aggregate DTO는 후속)
 - campaign budget / partner_settlements / cash_out actual 변경: **Production 금지**
-- Production actual enable은 **별도 승인** (Stage 3-E 후보)
+- Production actual enable은 **별도 승인** (Stage 3-E-Controlled-Open 후보)
 
-상세: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md) · [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md) · [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md) · [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md) · [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md) · [stage-3-d-production-reward-open-preflight.md](./stage-3-d-production-reward-open-preflight.md) · [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md)
+상세: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md) · [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md) · [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md) · [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md) · [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md) · [stage-3-d-production-reward-open-preflight.md](./stage-3-d-production-reward-open-preflight.md) · [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md) · [stage-3-e-runtime-fraud-engine-controlled-open-preflight.md](./stage-3-e-runtime-fraud-engine-controlled-open-preflight.md)
 
 ---
 
 ## machine marker 정책
 
-- stage30·stage1G·stage1GR·stage3A·stage3D 등 진단 marker: **`/admin/diagnostics` 및 `/admin/reward-preflight` only**
-- public route에 `stage3D` 문자열 자체 노출 금지 — verify public-marker-guard로 검증
+- stage30·stage1G·stage1GR·stage3A·stage3D·stage3E 등 진단 marker: **`/admin/diagnostics` 및 `/admin/reward-preflight` only**
+- public route에 `stage3D`/`stage3E` 문자열 자체 노출 금지 — verify public-marker-guard로 검증
