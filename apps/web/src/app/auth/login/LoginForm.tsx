@@ -3,19 +3,61 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { SessionSnapshot } from "@/lib/auth/session";
+import {
+  formatOAuthDiagnosticLines,
+  getOAuthUserMessage,
+  hasOAuthError,
+  parseOAuthErrorFromHash,
+  type OAuthErrorDetails,
+} from "@/lib/auth/oauth-error";
 import { loginAction, oauthSignInAction, signupAction } from "./actions";
+
+function readHashOAuthError(): OAuthErrorDetails | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const parsed = parseOAuthErrorFromHash(window.location.hash);
+  if (!hasOAuthError(parsed)) {
+    return null;
+  }
+  if (window.history.replaceState) {
+    const url = new URL(window.location.href);
+    url.hash = "";
+    window.history.replaceState(null, "", url.toString());
+  }
+  return parsed;
+}
 
 export function LoginForm({
   session,
   initialError,
+  oauthDiagnostic,
 }: {
   session: SessionSnapshot;
   initialError: string | null;
+  oauthDiagnostic?: OAuthErrorDetails & { callbackCodeMissing?: boolean };
 }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(initialError);
+  const [hashError] = useState(readHashOAuthError);
+  const [message, setMessage] = useState<string | null>(() => {
+    if (hashError) {
+      return getOAuthUserMessage(hashError);
+    }
+    return initialError;
+  });
+  const [diagnosticLines] = useState<string[]>(() => {
+    if (hashError) {
+      return formatOAuthDiagnosticLines(hashError, { callbackCodeMissing: true });
+    }
+    if (oauthDiagnostic && hasOAuthError(oauthDiagnostic)) {
+      return formatOAuthDiagnosticLines(oauthDiagnostic, {
+        callbackCodeMissing: oauthDiagnostic.callbackCodeMissing,
+      });
+    }
+    return [];
+  });
   const [isPending, startTransition] = useTransition();
   const [oauthPending, startOAuthTransition] = useTransition();
 
@@ -146,9 +188,19 @@ export function LoginForm({
       </form>
 
       {message ? (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          {message}
-        </p>
+        <div className="space-y-2">
+          <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {message}
+          </p>
+          {diagnosticLines.length > 0 ? (
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
+              <p className="font-medium text-zinc-800">OAuth 진단</p>
+              {diagnosticLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <Link
