@@ -362,3 +362,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-G design 문서, product policy, roadmap, admin marker, public marker guard, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, `partner_settlements` mutation=false 유지 |
 | **Implementation Stage** | Stage 3-G-Partner-Settlement-Manual-Approval-Design |
 | **Related files** | docs/adme/stage-3-g-partner-settlement-manual-approval-design.md, docs/adme/stage-3-g-partner-settlement-attribution-policy.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/rewards/stage3g-partner-settlement-manual-approval.ts |
+
+---
+
+## ADME-DECISION-20260709-012
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-H Legal / Tax / Payment Compliance Review Gate |
+| **Status** | accepted |
+| **Decision** | actual reward open 전 법무/세무/결제 규제 검토를 별도 gate로 분리한다. Stage 3-H는 문서·SSOT·admin preflight·검증만 수행한다. DB migration 및 Production mutation은 금지한다. 전자금융거래법/소득세/개인정보/광고성 정보/약관/파트너계약 검토 완료 전 actual open은 금지한다. 모든 핵심 판단은 external legal and tax review 전까지 pending_external_legal_tax_review, requires_counsel 또는 undetermined 상태로 둔다. |
+| **Reason** | Production reward open, cash-out actual processing, partner settlement actual generation 전에 법무·세무·결제 리스크와 blocker를 machine-readable gate로 고정하기 위함 |
+| **Impact** | Stage 3-H compliance SSOT, admin marker, product policy, roadmap, legal/tax review questionnaire, public marker guard, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-H-Legal-Tax-Payment-Compliance-Review |
+| **Related files** | docs/adme/stage-3-h-legal-tax-payment-compliance-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3h-legal-tax-payment-compliance.ts, apps/web/src/app/admin/compliance-preflight/page.tsx |

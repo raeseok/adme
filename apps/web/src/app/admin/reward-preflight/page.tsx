@@ -1,4 +1,5 @@
 import { ShellCard } from "@/components/ShellCard";
+import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
 import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
 import { getStage3FCashOutManualApprovalState } from "@/lib/rewards/stage3f-cash-out-manual-approval";
 import { getStage3GPartnerSettlementManualApprovalState } from "@/lib/rewards/stage3g-partner-settlement-manual-approval";
@@ -14,6 +15,7 @@ export default function RewardPreflightPage() {
   const approval = getStage3EControlledOpenApprovalState();
   const cashOut = getStage3FCashOutManualApprovalState();
   const partnerSettlement = getStage3GPartnerSettlementManualApprovalState();
+  const compliance = getStage3HLegalTaxPaymentComplianceState();
 
   return (
     <ShellCard title="AdMe Stage 3-D reward preflight">
@@ -28,6 +30,23 @@ export default function RewardPreflightPage() {
           ← diagnostics 요약
         </Link>
       </p>
+
+      <section
+        aria-label="Stage 3-H legal tax payment compliance review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-amber-500 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Legal / Tax / Payment Compliance Review
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open is blocked pending external legal and tax review
+        </p>
+        {Object.entries(compliance).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-E controlled open approval markers"

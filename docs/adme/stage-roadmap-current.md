@@ -35,7 +35,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-E-Controlled-Open-Approval** | controlled open 실행 전 approval package 완료 인정 (actual open=false; mutation=false) |
 | **Stage 3-E-Controlled-Open-Approval-R** | approval marker/guard 보강 완료 인정 (reward open flag=false; kill switch=true; allowlist active=false) |
 | **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (`advertisers.partner_id`; monthly close; mutation=false) |
-| **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | Partner settlement manual approval design preflight (`settlement_share_rate_snapshot`, `(partner_id, settlement_month)`, `pending -> confirmed -> paid`, paid update blocked, `chargeback next month`, `partners.status='terminated'`, do not null advertiser partner_id; actual processing=false; mutation=false; DB migration=false) |
+| **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | 완료 인정: Partner settlement manual approval design preflight (`settlement_share_rate_snapshot`, `(partner_id, settlement_month)`, `pending -> confirmed -> paid`, paid update blocked, `chargeback next month`, `partners.status='terminated'`, do not null advertiser partner_id; actual processing=false; mutation=false; DB migration=false) |
 
 ---
 
@@ -56,9 +56,10 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
-| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보 | 별도 명시 승인 전 보류 |
-| Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation | 별도 승인 필요 |
-| Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation | 별도 Stage까지 미구현 |
+| **Stage 3-H-Legal-Tax-Payment-Compliance-Review** | Legal / Tax / Payment Compliance Review. documentation/preflight only, no mutation, no migration | 없음 |
+| **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보. requires explicit owner approval after Stage 3-H and external review | 별도 명시 승인 전 보류 |
+| Cash-out actual processing | `cash_redemption_requests` 신청/승인/이체/복구 actual implementation. requires explicit owner approval after Stage 3-H and external review | 별도 승인 필요 |
+| Partner settlement actual generation | `partner_settlements` monthly close 생성, batch RPC, paid update block trigger, chargeback implementation. requires explicit owner approval after Stage 3-H and external review | 별도 Stage까지 미구현 |
 | Auto bank transfer API | 자동 계좌이체 연동 | MVP 제외 또는 파일럿 검증 이후 |
 | **Stage 1-H** | (후보) 프로필·매칭 후속 확장 | TBD |
 | Auth parity | prod Google provider 정리 | 없음 |
@@ -79,8 +80,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 4. **Stage 3-F-Cash-out-Manual-Approval-Design** — reward actual open 전 cash-out 운영 리스크를 설계·marker·verify로 고정
 5. **Stage 3-F-R Addendum** — Partner Settlement Manual Approval Design 전 attribution policy lock (`advertisers.partner_id`; partner_settlements mutation=false)
 6. **Stage 3-G-Partner-Settlement-Manual-Approval-Design** — 정산 수동 승인 구조를 설계·marker·verify로 고정(actual processing=false)
-7. **Stage 3-E-Controlled-Open-Execution** — 별도 명시 승인 문장 없이는 진입 금지
-8. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
+7. **Stage 3-H-Legal-Tax-Payment-Compliance-Review** — Legal / Tax / Payment Compliance Review를 documentation/preflight only로 고정(no mutation, no migration)
+8. **Stage 3-E-Controlled-Open-Execution** — Stage 3-H 및 external review 이후 별도 명시 승인 문장 없이는 진입 금지
+9. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -111,7 +113,8 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-E-Controlled-Open-Approval-R** | ✅ 완료 인정 (marker/guard 보강; reward open=false) |
 | **Stage 3-F-Cash-out-Manual-Approval-Design** | ✅ 완료 인정 (design only; cash-out actual processing=false) |
 | **Stage 3-F-R Addendum** | Partner settlement attribution policy locked (policy only; partner_settlements mutation=false) |
-| **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | 진행/완료 후보 (design only; partner settlement actual processing=false) |
+| **Stage 3-G-Partner-Settlement-Manual-Approval-Design** | ✅ 완료 인정 (design only; partner settlement actual processing=false) |
+| **Stage 3-H-Legal-Tax-Payment-Compliance-Review** | 다음 단계 / 진행 후보 (documentation/preflight only; no mutation; no migration) |
 | **Stage 3-E-Controlled-Open-Execution** | 명시 승인 전 보류 |
 | **Cash-out actual processing** | 별도 승인 필요 |
 | **Partner settlement actual generation** | 별도 승인 필요 |
@@ -136,6 +139,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-E-Controlled-Open-Approval: `verify:stage3e-controlled-open-approval`, `verify:stage3e-controlled-open-production-blocked`, `verify:stage3e-controlled-open-public-marker-guard`, `verify:stage3e-controlled-open-no-mutation`, `verify:stage3e-controlled-open-redaction`, `verify:stage3e-controlled-open-limits`
 - Stage 3-F-Cash-out-Manual-Approval-Design: `verify:stage3f-cash-out-design`
 - Stage 3-G-Partner-Settlement-Manual-Approval-Design: `verify:stage3g-partner-settlement-design`
+- Stage 3-H-Legal-Tax-Payment-Compliance-Review: `verify:stage3h-compliance-review`
 
 ---
 
@@ -158,6 +162,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md)
 - [stage-3-g-partner-settlement-attribution-policy.md](./stage-3-g-partner-settlement-attribution-policy.md)
 - [stage-3-g-partner-settlement-manual-approval-design.md](./stage-3-g-partner-settlement-manual-approval-design.md)
+- [stage-3-h-legal-tax-payment-compliance-review.md](./stage-3-h-legal-tax-payment-compliance-review.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

@@ -9,6 +9,7 @@ import {
   isSupabaseUrlConfigured,
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
+import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
@@ -105,6 +106,7 @@ export default async function DiagnosticsPage() {
   const stage3EApproval = getStage3EControlledOpenApprovalState();
   const stage3FCashOut = getStage3FCashOutManualApprovalState();
   const stage3GPartnerSettlement = getStage3GPartnerSettlementManualApprovalState();
+  const stage3HCompliance = getStage3HLegalTaxPaymentComplianceState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -119,6 +121,22 @@ export default async function DiagnosticsPage() {
           Stage 3-D reward preflight 상세 →
         </Link>
       </p>
+      <section
+        aria-label="Stage 3-H legal tax payment compliance review markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-amber-500 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Legal / Tax / Payment Compliance Review
+        </p>
+        <p className="font-sans text-sm">
+          Actual reward open is blocked pending external legal and tax review
+        </p>
+        {Object.entries(stage3HCompliance).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
       <section
         aria-label="Stage 3-E controlled open approval markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-fuchsia-500 bg-fuchsia-50 px-3 py-3 font-mono text-xs text-fuchsia-950"
