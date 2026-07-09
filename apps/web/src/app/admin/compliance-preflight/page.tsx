@@ -1,11 +1,13 @@
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
+import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default function CompliancePreflightPage() {
   const compliance = getStage3HLegalTaxPaymentComplianceState();
+  const externalReviewPackage = getStage3HRExternalReviewPackageState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -39,6 +41,27 @@ export default function CompliancePreflightPage() {
           Reward preflight 상세 →
         </Link>
       </p>
+
+      <section
+        aria-label="Stage 3-H-R external legal tax review package markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-orange-500 bg-orange-50 px-3 py-3 font-mono text-xs text-orange-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          External Legal / Tax Review Package
+        </p>
+        <p className="font-sans text-sm">
+          External legal and tax review package is prepared
+        </p>
+        <p className="font-sans text-sm">External review is not completed</p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        {Object.entries(externalReviewPackage).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
 
       <section
         aria-label="Stage 3-H legal tax payment compliance review markers"

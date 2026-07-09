@@ -109,11 +109,12 @@ verify script는 **보조**이며, 화면 직접 점검을 대체하지 않는�
 - Stage 3-F-Cash-out-Manual-Approval-Design: 실제 reward mutation 전에 cash-out 운영 리스크를 먼저 고정한다. 최소 전환 금액은 10,000P, MVP 처리 방식은 관리자 수동 승인 + 수동 이체, 자동이체 API는 MVP 제외다. cash-out actual processing=false, cash-out mutation=false이며 Production reward open gate와 cash-out processing gate는 별도 승인으로 분리한다
 - Stage 3-G-Partner-Settlement-Manual-Approval-Design: partner attribution lock을 전제로 정산 수동 승인 구조를 설계·문서·admin marker·verify contract로만 고정한다. partner settlement actual processing=false, `partner_settlements` mutation=false, monthly close batch=false, partner payout action=false이며 DB migration은 없다
 - Stage 3-H-Legal-Tax-Payment-Compliance-Review: actual reward open 전 external legal and tax review를 별도 compliance gate로 둔다. electronic financial transaction / prepaid / withholding / privacy policy / commercial ad consent / point terms / advertiser terms / partner agreement 검토가 필요하며, 모든 판단은 pending_external_legal_tax_review 또는 undetermined 상태다. Stage 3-E-Controlled-Open-Execution은 계속 blocked, cash-out actual processing blocked, partner settlement actual processing blocked, DB migration blocked다
+- Stage 3-H-R-External-Review-Package: external legal and tax review package prepared 상태를 기록한다. legal counsel questionnaire, tax accountant questionnaire, external counsel attestation template은 준비되었지만 external review completed=false, legal approval recorded=false, tax approval recorded=false다. actual open blocked, DB migration blocked, Production mutation=false 상태를 유지한다
 - advertiser/partner: consumer **raw** `point_ledger` row 직접 접근 금지 (aggregate DTO는 후속)
 - campaign budget / partner_settlements / cash_out actual 변경: **Production 금지**
 - Production actual enable은 **별도 승인** (Stage 3-E-Controlled-Open-Execution 후보). reward full open, cash_out actual processing, partner_settlements actual processing은 계속 금지
 
-상세: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md) · [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md) · [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md) · [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md) · [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md) · [stage-3-d-production-reward-open-preflight.md](./stage-3-d-production-reward-open-preflight.md) · [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md) · [stage-3-e-runtime-fraud-engine-controlled-open-preflight.md](./stage-3-e-runtime-fraud-engine-controlled-open-preflight.md) · [stage-3-e-controlled-open-approval.md](./stage-3-e-controlled-open-approval.md) · [stage-3-e-controlled-open-runbook.md](./stage-3-e-controlled-open-runbook.md) · [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md) · [stage-3-g-partner-settlement-attribution-policy.md](./stage-3-g-partner-settlement-attribution-policy.md) · [stage-3-g-partner-settlement-manual-approval-design.md](./stage-3-g-partner-settlement-manual-approval-design.md) · [stage-3-h-legal-tax-payment-compliance-review.md](./stage-3-h-legal-tax-payment-compliance-review.md)
+상세: [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md) · [stage-3-a-point-ledger-dev-dry-run-result.md](./stage-3-a-point-ledger-dev-dry-run-result.md) · [stage-3-b-quiz-reward-full-transaction-dev-only.md](./stage-3-b-quiz-reward-full-transaction-dev-only.md) · [stage-3-c-consumer-quiz-submit-ui-controlled-integration.md](./stage-3-c-consumer-quiz-submit-ui-controlled-integration.md) · [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md) · [stage-3-d-production-reward-open-preflight.md](./stage-3-d-production-reward-open-preflight.md) · [stage-3-d-kakao-oauth-secret-safety-attestation.md](./stage-3-d-kakao-oauth-secret-safety-attestation.md) · [stage-3-e-runtime-fraud-engine-controlled-open-preflight.md](./stage-3-e-runtime-fraud-engine-controlled-open-preflight.md) · [stage-3-e-controlled-open-approval.md](./stage-3-e-controlled-open-approval.md) · [stage-3-e-controlled-open-runbook.md](./stage-3-e-controlled-open-runbook.md) · [stage-3-f-cash-out-manual-approval-design.md](./stage-3-f-cash-out-manual-approval-design.md) · [stage-3-g-partner-settlement-attribution-policy.md](./stage-3-g-partner-settlement-attribution-policy.md) · [stage-3-g-partner-settlement-manual-approval-design.md](./stage-3-g-partner-settlement-manual-approval-design.md) · [stage-3-h-legal-tax-payment-compliance-review.md](./stage-3-h-legal-tax-payment-compliance-review.md) · [stage-3-h-r-external-review-package.md](./stage-3-h-r-external-review-package.md)
 
 ---
 
@@ -185,10 +186,21 @@ verify script는 **보조**이며, 화면 직접 점검을 대체하지 않는�
 
 ---
 
+## Stage 3-H-R External Review Package
+
+- Stage 3-H-R은 외부 법무법인·세무사에게 전달할 검토 패키지와 회신 반영용 attestation template 준비 단계다.
+- external review package prepared=true, legal counsel questionnaire prepared=true, tax accountant questionnaire prepared=true, attestation template prepared=true다.
+- external review completed=false, legal approval recorded=false, tax approval recorded=false 상태를 유지한다.
+- actual open allowed=false, DB migration allowed=false, Production reward/point_ledger/cash_redemption_requests/partner_settlements mutation=false 상태를 유지한다.
+- 외부 자문 결과 없이 등록 면제, 원천징수 면제, 법률·세무 리스크 없음 같은 확정값은 기록하지 않는다.
+
+---
+
 ## machine marker 정책
 
 - stage30·stage1G·stage1GR·stage3A·stage3D·stage3E·stage3F 등 진단 marker: **admin route only**
 - Stage 3-F marker는 `/admin/diagnostics`, `/admin/reward-preflight`, `/admin/cash-out-preflight`에만 노출
 - Stage 3-G marker는 `/admin/diagnostics`, `/admin/reward-preflight`, `/admin/partner-settlement-preflight`에만 노출
 - Stage 3-H marker는 `/admin/diagnostics`, `/admin/reward-preflight`, `/admin/compliance-preflight`에만 노출
-- public route에 `stage3D`/`stage3E`/`stage3F`/`stage3G`/`stage3H` 문자열 자체 노출 금지 — verify public-marker-guard로 검증
+- Stage 3-H-R marker는 `/admin/diagnostics`, `/admin/compliance-preflight`에만 노출
+- public route에 `stage3D`/`stage3E`/`stage3F`/`stage3G`/`stage3H`/`stage3HR` 문자열 자체 노출 금지 — verify public-marker-guard로 검증

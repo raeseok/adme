@@ -377,3 +377,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-H compliance SSOT, admin marker, product policy, roadmap, legal/tax review questionnaire, public marker guard, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
 | **Implementation Stage** | Stage 3-H-Legal-Tax-Payment-Compliance-Review |
 | **Related files** | docs/adme/stage-3-h-legal-tax-payment-compliance-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3h-legal-tax-payment-compliance.ts, apps/web/src/app/admin/compliance-preflight/page.tsx |
+
+---
+
+## ADME-DECISION-20260709-013
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | External Legal / Tax Review Package Before Actual Reward Open |
+| **Status** | accepted |
+| **Decision** | 외부 검토 패키지와 attestation 양식을 actual open 전 별도 단계로 분리한다. external review completed=false 상태에서는 actual open allowed=false다. Stage 3-H-R에서는 DB migration 및 Production mutation을 금지한다. 법무/세무 자문 결과 없이 등록 면제, 원천징수 면제 등 확정값을 기록하지 않는다. |
+| **Reason** | Stage 3-H compliance gate 이후 외부 법무법인·세무사에게 전달할 자료와 회신 기록 양식을 분리해 actual open 전 검토 증빙과 blocker를 명확히 유지하기 위함 |
+| **Impact** | Stage 3-H-R external review package, legal counsel questionnaire, tax accountant questionnaire, attestation template, admin compliance/diagnostics marker, verify script. Production reward open=false, reward kill switch=true, allowlist active=false, cash-out actual processing=false, partner settlement actual processing=false, DB migration=false 유지 |
+| **Implementation Stage** | Stage 3-H-R-External-Review-Package |
+| **Related files** | docs/adme/stage-3-h-r-external-review-package.md, docs/adme/external-review/legal-counsel-questionnaire.md, docs/adme/external-review/tax-accountant-questionnaire.md, docs/adme/external-review/external-counsel-attestation-template.md, apps/web/src/lib/compliance/stage3hr-external-review-package.ts |

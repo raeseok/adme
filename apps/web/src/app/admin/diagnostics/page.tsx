@@ -10,6 +10,7 @@ import {
 } from "@/lib/deploy-info";
 import { ShellCard } from "@/components/ShellCard";
 import { getStage3HLegalTaxPaymentComplianceState } from "@/lib/compliance/stage3h-legal-tax-payment-compliance";
+import { getStage3HRExternalReviewPackageState } from "@/lib/compliance/stage3hr-external-review-package";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
@@ -107,6 +108,7 @@ export default async function DiagnosticsPage() {
   const stage3FCashOut = getStage3FCashOutManualApprovalState();
   const stage3GPartnerSettlement = getStage3GPartnerSettlementManualApprovalState();
   const stage3HCompliance = getStage3HLegalTaxPaymentComplianceState();
+  const stage3HRExternalReviewPackage = getStage3HRExternalReviewPackageState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -121,6 +123,26 @@ export default async function DiagnosticsPage() {
           Stage 3-D reward preflight 상세 →
         </Link>
       </p>
+      <section
+        aria-label="Stage 3-H-R external legal tax review package markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-orange-500 bg-orange-50 px-3 py-3 font-mono text-xs text-orange-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          External Legal / Tax Review Package
+        </p>
+        <p className="font-sans text-sm">
+          External legal and tax review package is prepared
+        </p>
+        <p className="font-sans text-sm">External review is not completed</p>
+        <p className="font-sans text-sm">
+          Actual reward open remains blocked
+        </p>
+        {Object.entries(stage3HRExternalReviewPackage).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
       <section
         aria-label="Stage 3-H legal tax payment compliance review markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-amber-500 bg-amber-50 px-3 py-3 font-mono text-xs text-amber-950"
