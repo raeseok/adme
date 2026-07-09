@@ -97,8 +97,9 @@ Consumer UI (QuizSubmitControlledPanel)
 - Stage 2-A fixture campaign(`stage2a-fixture-*`)은 controlled integration 대상 아님
 - Production reward open은 별도 Stage 승인 필요
 - Playwright 기반 full UI E2E는 dev Supabase + 배포 환경 전제
+- Production Kakao OAuth E2E는 Stage 3-C-K3에서 성공 기록 ([stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md))
 
 ## 다음 후보 Stage
 
-- **Stage 3-D** — Production reward open preflight (별도 승인)
+- **Stage 3-D** — Production reward open preflight (별도 승인; Auth E2E는 K3에서 충족)
 - advertiser campaign authoring / settlement / cash-out 순서는 새 채팅에서 설계

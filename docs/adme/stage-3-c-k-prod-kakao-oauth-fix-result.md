@@ -60,4 +60,5 @@ OAuth 수정 후에도 Production reward mutation=false, quiz_answer exposure=fa
 
 ## 다음 Stage
 
-Stage 3-D 착수 가능 (Production reward open은 별도 승인).
+Stage 3-D 착수 전 Auth E2E는 Stage 3-C-K3에서 충족. Production reward open은 별도 preflight·승인 필요.  
+상세: [stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md](./stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md)

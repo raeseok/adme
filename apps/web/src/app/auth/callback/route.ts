@@ -3,6 +3,7 @@ import {
   buildOAuthErrorLoginSearchParams,
   parseOAuthErrorFromSearchParams,
   hasOAuthError,
+  summarizeOAuthErrorDescription,
 } from "@/lib/auth/oauth-error";
 import { safeNextPath } from "@/lib/auth/oauth";
 import { createClient } from "@/lib/supabase/server";
@@ -24,25 +25,68 @@ function buildHashCaptureHtml(origin: string, nextPath: string): string {
       var hash = window.location.hash || "";
       var query = window.location.search || "";
       var target = new URL(loginBase);
+
+      function summarizeDescription(value) {
+        if (!value) return null;
+        var lowered = String(value).toLowerCase();
+        if (
+          lowered.indexOf("unable to exchange external code") !== -1 ||
+          lowered.indexOf("exchange external code") !== -1 ||
+          lowered.indexOf("external code") !== -1
+        ) {
+          return "external_code_exchange_failed";
+        }
+        if (
+          lowered.indexOf("invalid_client") !== -1 ||
+          lowered.indexOf("bad client credentials") !== -1 ||
+          lowered.indexOf("client credentials") !== -1
+        ) {
+          return "invalid_client_credentials";
+        }
+        if (
+          lowered.indexOf("email") !== -1 &&
+          (lowered.indexOf("not provided") !== -1 ||
+            lowered.indexOf("missing") !== -1 ||
+            lowered.indexOf("from external provider") !== -1)
+        ) {
+          return "email_not_provided";
+        }
+        if (
+          lowered.indexOf("provider is not enabled") !== -1 ||
+          lowered.indexOf("unsupported provider") !== -1
+        ) {
+          return "provider_not_enabled";
+        }
+        if (lowered.indexOf("database") !== -1 || lowered.indexOf("saving new user") !== -1) {
+          return "database_user_save_failed";
+        }
+        if (/[A-Za-z0-9_-]{24,}/.test(String(value))) {
+          return "oauth_provider_error_redacted";
+        }
+        return "oauth_provider_error";
+      }
+
+      function applySafeParams(source) {
+        var error = source.get("error");
+        var errorCode = source.get("error_code");
+        var description = source.get("error_description");
+        if (error && /^[A-Za-z0-9_.-]{1,64}$/.test(error) && error.length < 24) {
+          target.searchParams.set("oauth_error", error.toLowerCase());
+        }
+        if (errorCode && /^[A-Za-z0-9_.-]{1,64}$/.test(errorCode) && errorCode.length < 40) {
+          target.searchParams.set("oauth_error_code", errorCode.toLowerCase());
+        }
+        var summary = summarizeDescription(description);
+        if (summary) {
+          target.searchParams.set("oauth_error_summary", summary);
+        }
+      }
+
       if (hash.length > 1) {
-        var hashParams = new URLSearchParams(hash.slice(1));
-        ["error", "error_code", "error_description"].forEach(function (key) {
-          var value = hashParams.get(key);
-          if (!value) return;
-          if (key === "error") target.searchParams.set("oauth_error", value);
-          if (key === "error_code") target.searchParams.set("oauth_error_code", value);
-          if (key === "error_description") target.searchParams.set("oauth_error_description", value);
-        });
+        applySafeParams(new URLSearchParams(hash.slice(1)));
       }
       if (!target.searchParams.get("oauth_error") && query.length > 1) {
-        var queryParams = new URLSearchParams(query.slice(1));
-        ["error", "error_code", "error_description"].forEach(function (key) {
-          var value = queryParams.get(key);
-          if (!value) return;
-          if (key === "error") target.searchParams.set("oauth_error", value);
-          if (key === "error_code") target.searchParams.set("oauth_error_code", value);
-          if (key === "error_description") target.searchParams.set("oauth_error_description", value);
-        });
+        applySafeParams(new URLSearchParams(query.slice(1)));
       }
       target.searchParams.set("callback_code_missing", "true");
       if (nextPath && nextPath !== "/consumer/profile") {
@@ -75,9 +119,16 @@ export async function GET(request: Request) {
   }
 
   if (hasOAuthError(oauthError)) {
-    const params = buildOAuthErrorLoginSearchParams(oauthError, {
-      callbackCodeMissing: true,
-    });
+    const params = buildOAuthErrorLoginSearchParams(
+      {
+        error: oauthError.error,
+        errorCode: oauthError.errorCode,
+        errorSummary:
+          oauthError.errorSummary ??
+          summarizeOAuthErrorDescription(searchParams.get("error_description")),
+      },
+      { callbackCodeMissing: true },
+    );
     return NextResponse.redirect(`${origin}/auth/login?${params.toString()}`);
   }
 

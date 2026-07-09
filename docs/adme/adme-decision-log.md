@@ -244,3 +244,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | verify:prod-kakao-oauth-authorize, stage-3-c-k-prod-kakao-oauth-fix-result.md |
 | **Implementation Stage** | Stage 3-C-K |
 | **Related files** | docs/adme/stage-3-c-k-prod-kakao-oauth-fix-result.md, apps/web/scripts/verify-prod-kakao-oauth-authorize.mjs |
+
+---
+
+## ADME-DECISION-20260709-004
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-09 |
+| **Title** | Stage 3-C-K3 Production Kakao OAuth E2E 정상화 및 OAuth diagnostic redaction |
+| **Status** | implemented |
+| **Decision** | Production Kakao OAuth는 (1) prod Supabase provider backend 활성화, (2) Kakao Developers prod callback URI 등록, (3) Client Secret 정합성 확보 후 정상화되었다. OAuth 진단 UI는 `error`/`error_code`/요약(`oauthErrorSummary`)만 public 화면에 표시하고, external code·authorization code·access/refresh token·client_secret 원문·일부를 노출하지 않는 redaction 정책을 적용한다. Stage 3-D 착수 전 Auth E2E 성공 조건은 충족되었으나, Production reward open은 별도 preflight·승인을 거쳐야 한다. |
+| **Reason** | K/K2에서 provider·redirect·credentials 오류를 순차 해소했고, K2 진단 UI의 description 원문 표시로 code 일부 노출 위험이 남아 보안 보강이 필요했다. |
+| **Impact** | oauth-error redaction, verify:oauth-redaction-guard, stage-3-c-k3 문서, Stage 3-D 착수 전제 |
+| **Implementation Stage** | Stage 3-C-K3 |
+| **Related files** | docs/adme/stage-3-c-k3-kakao-oauth-e2e-and-redaction-result.md, apps/web/src/lib/auth/oauth-error.ts, apps/web/scripts/verify-oauth-redaction-guard.mjs |

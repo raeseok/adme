@@ -3,36 +3,67 @@ const OAUTH_SECRET_QUERY_KEYS = new Set([
   "token",
   "access_token",
   "refresh_token",
+  "id_token",
   "provider_token",
   "provider_refresh_token",
+  "client_secret",
+  "authorization_code",
+]);
+
+const SAFE_ERROR_CODES = new Set([
+  "server_error",
+  "access_denied",
+  "invalid_request",
+  "unauthorized_client",
+  "unsupported_response_type",
+  "invalid_scope",
+  "temporarily_unavailable",
+  "unexpected_failure",
+  "validation_failed",
+  "provider_disabled",
+  "oauth_provider_not_supported",
+  "bad_oauth_callback",
+  "bad_oauth_state",
+  "email_address_not_provided",
 ]);
 
 export type OAuthErrorDetails = {
   error: string | null;
   errorCode: string | null;
-  errorDescription: string | null;
+  /** Never a raw provider description — only a short safe summary key. */
+  errorSummary: string | null;
 };
 
 export function parseOAuthErrorFromSearchParams(
   searchParams: URLSearchParams,
 ): OAuthErrorDetails {
+  const rawDescription =
+    searchParams.get("error_description") ??
+    searchParams.get("oauth_error_description") ??
+    null;
+  const summaryFromParam = sanitizeOAuthSummaryValue(
+    searchParams.get("oauth_error_summary"),
+  );
+
   return {
-    error: sanitizeOAuthErrorValue(searchParams.get("error")),
-    errorCode: sanitizeOAuthErrorValue(searchParams.get("error_code")),
-    errorDescription: sanitizeOAuthErrorValue(searchParams.get("error_description")),
+    error: sanitizeOAuthErrorCode(searchParams.get("error") ?? searchParams.get("oauth_error")),
+    errorCode: sanitizeOAuthErrorCode(
+      searchParams.get("error_code") ?? searchParams.get("oauth_error_code"),
+    ),
+    errorSummary: summaryFromParam ?? summarizeOAuthErrorDescription(rawDescription),
   };
 }
 
 export function parseOAuthErrorFromHash(hash: string): OAuthErrorDetails {
   if (!hash || hash === "#") {
-    return { error: null, errorCode: null, errorDescription: null };
+    return { error: null, errorCode: null, errorSummary: null };
   }
   const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
   return parseOAuthErrorFromSearchParams(params);
 }
 
 export function hasOAuthError(details: OAuthErrorDetails): boolean {
-  return Boolean(details.error || details.errorCode || details.errorDescription);
+  return Boolean(details.error || details.errorCode || details.errorSummary);
 }
 
 export function buildOAuthErrorLoginSearchParams(
@@ -46,8 +77,8 @@ export function buildOAuthErrorLoginSearchParams(
   if (details.errorCode) {
     params.set("oauth_error_code", details.errorCode);
   }
-  if (details.errorDescription) {
-    params.set("oauth_error_description", details.errorDescription);
+  if (details.errorSummary) {
+    params.set("oauth_error_summary", details.errorSummary);
   }
   if (options?.callbackCodeMissing) {
     params.set("callback_code_missing", "true");
@@ -73,8 +104,8 @@ export function formatOAuthDiagnosticLines(
   if (details.errorCode) {
     lines.push(`oauthErrorCode=${details.errorCode}`);
   }
-  if (details.errorDescription) {
-    lines.push(`oauthErrorDescription=${details.errorDescription}`);
+  if (details.errorSummary) {
+    lines.push(`oauthErrorSummary=${details.errorSummary}`);
   }
   if (options?.callbackCodeMissing) {
     lines.push("callbackCodeMissing=true");
@@ -82,18 +113,114 @@ export function formatOAuthDiagnosticLines(
   return lines;
 }
 
-function sanitizeOAuthErrorValue(value: string | null): string | null {
+/** Maps raw provider/auth descriptions to a short safe summary. Never returns secrets. */
+export function summarizeOAuthErrorDescription(value: string | null): string | null {
   if (!value) {
     return null;
   }
-  const trimmed = value.trim();
-  if (!trimmed || trimmed.length > 200) {
+  const lowered = value.toLowerCase();
+
+  if (
+    lowered.includes("unable to exchange external code") ||
+    lowered.includes("exchange external code") ||
+    lowered.includes("external code")
+  ) {
+    return "external_code_exchange_failed";
+  }
+  if (
+    lowered.includes("invalid_client") ||
+    lowered.includes("bad client credentials") ||
+    lowered.includes("client credentials")
+  ) {
+    return "invalid_client_credentials";
+  }
+  if (
+    lowered.includes("email") &&
+    (lowered.includes("not provided") ||
+      lowered.includes("missing") ||
+      lowered.includes("from external provider"))
+  ) {
+    return "email_not_provided";
+  }
+  if (lowered.includes("provider is not enabled") || lowered.includes("unsupported provider")) {
+    return "provider_not_enabled";
+  }
+  if (lowered.includes("database") || lowered.includes("saving new user")) {
+    return "database_user_save_failed";
+  }
+  if (containsSecretMaterial(value)) {
+    return "oauth_provider_error_redacted";
+  }
+  return "oauth_provider_error";
+}
+
+function sanitizeOAuthErrorCode(value: string | null): string | null {
+  if (!value) {
     return null;
   }
-  if (/[A-Za-z0-9_-]{32,}/.test(trimmed)) {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed || trimmed.length > 64) {
+    return null;
+  }
+  if (containsSecretMaterial(trimmed)) {
+    return null;
+  }
+  if (!/^[a-z0-9_.-]+$/.test(trimmed)) {
+    return null;
+  }
+  if (SAFE_ERROR_CODES.has(trimmed) || trimmed.length <= 40) {
+    return trimmed;
+  }
+  return null;
+}
+
+function sanitizeOAuthSummaryValue(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed || trimmed.length > 64) {
+    return null;
+  }
+  if (containsSecretMaterial(trimmed)) {
+    return null;
+  }
+  if (!/^[a-z0-9_]+$/.test(trimmed)) {
     return null;
   }
   return trimmed;
+}
+
+export function containsSecretMaterial(value: string): boolean {
+  const lowered = value.toLowerCase();
+  if (
+    /(?:^|[^\w])(?:access_token|refresh_token|id_token|provider_token|provider_refresh_token|client_secret|authorization_code)\s*[=:]/i.test(
+      value,
+    )
+  ) {
+    return true;
+  }
+  if (/\bcode\s*[=:]\s*[A-Za-z0-9_-]{8,}/i.test(value)) {
+    return true;
+  }
+  if (/unable to exchange external code\s*:\s*\S+/i.test(value)) {
+    return true;
+  }
+  if (/external code\s*:\s*\S+/i.test(value)) {
+    return true;
+  }
+  if (/[A-Za-z0-9_-]{24,}/.test(value)) {
+    return true;
+  }
+  if (
+    lowered.includes("access_token") ||
+    lowered.includes("refresh_token") ||
+    lowered.includes("client_secret") ||
+    lowered.includes("authorization_code")
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export function isSafeOAuthLoginQueryKey(key: string): boolean {
@@ -104,7 +231,7 @@ export function isSafeOAuthLoginQueryKey(key: string): boolean {
     key === "error" ||
     key === "oauth_error" ||
     key === "oauth_error_code" ||
-    key === "oauth_error_description" ||
+    key === "oauth_error_summary" ||
     key === "callback_code_missing"
   );
 }
@@ -118,9 +245,11 @@ export function pickOAuthErrorFromLoginSearchParams(
   };
 
   const fromOAuthParams: OAuthErrorDetails = {
-    error: sanitizeOAuthErrorValue(get("oauth_error")),
-    errorCode: sanitizeOAuthErrorValue(get("oauth_error_code")),
-    errorDescription: sanitizeOAuthErrorValue(get("oauth_error_description")),
+    error: sanitizeOAuthErrorCode(get("oauth_error")),
+    errorCode: sanitizeOAuthErrorCode(get("oauth_error_code")),
+    errorSummary:
+      sanitizeOAuthSummaryValue(get("oauth_error_summary")) ??
+      summarizeOAuthErrorDescription(get("oauth_error_description")),
   };
 
   if (hasOAuthError(fromOAuthParams)) {
@@ -130,13 +259,20 @@ export function pickOAuthErrorFromLoginSearchParams(
     };
   }
 
+  const legacyError = get("error");
+  if (legacyError === "missing_code" || legacyError === "callback_failed") {
+    return {
+      error: null,
+      errorCode: null,
+      errorSummary: null,
+      callbackCodeMissing: legacyError === "missing_code",
+    };
+  }
+
   return {
-    error: get("error") === "missing_code" || get("error") === "callback_failed"
-      ? null
-      : sanitizeOAuthErrorValue(get("error")),
+    error: sanitizeOAuthErrorCode(legacyError),
     errorCode: null,
-    errorDescription: null,
-    callbackCodeMissing:
-      get("callback_code_missing") === "true" || get("error") === "missing_code",
+    errorSummary: null,
+    callbackCodeMissing: get("callback_code_missing") === "true",
   };
 }
