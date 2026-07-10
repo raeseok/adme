@@ -13,12 +13,14 @@ import {
   STAGE3M_STATUS_TAXONOMY_REVIEW,
   getStage3MKycTaxTermsDbMigrationDesignReviewState,
 } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
+import { getStage3NKycTaxTermsImplementationApprovalGateState } from "@/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default function KycTaxTermsDbMigrationReviewPage() {
   const review = getStage3MKycTaxTermsDbMigrationDesignReviewState();
+  const approvalGate = getStage3NKycTaxTermsImplementationApprovalGateState();
 
   return (
     <ShellCard title="KYC / Tax / Terms DB Migration Design Review">
@@ -36,6 +38,14 @@ export default function KycTaxTermsDbMigrationReviewPage() {
           className="font-medium text-blue-600 hover:text-blue-800"
         >
           KYC / Tax / Terms data model preflight 상세 →
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/kyc-tax-terms-implementation-approval"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Implementation approval gate 상세 →
         </Link>
       </p>
 
@@ -80,6 +90,30 @@ export default function KycTaxTermsDbMigrationReviewPage() {
         <p className="font-sans text-sm">NO ACTUAL CASH-OUT PROCESSING</p>
         <p className="font-sans text-sm">LEGAL CONCLUSION NOT DECLARED</p>
         {Object.entries(review).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+
+      <section
+        aria-label="Stage 3-N KYC tax terms implementation approval gate summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-red-500 bg-red-50 px-3 py-3 font-mono text-xs text-red-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-N KYC/Tax/Terms Implementation Approval Gate
+        </p>
+        <p className="font-sans text-sm">
+          Stage 3-M design completion is not implementation approval
+        </p>
+        <p className="font-sans text-sm">Migration implementation: BLOCKED</p>
+        <p>stage3NApprovalGateComplete=true</p>
+        <p>stage3NOverallApprovalStatus=blocked</p>
+        <p>stage3NDevMigrationApprovalGranted=false</p>
+        <p>stage3NProductionMigrationApprovalGranted=false</p>
+        <p>stage3NActualCashOutProcessingAllowed=false</p>
+        <p>stage3NLegalConclusionDeclared=false</p>
+        {Object.entries(approvalGate).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

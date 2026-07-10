@@ -45,6 +45,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-K-R Protected Fund Status Taxonomy Alignment** | 현재 단계: evaluator/docs/admin marker/verify taxonomy alignment only, no migration, no db push, no mutation |
 | **Stage 3-L KYC/Tax/Terms Data Model Design** | 완료 후보: KYC/account verification, tax review, terms versioning, marketing consent withdrawal, user-level cash-out gate design only, no migration, no db push, no mutation |
 | **Stage 3-M KYC/Tax/Terms DB Migration Design Review** | 완료 후보: DB migration design review only, no migration file, no Supabase db push, no personal data collection, no provider integration, no tax filing/withholding, no actual cash-out processing |
+| **Stage 3-N KYC/Tax/Terms Implementation Approval Gate** | 완료 후보: read-only approval gate, overallApprovalStatus=blocked, implementation approval not granted, no migration, no mutation |
 
 ---
 
@@ -66,6 +67,9 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | ID | 내용 | 금전성 mutation |
 |---|---|---|
 | **Stage 3-K-DB-R Protected Fund DB Migration Design Review** | protected fund DB schema/RLS/RPC/audit/admin preflight design review only. actual migration은 아님 | 없음 |
+| **Stage 3-O External Review Question Pack** | Stage 3-N blocker를 외부 법률·세무·개인정보·보안 검토 질문서로 전환. migration implementation 아님 | 없음 |
+| **Stage 3-N-R Approval Gate Reinforcement** | Stage 3-N gate marker/문서 보강 후보. approval flag true 전환 아님 | 없음 |
+| **Stage 3-P Dev-only Migration Implementation Approval** | dev-only migration 구현 승인 후보. Stage 3-N 완료만으로 자동 진입 금지 | 별도 명시 승인 전 금지 |
 | **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | prepaid threshold DB migration actual implementation 후보. Stage 3-J-R 완료 후에도 기술사님 별도 명시 승인 전 금지 | 별도 명시 승인 전 금지 |
 | KYC/Tax/Terms actual DB migration implementation | Stage 3-M 이후에도 자동 확정하지 않음. 별도 명시 승인, 외부 법률·세무 검토, retention/deletion 정책 확정 전 금지 | 별도 명시 승인 전 금지 |
 | **Stage 3-E-Controlled-Open-Execution** | Production reward controlled open 실제 실행 후보. 전제는 registration completed가 아니라 threshold runtime monitoring implemented + exemption limits verified + explicit owner approval | 별도 명시 승인 전 보류 |
@@ -101,9 +105,11 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 13. **Stage 3-K-R Protected Fund Status Taxonomy Alignment** — status taxonomy alignment only, no migration, no db push, no mutation
 14. **Stage 3-L KYC/Tax/Terms Data Model Design** — cash-out 전 KYC/account verification, 세무 검토, 약관 버전, 동의/철회, user-level cash-out gate 설계 only, no migration, no db push, no mutation
 15. **Stage 3-M** — KYC/Tax/Terms DB migration design review only, no migration, no db push, no mutation
-16. **Stage 3-K-DB-R / Stage 3-J-M 후보 검토** — Stage 3-K-DB-R은 design review only, Stage 3-J-M과 protected fund/KYC actual DB migration implementation은 기술사님 별도 명시 승인 전 금지
-17. **Stage 3-E-Controlled-Open-Execution** — threshold runtime monitoring implemented + runtime protected fund reconciliation completed + exemption limits verified + KYC/Tax/Terms cash-out gate implementation reviewed + 기술사님 명시 승인 전 계속 금지
-18. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
+16. **Stage 3-N** — KYC/Tax/Terms implementation approval gate only, overallApprovalStatus=blocked, no migration, no mutation
+17. **Stage 3-O / Stage 3-N-R / Stage 3-P 후보 검토** — External Review Question Pack 또는 approval gate 보강을 우선 검토. Stage 3-P는 별도 명시 승인 전 금지
+18. **Stage 3-K-DB-R / Stage 3-J-M 후보 검토** — Stage 3-K-DB-R은 design review only, Stage 3-J-M과 protected fund/KYC actual DB migration implementation은 기술사님 별도 명시 승인 전 금지
+19. **Stage 3-E-Controlled-Open-Execution** — threshold runtime monitoring implemented + runtime protected fund reconciliation completed + exemption limits verified + KYC/Tax/Terms cash-out gate implementation reviewed + 기술사님 명시 승인 전 계속 금지
+20. 이후 **Partner settlement actual generation** 또는 **Cash-out actual processing** 별도 승인 Stage
 
 ---
 
@@ -144,6 +150,10 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-K-R Protected Fund Status Taxonomy Alignment** | 현재 단계 (status taxonomy alignment only; no migration; no db push; no mutation) |
 | **Stage 3-L KYC/Tax/Terms Data Model Design** | 완료 후보 (data model design only; no migration; no db push; no mutation; cash-out actual processing=false) |
 | **Stage 3-M KYC/Tax/Terms DB Migration Design Review** | 완료 후보 (design review only; actual migration 아님; Supabase db push 없음; 개인정보 수집/provider 연동/세무 신고/원천징수/actual cash-out 없음) |
+| **Stage 3-N KYC/Tax/Terms Implementation Approval Gate** | 완료 후보 (read-only approval gate; overallApprovalStatus=blocked; migration approval=false; no migration; no mutation) |
+| **Stage 3-N-R Approval Gate Reinforcement** | 다음 후보 (approval gate 보강; approval flag true 전환 아님) |
+| **Stage 3-O External Review Question Pack** | 다음 후보 (외부 검토 질문서; implementation 아님) |
+| **Stage 3-P Dev-only Migration Implementation Approval** | 별도 명시 승인 전 금지 |
 | **Stage 3-K-DB-R Protected Fund DB Migration Design Review** | 다음 후보 (design review only; actual migration 아님) |
 | **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | 별도 명시 승인 전 금지 |
 | **KYC/Tax/Terms actual DB migration implementation** | Stage 3-M 완료 후에도 자동 확정하지 않음; 별도 명시 승인 전 금지 |
@@ -181,6 +191,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-K-R-Protected-Fund-Status-Taxonomy-Alignment: `verify:stage3k-protected-fund-reconciliation-design`
 - Stage 3-L-KYC-Tax-Terms-Data-Model-Design: `verify:stage3l-kyc-tax-terms-data-model-design`
 - Stage 3-M-KYC-Tax-Terms-DB-Migration-Design-Review: `verify:stage3m-kyc-tax-terms-db-migration-design-review`
+- Stage 3-N-KYC-Tax-Terms-Implementation-Approval-Gate: `verify:stage3n-kyc-tax-terms-implementation-approval-gate`
 
 ---
 
@@ -211,6 +222,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-k-protected-fund-reconciliation-design.md](./stage-3-k-protected-fund-reconciliation-design.md)
 - [stage-3-l-kyc-tax-terms-data-model-design.md](./stage-3-l-kyc-tax-terms-data-model-design.md)
 - [stage-3-m-kyc-tax-terms-db-migration-design-review.md](./stage-3-m-kyc-tax-terms-db-migration-design-review.md)
+- [stage-3-n-kyc-tax-terms-implementation-approval-gate.md](./stage-3-n-kyc-tax-terms-implementation-approval-gate.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)

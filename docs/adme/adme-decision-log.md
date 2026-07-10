@@ -497,3 +497,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-M design review SSOT, DB design review document, admin KYC/tax/terms DB migration review page, compliance/diagnostics/KYC preflight marker, product policy, roadmap, verify script. DB migration implemented=false, migration file created=false, Supabase db push executed=false, actual personal data collection=false, identity provider integrated=false, bank API integrated=false, tax filing=false, withholding calculation=false, actual cash-out processing allowed=false, Production mutation=false, legal conclusion declared=false, external legal/tax review still required=true 유지 |
 | **Implementation Stage** | Stage 3-M-KYC-Tax-Terms-DB-Migration-Design-Review |
 | **Related files** | docs/adme/stage-3-m-kyc-tax-terms-db-migration-design-review.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review.ts, apps/web/src/app/admin/kyc-tax-terms-db-migration-review/page.tsx, apps/web/scripts/verify-stage3m-kyc-tax-terms-db-migration-design-review.mjs |
+
+---
+
+## ADME-DECISION-20260710-020
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-10 |
+| **Title** | Stage 3-N Separates Design Completion From Implementation Approval |
+| **Status** | accepted |
+| **Decision** | Stage 3-M KYC/Tax/Terms DB migration design review completion is not migration implementation approval. Stage 3-N creates a read-only implementation approval gate with `overallApprovalStatus=blocked`. Dev-only migration approval, Production migration approval, personal data collection approval, provider integration approval, tax implementation approval, and cash-out execution approval remain false until explicit business owner approval and required external legal, tax, privacy, security, and provider reviews are completed. |
+| **Reason** | KYC, bank account, tax, legal acceptance, marketing consent, and cash redemption request schemas touch sensitive personal, financial, tax, and legal evidence. Implementation must not proceed from design review alone; blocker classification and external review evidence must be visible before any migration work starts. |
+| **Impact** | Stage 3-N approval gate SSOT, admin implementation approval page, compliance/diagnostics/Stage 3-M summary marker, product policy, roadmap, verify script. No SQL migration, no Supabase db push, no DB mutation, no personal data collection, no provider integration, no tax calculation or filing, no actual cash-out processing, no Production mutation. `overallApprovalStatus=blocked`, `devMigrationApprovalGranted=false`, `productionMigrationApprovalGranted=false` 유지 |
+| **Implementation Stage** | Stage 3-N-KYC-Tax-Terms-Implementation-Approval-Gate |
+| **Related files** | docs/adme/stage-3-n-kyc-tax-terms-implementation-approval-gate.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate.ts, apps/web/src/app/admin/kyc-tax-terms-implementation-approval/page.tsx, apps/web/scripts/verify-stage3n-kyc-tax-terms-implementation-approval-gate.mjs |

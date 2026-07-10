@@ -30,6 +30,12 @@ export default function AdminPage() {
         >
           Stage 3-M KYC / Tax / Terms DB migration review →
         </Link>
+        <Link
+          href="/admin/kyc-tax-terms-implementation-approval"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-N KYC / Tax / Terms implementation approval →
+        </Link>
       </div>
     </ShellCard>
   );

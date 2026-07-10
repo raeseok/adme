@@ -7,6 +7,7 @@ import { getStage3JRPrepaidThresholdDbMigrationDesignReviewState } from "@/lib/c
 import { getStage3KProtectedFundReconciliationDesignState } from "@/lib/compliance/stage3k-protected-fund-reconciliation-design";
 import { getStage3LKycTaxTermsDesignState } from "@/lib/compliance/stage3l-kyc-tax-terms-design";
 import { getStage3MKycTaxTermsDbMigrationDesignReviewState } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
+import { getStage3NKycTaxTermsImplementationApprovalGateState } from "@/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ export default function CompliancePreflightPage() {
   const kycTaxTermsDesign = getStage3LKycTaxTermsDesignState();
   const kycTaxTermsDbMigrationDesignReview =
     getStage3MKycTaxTermsDbMigrationDesignReviewState();
+  const kycTaxTermsImplementationApprovalGate =
+    getStage3NKycTaxTermsImplementationApprovalGateState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -90,6 +93,38 @@ export default function CompliancePreflightPage() {
           KYC / Tax / Terms DB migration design review 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/kyc-tax-terms-implementation-approval"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          KYC / Tax / Terms implementation approval gate 상세 →
+        </Link>
+      </p>
+
+      <section
+        aria-label="Stage 3-N KYC tax terms implementation approval gate markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-red-500 bg-red-50 px-3 py-3 font-mono text-xs text-red-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          Stage 3-N KYC/Tax/Terms Implementation Approval Gate
+        </p>
+        <p className="font-sans text-sm">Read-only approval gate</p>
+        <p className="font-sans text-sm">Migration implementation: BLOCKED</p>
+        <p>stage3NApprovalGateComplete=true</p>
+        <p>stage3NOverallApprovalStatus=blocked</p>
+        <p>stage3NDevMigrationApprovalGranted=false</p>
+        <p>stage3NProductionMigrationApprovalGranted=false</p>
+        <p>stage3NActualCashOutProcessingAllowed=false</p>
+        <p>stage3NLegalConclusionDeclared=false</p>
+        {Object.entries(kycTaxTermsImplementationApprovalGate).map(
+          ([key, value]) => (
+            <p key={key}>
+              {key}={String(value)}
+            </p>
+          ),
+        )}
+      </section>
 
       <section
         aria-label="Stage 3-M KYC tax terms DB migration design review markers"
