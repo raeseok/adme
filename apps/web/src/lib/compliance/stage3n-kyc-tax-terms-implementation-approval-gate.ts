@@ -500,6 +500,14 @@ const unresolvedCount = STAGE3N_APPROVAL_GATE_ITEMS.filter(
   (item) => item.evidenceStatus === "unresolved",
 ).length;
 
+const explicitBlockerCount = STAGE3N_APPROVAL_GATE_ITEMS.filter(
+  (item) => item.itemDecision === "blocker",
+).length;
+
+const approvedDesignPrincipleCount = STAGE3N_APPROVAL_GATE_ITEMS.filter(
+  (item) => item.itemDecision === "approved_design_principle",
+).length;
+
 export const STAGE3N_APPROVAL_PRINCIPLES = {
   externalReviewCannotBeApprovedByCodeAuthorAssumption: true,
   businessOwnerExplicitApprovalRequired: true,
@@ -548,6 +556,11 @@ export type Stage3NKycTaxTermsImplementationApprovalGateState = {
   blockerCount: number;
   unresolvedCount: number;
   approvalGateItemCount: number;
+  totalGateItemCount: number;
+  explicitBlockerCount: number;
+  approvalBlockingItemCount: number;
+  approvedDesignPrincipleCount: number;
+  unresolvedEvidenceCount: number;
   coreBlockerItemCount: 14;
   stage3NNoApproveButton: true;
   stage3NNoOverrideButton: true;
@@ -591,6 +604,11 @@ export function getStage3NKycTaxTermsImplementationApprovalGateState(): Stage3NK
     blockerCount,
     unresolvedCount,
     approvalGateItemCount: STAGE3N_APPROVAL_GATE_ITEMS.length,
+    totalGateItemCount: STAGE3N_APPROVAL_GATE_ITEMS.length,
+    explicitBlockerCount,
+    approvalBlockingItemCount: blockerCount,
+    approvedDesignPrincipleCount,
+    unresolvedEvidenceCount: unresolvedCount,
     coreBlockerItemCount: 14,
     stage3NNoApproveButton: true,
     stage3NNoOverrideButton: true,

@@ -8,6 +8,7 @@ import { getStage3KProtectedFundReconciliationDesignState } from "@/lib/complian
 import { getStage3LKycTaxTermsDesignState } from "@/lib/compliance/stage3l-kyc-tax-terms-design";
 import { getStage3MKycTaxTermsDbMigrationDesignReviewState } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
 import { getStage3NKycTaxTermsImplementationApprovalGateState } from "@/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate";
+import { getStage3OExternalReviewQuestionPackState } from "@/lib/compliance/stage3o-external-review-question-pack";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,8 @@ export default function CompliancePreflightPage() {
     getStage3MKycTaxTermsDbMigrationDesignReviewState();
   const kycTaxTermsImplementationApprovalGate =
     getStage3NKycTaxTermsImplementationApprovalGateState();
+  const externalReviewQuestionPack =
+    getStage3OExternalReviewQuestionPackState();
 
   return (
     <ShellCard title="Legal / Tax / Payment Compliance Review">
@@ -101,6 +104,14 @@ export default function CompliancePreflightPage() {
           KYC / Tax / Terms implementation approval gate 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/external-review-question-pack"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-O external review question pack 상세 →
+        </Link>
+      </p>
 
       <section
         aria-label="Stage 3-N KYC tax terms implementation approval gate markers"
@@ -124,6 +135,28 @@ export default function CompliancePreflightPage() {
             </p>
           ),
         )}
+      </section>
+
+      <section
+        aria-label="Stage 3-O external review question pack summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-red-500 bg-red-50 px-3 py-3 font-mono text-xs text-red-950"
+      >
+        <p className="font-sans text-sm font-semibold">
+          ADME_STAGE_3_O_EXTERNAL_REVIEW_QUESTION_PACK
+        </p>
+        <p className="font-sans text-sm">External Review Question Pack</p>
+        <p className="font-sans text-sm">Questions prepared: YES</p>
+        <p className="font-sans text-sm">Questions sent: NO</p>
+        <p className="font-sans text-sm">Responses received: NO</p>
+        <p className="font-sans text-sm">Migration implementation: BLOCKED</p>
+        <p className="font-sans text-sm">Production mutation: DISABLED</p>
+        <p className="font-sans text-sm">No personal data collection</p>
+        <p className="font-sans text-sm">No actual cash-out processing</p>
+        {Object.entries(externalReviewQuestionPack).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
       </section>
 
       <section
