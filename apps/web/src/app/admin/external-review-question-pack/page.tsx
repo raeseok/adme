@@ -5,6 +5,10 @@ import {
   getStage3OExternalReviewQuestionPackState,
   getStage3OQuestionsByDomain,
 } from "@/lib/compliance/stage3o-external-review-question-pack";
+import {
+  STAGE3P_VISIBLE_MARKERS,
+  getStage3PDevOnlyKycTaxTermsSchemaFoundationState,
+} from "@/lib/compliance/stage3p-dev-only-kyc-tax-terms-schema-foundation";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +38,7 @@ function decisionTiming(question: (typeof STAGE3O_EXTERNAL_REVIEW_QUESTIONS)[num
 
 export default function ExternalReviewQuestionPackPage() {
   const state = getStage3OExternalReviewQuestionPackState();
+  const stage3P = getStage3PDevOnlyKycTaxTermsSchemaFoundationState();
 
   return (
     <ShellCard title="External Review Question Pack">
@@ -53,6 +58,14 @@ export default function ExternalReviewQuestionPackPage() {
           className="font-medium text-blue-600 hover:text-blue-800"
         >
           Stage 3-N implementation approval gate 상세 →
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/dev-kyc-tax-terms-schema-foundation"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-P dev schema foundation 상세 →
         </Link>
       </p>
 
@@ -99,6 +112,22 @@ export default function ExternalReviewQuestionPackPage() {
         <p className="font-sans text-sm">No personal data collection</p>
         <p className="font-sans text-sm">No actual cash-out processing</p>
         {Object.entries(state).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+
+      <section
+        aria-label="Stage 3-P dev KYC tax terms schema foundation summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        {STAGE3P_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        {Object.entries(stage3P).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

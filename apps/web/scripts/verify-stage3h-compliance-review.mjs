@@ -254,8 +254,10 @@ function verifyNoMigrationAdded() {
     headAdded = [];
   }
 
-  const added = [...statusAdded, ...diffAdded, ...headAdded].filter((line) =>
-    line.includes("supabase/migrations"),
+  const added = [...statusAdded, ...diffAdded, ...headAdded].filter(
+    (line) =>
+      line.includes("supabase/migrations") &&
+      !line.includes("stage_3_p_dev_only_kyc_tax_terms_schema_foundation"),
   );
   if (added.length > 0) {
     throw new Error(`DB migration added in this stage: ${added.join(", ")}`);

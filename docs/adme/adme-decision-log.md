@@ -512,3 +512,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-N approval gate SSOT, admin implementation approval page, compliance/diagnostics/Stage 3-M summary marker, product policy, roadmap, verify script. No SQL migration, no Supabase db push, no DB mutation, no personal data collection, no provider integration, no tax calculation or filing, no actual cash-out processing, no Production mutation. `overallApprovalStatus=blocked`, `devMigrationApprovalGranted=false`, `productionMigrationApprovalGranted=false` 유지 |
 | **Implementation Stage** | Stage 3-N-KYC-Tax-Terms-Implementation-Approval-Gate |
 | **Related files** | docs/adme/stage-3-n-kyc-tax-terms-implementation-approval-gate.md, docs/adme/product-policy-current.md, docs/adme/stage-roadmap-current.md, apps/web/src/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate.ts, apps/web/src/app/admin/kyc-tax-terms-implementation-approval/page.tsx, apps/web/scripts/verify-stage3n-kyc-tax-terms-implementation-approval-gate.mjs |
+
+---
+
+## ADME-DECISION-20260710-021
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-10 |
+| **Title** | Stage 3-P-R Requires Explicit Dev Supabase Link Verification Before Dev-only Migration |
+| **Status** | accepted |
+| **Decision** | Stage 3-P dev-only KYC/Tax/Terms schema foundation은 사업 오너 dev approval에 따라 dev Supabase에만 적용한다. Supabase CLI가 Production ref에 linked된 상태에서는 즉시 중단하며, 모든 dev-only DB mutation 전 `verify:supabase-dev-link-safety`로 linked ref가 dev `ogncvdxrrsjnwsuvgoyh`와 정확히 일치하고 prod `vupsalteyltjqumppltc`가 linked=false임을 확인한다. projects list에 prod project가 존재하는 것과 linked target이 prod인 것은 구분한다. Production migration, 개인정보 수집, provider 연동, 세무 구현, actual cash-out은 계속 별도 승인 전 금지한다. |
+| **Reason** | Production Supabase에 dev-only migration이 적용되는 사고를 방지하고, dev-only schema foundation을 provider-neutral, non-sensitive, rollback 가능한 개발 기반으로 제한하기 위함 |
+| **Impact** | Stage 3-P SSOT, dev-only migration, Supabase dev link safety verify, dev DB validation SQL, admin Stage 3-P marker, compliance/diagnostics/Stage 3-M/N/O summary marker. Production DB mutation=false, productionMigrationApprovalGranted=false, actualPersonalDataCollectionImplemented=false, actualCashOutProcessingAllowed=false 유지 |
+| **Implementation Stage** | Stage 3-P-R-Supabase-CLI-Dev-Link-Safety-Recovery-and-Stage-3-P-Closure |
+| **Related files** | docs/adme/stage-3-p-dev-only-kyc-tax-terms-schema-foundation.md, supabase/migrations/20260710110500_stage_3_p_dev_only_kyc_tax_terms_schema_foundation.sql, supabase/validation/validate_stage3p_dev_schema.sql, apps/web/src/lib/compliance/stage3p-dev-only-kyc-tax-terms-schema-foundation.ts, apps/web/scripts/verify-supabase-dev-link-safety.mjs, apps/web/scripts/verify-stage3p-dev-kyc-tax-terms-schema-foundation.mjs |

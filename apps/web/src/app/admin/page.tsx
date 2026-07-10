@@ -36,6 +36,12 @@ export default function AdminPage() {
         >
           Stage 3-N KYC / Tax / Terms implementation approval →
         </Link>
+        <Link
+          href="/admin/dev-kyc-tax-terms-schema-foundation"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-P dev KYC / Tax / Terms schema foundation →
+        </Link>
       </div>
     </ShellCard>
   );

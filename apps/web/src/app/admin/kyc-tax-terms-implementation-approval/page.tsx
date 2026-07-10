@@ -9,6 +9,10 @@ import {
   getStage3NKycTaxTermsImplementationApprovalGateState,
 } from "@/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate";
 import { getStage3OExternalReviewQuestionPackState } from "@/lib/compliance/stage3o-external-review-question-pack";
+import {
+  STAGE3P_VISIBLE_MARKERS,
+  getStage3PDevOnlyKycTaxTermsSchemaFoundationState,
+} from "@/lib/compliance/stage3p-dev-only-kyc-tax-terms-schema-foundation";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +20,7 @@ export const dynamic = "force-dynamic";
 export default function KycTaxTermsImplementationApprovalPage() {
   const gate = getStage3NKycTaxTermsImplementationApprovalGateState();
   const questionPack = getStage3OExternalReviewQuestionPackState();
+  const stage3P = getStage3PDevOnlyKycTaxTermsSchemaFoundationState();
 
   return (
     <ShellCard title="Stage 3-N KYC / Tax / Terms Implementation Approval Gate">
@@ -43,6 +48,14 @@ export default function KycTaxTermsImplementationApprovalPage() {
           className="font-medium text-blue-600 hover:text-blue-800"
         >
           Stage 3-O external review question pack 상세 →
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/dev-kyc-tax-terms-schema-foundation"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-P dev schema foundation 상세 →
         </Link>
       </p>
 
@@ -107,6 +120,22 @@ export default function KycTaxTermsImplementationApprovalPage() {
         <p className="font-sans text-sm">No personal data collection</p>
         <p className="font-sans text-sm">No actual cash-out processing</p>
         {Object.entries(questionPack).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+
+      <section
+        aria-label="Stage 3-P dev KYC tax terms schema foundation summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        {STAGE3P_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        {Object.entries(stage3P).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

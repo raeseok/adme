@@ -625,6 +625,9 @@ function verifyNoMigrationAdded() {
   const migrationDir = join(REPO_ROOT, "supabase/migrations");
   const migrationFiles = readdirSync(migrationDir);
   for (const file of migrationFiles) {
+    if (file.includes("stage_3_p_dev_only_kyc_tax_terms_schema_foundation")) {
+      continue;
+    }
     assertNotContains(file, "stage_3_l", "no Stage 3-L DB migration file");
     assertNotContains(file, "stage3l", "no Stage 3-L DB migration file");
     assertNotContains(file, "kyc_tax_terms", "no KYC tax terms DB migration file");
@@ -632,8 +635,10 @@ function verifyNoMigrationAdded() {
 
   const statusAdded = gitLines("git status --porcelain -- supabase/migrations");
   const diffAdded = gitLines("git diff --name-only --diff-filter=A HEAD -- supabase/migrations");
-  const added = [...statusAdded, ...diffAdded].filter((line) =>
-    line.includes("supabase/migrations"),
+  const added = [...statusAdded, ...diffAdded].filter(
+    (line) =>
+      line.includes("supabase/migrations") &&
+      !line.includes("stage_3_p_dev_only_kyc_tax_terms_schema_foundation"),
   );
   if (added.length > 0) {
     throw new Error(`DB migration added in this stage: ${added.join(", ")}`);

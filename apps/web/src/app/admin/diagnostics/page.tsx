@@ -19,6 +19,10 @@ import { getStage3LKycTaxTermsDesignState } from "@/lib/compliance/stage3l-kyc-t
 import { getStage3MKycTaxTermsDbMigrationDesignReviewState } from "@/lib/compliance/stage3m-kyc-tax-terms-db-migration-design-review";
 import { getStage3NKycTaxTermsImplementationApprovalGateState } from "@/lib/compliance/stage3n-kyc-tax-terms-implementation-approval-gate";
 import { getStage3OExternalReviewQuestionPackState } from "@/lib/compliance/stage3o-external-review-question-pack";
+import {
+  STAGE3P_VISIBLE_MARKERS,
+  getStage3PDevOnlyKycTaxTermsSchemaFoundationState,
+} from "@/lib/compliance/stage3p-dev-only-kyc-tax-terms-schema-foundation";
 import { STAGE1F_R_SOURCE } from "@/lib/regions/stage1f-r-source";
 import { getStage30ReadinessState } from "@/lib/stage3/readiness";
 import { getStage3ADiagnosticsState } from "@/lib/stage3/stage3a-dry-run";
@@ -132,6 +136,8 @@ export default async function DiagnosticsPage() {
     getStage3NKycTaxTermsImplementationApprovalGateState();
   const stage3OExternalReviewQuestionPack =
     getStage3OExternalReviewQuestionPackState();
+  const stage3PDevSchemaFoundation =
+    getStage3PDevOnlyKycTaxTermsSchemaFoundationState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -194,6 +200,14 @@ export default async function DiagnosticsPage() {
           Stage 3-O external review question pack 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/dev-kyc-tax-terms-schema-foundation"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-P dev schema foundation 상세 →
+        </Link>
+      </p>
       <section
         aria-label="Stage 3-N KYC tax terms implementation approval gate markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-red-500 bg-red-50 px-3 py-3 font-mono text-xs text-red-950"
@@ -239,6 +253,21 @@ export default async function DiagnosticsPage() {
             </p>
           ),
         )}
+      </section>
+      <section
+        aria-label="Stage 3-P dev KYC tax terms schema foundation summary markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-emerald-500 bg-emerald-50 px-3 py-3 font-mono text-xs text-emerald-950"
+      >
+        {STAGE3P_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        {Object.entries(stage3PDevSchemaFoundation).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
       </section>
       <section
         aria-label="Stage 3-M KYC tax terms DB migration design review markers"

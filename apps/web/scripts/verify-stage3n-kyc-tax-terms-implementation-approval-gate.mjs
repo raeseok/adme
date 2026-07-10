@@ -403,8 +403,10 @@ function verifyNoMigrationAdded() {
 
   const statusAdded = gitLines("git status --porcelain -- supabase/migrations");
   const diffAdded = gitLines("git diff --name-only --diff-filter=A HEAD -- supabase/migrations");
-  const added = [...statusAdded, ...diffAdded].filter((line) =>
-    line.includes("supabase/migrations"),
+  const added = [...statusAdded, ...diffAdded].filter(
+    (line) =>
+      line.includes("supabase/migrations") &&
+      !line.includes("stage_3_p_dev_only_kyc_tax_terms_schema_foundation"),
   );
   if (added.length > 0) {
     throw new Error(`DB migration added in this stage: ${added.join(", ")}`);
