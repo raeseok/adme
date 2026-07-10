@@ -104,6 +104,9 @@ const PUBLIC_SOURCE_ROOTS = [
   join(WEB_ROOT, "src/app/consumer"),
 ];
 
+const dangerousActualCashOutObject =
+  "actualCashOutProcessingAllowed" + ": true";
+
 function readText(path) {
   return readFileSync(path, "utf8");
 }
@@ -278,7 +281,7 @@ function verifyRegistry() {
     'migrationFileCreated: true',
     'supabaseDbPushExecuted: true',
     'actualPersonalDataCollectionImplemented: true',
-    'actualCashOutProcessingAllowed: true',
+    dangerousActualCashOutObject,
     'productionMutation: true',
     'legalConclusionDeclared: true',
     'overallApprovalStatus: "approved"',
