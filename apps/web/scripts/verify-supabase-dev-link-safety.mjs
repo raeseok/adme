@@ -14,6 +14,8 @@ const EXPECTED_DEV_REF = "ogncvdxrrsjnwsuvgoyh";
 const FORBIDDEN_PROD_REF = "vupsalteyltjqumppltc";
 const STAGE3P_MIGRATION =
   "20260710110500_stage_3_p_dev_only_kyc_tax_terms_schema_foundation.sql";
+const STAGE3Q_MIGRATION =
+  "20260710131000_stage_3_q_cash_redemption_demo_state_machine.sql";
 
 function readText(path) {
   return readFileSync(path, "utf8").trim();
@@ -89,6 +91,40 @@ function verifyMigrationSafety() {
     "db reset",
   ]) {
     assert(!sql.toUpperCase().includes(forbidden.toUpperCase()), `migration has no ${forbidden}`);
+  }
+
+  const stage3QFiles = readdirSync(migrationDir).filter((file) =>
+    file.includes("stage_3_q_cash_redemption_demo_state_machine"),
+  );
+  if (stage3QFiles.length > 0) {
+    assert(
+      stage3QFiles.length === 1 && stage3QFiles[0] === STAGE3Q_MIGRATION,
+      `exactly one Stage 3-Q migration exists: ${STAGE3Q_MIGRATION}`,
+    );
+    const stage3QSql = readText(join(migrationDir, STAGE3Q_MIGRATION));
+    for (const forbidden of [
+      "DROP TABLE",
+      "DROP COLUMN",
+      "TRUNCATE",
+      "ALTER TABLE public.cash_redemption_requests",
+      "INSERT INTO public.point_ledger",
+      "UPDATE public.profiles",
+      "UPDATE public.users",
+      "CREATE TYPE",
+      "migration repair",
+      "db reset",
+    ]) {
+      assert(
+        !stage3QSql.toUpperCase().includes(forbidden.toUpperCase()),
+        `Stage 3-Q migration has no ${forbidden}`,
+      );
+    }
+
+    const disallowedDeletes = stage3QSql
+      .split(/\r?\n/)
+      .filter((line) => line.toUpperCase().includes("DELETE FROM"))
+      .filter((line) => !line.includes("public.cash_redemption_demo_"));
+    assert(disallowedDeletes.length === 0, "Stage 3-Q DELETE only touches demo tables");
   }
 }
 

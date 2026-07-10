@@ -527,3 +527,18 @@ Current 문서: [current-business-plan.md](./current-business-plan.md) · [curre
 | **Impact** | Stage 3-P SSOT, dev-only migration, Supabase dev link safety verify, dev DB validation SQL, admin Stage 3-P marker, compliance/diagnostics/Stage 3-M/N/O summary marker. Production DB mutation=false, productionMigrationApprovalGranted=false, actualPersonalDataCollectionImplemented=false, actualCashOutProcessingAllowed=false 유지 |
 | **Implementation Stage** | Stage 3-P-R-Supabase-CLI-Dev-Link-Safety-Recovery-and-Stage-3-P-Closure |
 | **Related files** | docs/adme/stage-3-p-dev-only-kyc-tax-terms-schema-foundation.md, supabase/migrations/20260710110500_stage_3_p_dev_only_kyc_tax_terms_schema_foundation.sql, supabase/validation/validate_stage3p_dev_schema.sql, apps/web/src/lib/compliance/stage3p-dev-only-kyc-tax-terms-schema-foundation.ts, apps/web/scripts/verify-supabase-dev-link-safety.mjs, apps/web/scripts/verify-stage3p-dev-kyc-tax-terms-schema-foundation.mjs |
+
+---
+
+## ADME-DECISION-20260710-022
+
+| 필드 | 내용 |
+|---|---|
+| **Date** | 2026-07-10 |
+| **Title** | Cash Redemption Investor Demo Uses Sandbox State Machine Before Actual Payout |
+| **Status** | accepted |
+| **Decision** | Stage 3-Q는 투자자 시연을 위해 소비자 cash redemption 신청, precondition, 관리자 검토, 보류, 승인, 처리 중, `demo_completed` 상태를 sandbox 전용 상태 머신으로 구현한다. Production Vercel은 DB write 없이 client-side guided demo만 제공한다. dev Supabase에만 `cash_redemption_demo_*` 테이블과 `stage3q_demo` RPC를 적용해 RLS, idempotency, invalid transition, append-only event history를 실측한다. 실제 `point_ledger` cash_out, `profiles.point_balance` 차감, 실제 계좌이체, 개인정보 수집, 세금 계산은 구현하지 않는다. |
+| **Reason** | 투자자에게 현금전환 업무 흐름을 화면으로 이해시키되, 실제 지급·개인정보·세무·Production mutation 리스크 없이 반복 가능한 시연 상태를 제공하기 위함 |
+| **Impact** | Stage 3-Q SSOT, dev-only migration/RPC/validation, consumer cash redemption demo route, admin cash redemption demo route, diagnostics marker, verify script. Production DB mutation=false, actual cash-out=false, point ledger cash_out=false 유지 |
+| **Implementation Stage** | Stage 3-Q-Cash-Redemption-Demo-State-Machine |
+| **Related files** | docs/adme/stage-3-q-cash-redemption-demo-state-machine.md, supabase/migrations/20260710131000_stage_3_q_cash_redemption_demo_state_machine.sql, supabase/validation/validate_stage3q_dev_state_machine.sql, apps/web/src/lib/rewards/stage3q-cash-redemption-demo-state-machine.ts, apps/web/src/app/consumer/cash-redemption/page.tsx, apps/web/src/app/admin/cash-redemption-demo/page.tsx, apps/web/scripts/verify-stage3q-cash-redemption-demo-state-machine.mjs |

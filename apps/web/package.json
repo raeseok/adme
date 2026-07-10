@@ -106,6 +106,7 @@
     "verify:stage3n-kyc-tax-terms-implementation-approval-gate": "node scripts/verify-stage3n-kyc-tax-terms-implementation-approval-gate.mjs",
     "verify:stage3o-external-review-question-pack": "node scripts/verify-stage3o-external-review-question-pack.mjs",
     "verify:stage3p-dev-kyc-tax-terms-schema-foundation": "node scripts/verify-stage3p-dev-kyc-tax-terms-schema-foundation.mjs",
+    "verify:stage3q-cash-redemption-demo-state-machine": "node scripts/verify-stage3q-cash-redemption-demo-state-machine.mjs",
     "verify:supabase-dev-link-safety": "node scripts/verify-supabase-dev-link-safety.mjs",
     "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",
     "verify:oauth-redaction-guard": "node scripts/verify-oauth-redaction-guard.mjs",

@@ -42,6 +42,12 @@ export default function AdminPage() {
         >
           Stage 3-P dev KYC / Tax / Terms schema foundation →
         </Link>
+        <Link
+          href="/admin/cash-redemption-demo"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-Q cash redemption demo operations →
+        </Link>
       </div>
     </ShellCard>
   );

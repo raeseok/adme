@@ -75,6 +75,20 @@ export default async function ConsumerPage() {
           광고 카드 · 퀴즈 미리보기 보기
         </Link>
       </section>
+
+      <section className="mt-6 space-y-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4">
+        <p className="text-sm font-semibold text-emerald-950">현금전환 시연</p>
+        <p className="text-sm text-emerald-900">
+          투자자 시연용 Sandbox에서 포인트 현금전환 신청과 상태 흐름을 확인할 수
+          있습니다. 실제 포인트는 차감되지 않습니다.
+        </p>
+        <Link
+          href="/consumer/cash-redemption"
+          className="inline-block rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+        >
+          현금전환 시연 보기
+        </Link>
+      </section>
     </ShellCard>
   );
 }

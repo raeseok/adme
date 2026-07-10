@@ -31,6 +31,10 @@ import { getStage3CDiagnosticsState } from "@/lib/quiz-rewards/stage3c-diagnosti
 import { getStage3EControlledOpenApprovalState } from "@/lib/rewards/stage3e-controlled-open-approval";
 import { getStage3FCashOutManualApprovalState } from "@/lib/rewards/stage3f-cash-out-manual-approval";
 import { getStage3GPartnerSettlementManualApprovalState } from "@/lib/rewards/stage3g-partner-settlement-manual-approval";
+import {
+  STAGE3Q_VISIBLE_MARKERS,
+  getStage3QCashRedemptionDemoStateMachineState,
+} from "@/lib/rewards/stage3q-cash-redemption-demo-state-machine";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -138,6 +142,8 @@ export default async function DiagnosticsPage() {
     getStage3OExternalReviewQuestionPackState();
   const stage3PDevSchemaFoundation =
     getStage3PDevOnlyKycTaxTermsSchemaFoundationState();
+  const stage3QCashRedemptionDemo =
+    getStage3QCashRedemptionDemoStateMachineState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -208,6 +214,14 @@ export default async function DiagnosticsPage() {
           Stage 3-P dev schema foundation 상세 →
         </Link>
       </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/cash-redemption-demo"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 3-Q cash redemption demo operations 상세 →
+        </Link>
+      </p>
       <section
         aria-label="Stage 3-N KYC tax terms implementation approval gate markers"
         className="mt-4 space-y-1 rounded-lg border border-dashed border-red-500 bg-red-50 px-3 py-3 font-mono text-xs text-red-950"
@@ -264,6 +278,27 @@ export default async function DiagnosticsPage() {
           </p>
         ))}
         {Object.entries(stage3PDevSchemaFoundation).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 3-Q cash redemption demo state machine markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-sky-500 bg-sky-50 px-3 py-3 font-mono text-xs text-sky-950"
+      >
+        {STAGE3Q_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        <p>stage3QDemoStateMachineComplete=true</p>
+        <p>sandboxOnly=true</p>
+        <p>productionDbMutationAllowed=false</p>
+        <p>actualPointDeductionImplemented=false</p>
+        <p>actualBankTransferImplemented=false</p>
+        <p>overallDemoStatus=ready</p>
+        {Object.entries(stage3QCashRedemptionDemo).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

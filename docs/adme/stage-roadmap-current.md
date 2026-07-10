@@ -155,6 +155,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 | **Stage 3-O External Review Question Pack** | 다음 후보 (외부 검토 질문서; implementation 아님) |
 | **Stage 3-P Dev-only KYC/Tax/Terms Schema Foundation** | 완료 후보 (dev Supabase only; provider-neutral schema foundation; Production migration blocked; no personal data collection; no actual cash-out) |
 | **Stage 3-P-R Supabase CLI Dev Link Safety Recovery** | 완료 후보 (prod linked 상태 안전 해제, dev linked safety verify, dev DB 실측; Production DB command 없음) |
+| **Stage 3-Q Cash Redemption Demo State Machine** | 완료 후보 (investor demo sandbox; dev-only state machine/RPC; Production UI client-side simulation; no actual payout) |
 | **Stage 3-K-DB-R Protected Fund DB Migration Design Review** | 다음 후보 (design review only; actual migration 아님) |
 | **Stage 3-J-M Prepaid Threshold DB Migration Implementation** | 별도 명시 승인 전 금지 |
 | **KYC/Tax/Terms actual DB migration implementation** | Stage 3-M 완료 후에도 자동 확정하지 않음; 별도 명시 승인 전 금지 |
@@ -194,6 +195,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - Stage 3-M-KYC-Tax-Terms-DB-Migration-Design-Review: `verify:stage3m-kyc-tax-terms-db-migration-design-review`
 - Stage 3-N-KYC-Tax-Terms-Implementation-Approval-Gate: `verify:stage3n-kyc-tax-terms-implementation-approval-gate`
 - Stage 3-P-Dev-only-KYC-Tax-Terms-Schema-Foundation: `verify:supabase-dev-link-safety`, `verify:stage3p-dev-kyc-tax-terms-schema-foundation`
+- Stage 3-Q-Cash-Redemption-Demo-State-Machine: `verify:supabase-dev-link-safety`, `verify:stage3q-cash-redemption-demo-state-machine`
 
 ---
 
@@ -226,6 +228,7 @@ Living 문서: [current-business-plan.md](./current-business-plan.md) · [curren
 - [stage-3-m-kyc-tax-terms-db-migration-design-review.md](./stage-3-m-kyc-tax-terms-db-migration-design-review.md)
 - [stage-3-n-kyc-tax-terms-implementation-approval-gate.md](./stage-3-n-kyc-tax-terms-implementation-approval-gate.md)
 - [stage-3-p-dev-only-kyc-tax-terms-schema-foundation.md](./stage-3-p-dev-only-kyc-tax-terms-schema-foundation.md)
+- [stage-3-q-cash-redemption-demo-state-machine.md](./stage-3-q-cash-redemption-demo-state-machine.md)
 
 - [stage-3-0-supabase-env-separation.md](./stage-3-0-supabase-env-separation.md)
 - [stage-3-0-point-ledger-safety-preflight.md](./stage-3-0-point-ledger-safety-preflight.md)
