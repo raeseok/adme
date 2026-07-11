@@ -48,6 +48,18 @@ export default function AdminPage() {
         >
           Stage 3-Q cash redemption demo operations →
         </Link>
+        <Link
+          href="/admin/campaign-review"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-A advertiser campaign review demo →
+        </Link>
+        <Link
+          href="/advertiser"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-A advertiser console →
+        </Link>
       </div>
     </ShellCard>
   );

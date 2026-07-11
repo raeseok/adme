@@ -35,6 +35,10 @@ import {
   STAGE3Q_VISIBLE_MARKERS,
   getStage3QCashRedemptionDemoStateMachineState,
 } from "@/lib/rewards/stage3q-cash-redemption-demo-state-machine";
+import {
+  STAGE4A_VISIBLE_MARKERS,
+  getStage4AAdvertiserConsoleDemoState,
+} from "@/lib/advertiser-demo/stage4a-advertiser-console-demo";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -144,6 +148,7 @@ export default async function DiagnosticsPage() {
     getStage3PDevOnlyKycTaxTermsSchemaFoundationState();
   const stage3QCashRedemptionDemo =
     getStage3QCashRedemptionDemoStateMachineState();
+  const stage4AAdvertiserConsoleDemo = getStage4AAdvertiserConsoleDemoState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -220,6 +225,14 @@ export default async function DiagnosticsPage() {
           className="font-medium text-blue-600 hover:text-blue-800"
         >
           Stage 3-Q cash redemption demo operations 상세 →
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/campaign-review"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-A advertiser campaign review demo 상세 →
         </Link>
       </p>
       <section
@@ -299,6 +312,21 @@ export default async function DiagnosticsPage() {
         <p>actualBankTransferImplemented=false</p>
         <p>overallDemoStatus=ready</p>
         {Object.entries(stage3QCashRedemptionDemo).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 4-A advertiser console investor demo markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-violet-500 bg-violet-50 px-3 py-3 font-mono text-xs text-violet-950"
+      >
+        {STAGE4A_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        {Object.entries(stage4AAdvertiserConsoleDemo).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

@@ -1,10 +1,10 @@
 import { ShellCard } from "@/components/ShellCard";
 import { AdvertiserDemoConsole } from "@/components/stage4a/AdvertiserDemoConsole";
 
-export default function AdvertiserPage() {
+export default function AdvertiserNewCampaignPage() {
   return (
-    <ShellCard title="광고주 콘솔">
-      <AdvertiserDemoConsole view="dashboard" />
+    <ShellCard title="새 캠페인 만들기">
+      <AdvertiserDemoConsole view="wizard" />
     </ShellCard>
   );
 }
