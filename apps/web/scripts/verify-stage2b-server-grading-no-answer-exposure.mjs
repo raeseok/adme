@@ -2,6 +2,7 @@
  * Stage 2-B — server grading preview must not expose quiz answer keys or text
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -100,12 +101,82 @@ function scanStage2BSource() {
   return failed;
 }
 
+async function collectSafeDiagnostics(page, label) {
+  const screenshotPath = join(tmpdir(), `adme-stage2b-quiz-guard-${Date.now()}.png`);
+  const bodyText = await page.locator("body").innerText().catch(() => "");
+  const dataTestIds = await page
+    .locator("[data-testid]")
+    .evaluateAll((nodes) =>
+      nodes
+        .map((node) => node.getAttribute("data-testid"))
+        .filter((value) => typeof value === "string" && value.length > 0)
+        .slice(0, 80),
+    )
+    .catch(() => []);
+  const diagnostics = {
+    label,
+    url: page.url(),
+    pathname: new URL(page.url()).pathname,
+    title: await page.title().catch(() => ""),
+    previewPanelCount: await page.locator('[data-testid="quiz-submit-preview-panel"]').count(),
+    previewPanelVisible: await page
+      .locator('[data-testid="quiz-submit-preview-panel"]')
+      .first()
+      .isVisible()
+      .catch(() => false),
+    controlledPanelCount: await page.locator('[data-testid="quiz-submit-controlled-panel"]').count(),
+    controlledPanelVisible: await page
+      .locator('[data-testid="quiz-submit-controlled-panel"]')
+      .first()
+      .isVisible()
+      .catch(() => false),
+    previewRadioCount: await page
+      .locator('[data-testid="quiz-submit-preview-panel"] input[type="radio"]')
+      .count(),
+    controlledRadioCount: await page
+      .locator('[data-testid="quiz-submit-controlled-panel"] input[type="radio"]')
+      .count(),
+    pageRadioCount: await page.locator('input[type="radio"]').count(),
+    roleRadioCount: await page.getByRole("radio").count().catch(() => 0),
+    buttonCount: await page.locator("button").count(),
+    labelCount: await page.locator("label").count(),
+    previewSubmitCount: await page.locator('[data-testid="quiz-submit-preview-button"]').count(),
+    controlledSubmitCount: await page.locator('[data-testid="quiz-submit-controlled-button"]').count(),
+    adViewStartedCount: await page.locator('[data-testid="ad-view-started"]').count(),
+    minViewTimerCount: await page.locator('[data-testid="min-view-timer"]').count(),
+    visibleTextSnippet: bodyText.replace(/\s+/g, " ").slice(0, 700),
+    dataTestIds,
+    screenshotPath,
+  };
+  await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => null);
+  console.log(`DIAG: ${JSON.stringify(diagnostics, null, 2)}`);
+}
+
 async function scanProductionSubmit() {
   const browser = await chromium.launch({ headless: true });
   const failedRef = { count: 0 };
   try {
     const page = await browser.newPage();
     const collected = [];
+    const consoleErrors = [];
+    const pageErrors = [];
+    const requestFailures = [];
+
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        consoleErrors.push(message.text().slice(0, 300));
+      }
+    });
+    page.on("pageerror", (error) => {
+      pageErrors.push(String(error.message ?? error).slice(0, 300));
+    });
+    page.on("requestfailed", (request) => {
+      const url = new URL(request.url());
+      requestFailures.push({
+        path: url.pathname,
+        failure: request.failure()?.errorText?.slice(0, 160) ?? "unknown",
+      });
+    });
 
     page.on("response", async (res) => {
       const url = res.url();
@@ -122,11 +193,52 @@ async function scanProductionSubmit() {
       waitUntil: "networkidle",
     });
 
-    await page.waitForTimeout(5500);
-    const panel = page.locator('[data-testid="quiz-submit-preview-panel"]');
-    await panel.locator('input[type="radio"]').first().click();
-    await page.locator('[data-testid="quiz-submit-preview-button"]').click();
-    await page.waitForTimeout(3000);
+    const previewPanel = page.locator('[data-testid="quiz-submit-preview-panel"]');
+    const controlledPanel = page.locator('[data-testid="quiz-submit-controlled-panel"]');
+    const panel =
+      (await controlledPanel.count()) > 0 ? controlledPanel : previewPanel;
+    const submitButton =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-submit-controlled-button"]')
+        : page.locator('[data-testid="quiz-submit-preview-button"]');
+    const resultPanel =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-controlled-result"]')
+        : page.locator('[data-testid="quiz-preview-result"]');
+
+    await panel.waitFor({ state: "visible", timeout: 15000 });
+    await page.locator('[data-testid="ad-view-started"]').waitFor({
+      state: "visible",
+      timeout: 15000,
+    });
+    await page.locator('[data-testid="min-view-timer"]').waitFor({
+      state: "visible",
+      timeout: 15000,
+    });
+    await page
+      .locator('[data-testid="min-view-timer"]')
+      .getByText("이제 퀴즈를 제출할 수 있습니다.")
+      .waitFor({ state: "visible", timeout: 15000 });
+
+    if ((await panel.getByRole("radio").count()) === 0) {
+      await collectSafeDiagnostics(page, "before quiz radio click");
+      console.log(`DIAG: consoleErrors=${JSON.stringify(consoleErrors.slice(0, 10))}`);
+      console.log(`DIAG: pageErrors=${JSON.stringify(pageErrors.slice(0, 10))}`);
+      console.log(`DIAG: requestFailures=${JSON.stringify(requestFailures.slice(0, 10))}`);
+      throw new Error("quiz radio control not found");
+    }
+    await panel.getByRole("radio").first().click();
+    await submitButton.waitFor({ state: "visible", timeout: 15000 });
+    await submitButton.evaluate((button) => {
+      if (!(button instanceof HTMLButtonElement)) {
+        throw new Error("quiz submit target is not a button");
+      }
+      if (button.disabled) {
+        throw new Error("quiz submit button is disabled after timer and selection");
+      }
+    });
+    await submitButton.click();
+    await resultPanel.waitFor({ state: "visible", timeout: 15000 });
 
     const html = await page.content();
     collected.push({ url: "page-html-after-submit", text: html });

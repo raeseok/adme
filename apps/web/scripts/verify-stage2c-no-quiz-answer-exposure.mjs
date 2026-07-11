@@ -123,11 +123,28 @@ async function scanProductionSubmit() {
       waitUntil: "networkidle",
     });
 
-    await page.waitForTimeout(6500);
-    const panel = page.locator('[data-testid="quiz-attempt-panel"]');
-    await panel.locator('input[type="radio"]').first().click();
-    await page.locator('[data-testid="quiz-submit-preview-button"]').click();
-    await page.waitForTimeout(3000);
+    const controlledPanel = page.locator('[data-testid="quiz-submit-controlled-panel"]');
+    const attemptPanel = page.locator('[data-testid="quiz-attempt-panel"]');
+    const panel =
+      (await controlledPanel.count()) > 0 ? controlledPanel : attemptPanel;
+    const submitButton =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-submit-controlled-button"]')
+        : page.locator('[data-testid="quiz-submit-preview-button"]');
+    const resultPanel =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-controlled-result"]')
+        : page.locator('[data-testid="quiz-attempt-result"]');
+
+    await panel.waitFor({ state: "visible", timeout: 15000 });
+    await page
+      .locator('[data-testid="min-view-timer"]')
+      .getByText("이제 퀴즈를 제출할 수 있습니다.")
+      .waitFor({ state: "visible", timeout: 15000 });
+    await panel.getByRole("radio").first().click();
+    await submitButton.waitFor({ state: "visible", timeout: 15000 });
+    await submitButton.click();
+    await resultPanel.waitFor({ state: "visible", timeout: 15000 });
 
     const html = await page.content();
     collected.push({ url: "page-html-after-submit", text: html });

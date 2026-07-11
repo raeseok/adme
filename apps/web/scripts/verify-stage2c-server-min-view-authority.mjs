@@ -54,10 +54,20 @@ async function main() {
 
     await page.waitForTimeout(1000);
 
-    const panel = page.locator('[data-testid="quiz-attempt-panel"]');
-    await panel.locator('input[type="radio"]').first().click();
+    const controlledPanel = page.locator('[data-testid="quiz-submit-controlled-panel"]');
+    const attemptPanel = page.locator('[data-testid="quiz-attempt-panel"]');
+    const panel =
+      (await controlledPanel.count()) > 0 ? controlledPanel : attemptPanel;
+    const submitBtn =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-submit-controlled-button"]')
+        : page.locator('[data-testid="quiz-submit-preview-button"]');
+    const resultPanel =
+      (await controlledPanel.count()) > 0
+        ? page.locator('[data-testid="quiz-controlled-result"]')
+        : page.locator('[data-testid="quiz-attempt-result"]');
+    await panel.getByRole("radio").first().click();
 
-    const submitBtn = page.locator('[data-testid="quiz-submit-preview-button"]');
     if (!(await submitBtn.isDisabled())) {
       throw new Error("submit should be disabled before min-view satisfied");
     }
@@ -66,7 +76,7 @@ async function main() {
     await page.waitForTimeout(MIN_VIEW_SEC * 1000 + BUFFER_MS);
 
     const body = await page.locator("body").innerText();
-    if (!body.includes("최소 열람 시간이 완료되었습니다")) {
+    if (!body.includes("이제 퀴즈를 제출할 수 있습니다.")) {
       throw new Error("timer should complete after server min-view elapsed");
     }
 
@@ -75,7 +85,7 @@ async function main() {
     }
 
     await submitBtn.click();
-    await page.locator('[data-testid="quiz-attempt-result"]').waitFor({
+    await resultPanel.waitFor({
       state: "visible",
       timeout: 15000,
     });
