@@ -17,7 +17,7 @@ export function ShellCard({
         className={`w-full rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 ${wide ? "max-w-2xl" : "max-w-lg"}`}
       >
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{title}</h1>
-        <div className="mt-4 space-y-3 text-base leading-relaxed text-zinc-700">
+        <div className="mt-4 space-y-3 break-words text-base leading-relaxed text-zinc-700">
           {children}
         </div>
         {showHomeLink && (
