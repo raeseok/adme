@@ -39,6 +39,7 @@ export default async function ConsumerAdDetailPage({ params }: PageProps) {
     <ShellCard title={card.title} wide>
       <section className="space-y-2 text-sm text-zinc-800">
         <p>광고 본문을 확인한 뒤 퀴즈에 참여할 수 있습니다.</p>
+        <p>정답은 소비자 화면에 표시되지 않습니다.</p>
         <p>퀴즈의 비공개 채점 값은 화면과 네트워크 응답에 포함하지 않습니다.</p>
         {productionRewardBlocked ? (
           <p>
