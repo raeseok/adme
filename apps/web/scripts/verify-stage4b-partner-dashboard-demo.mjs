@@ -41,6 +41,8 @@ const REQUIRED_MARKERS = [
   "Production DB mutation 없음",
   "stage4BPartnerDashboardDemoComplete=true",
   "adme-stage4b-partner-demo-v1",
+  "관리자 파트너 정산 상세 Demo",
+  "실제 승인·송금·세금 처리 없음",
 ];
 
 function readText(path) {
@@ -59,6 +61,13 @@ function assertContains(text, needle, label) {
 
 function parseSpentValues(fixtures) {
   return [...fixtures.matchAll(/spentWon:\s*(\d+)/g)].map((match) => Number(match[1]));
+}
+
+function extractFunctionBody(source, functionName) {
+  const start = source.indexOf(`function ${functionName}`);
+  assert(start >= 0, `${functionName} exists`);
+  const nextFunction = source.indexOf("\nfunction ", start + 1);
+  return source.slice(start, nextFunction >= 0 ? nextFunction : source.length);
 }
 
 function verifyExecutableSettlementMath(fixtures) {
@@ -120,6 +129,18 @@ function main() {
   const selectors = readText(join(REPO_ROOT, "apps/web/src/lib/partner-demo/selectors.ts"));
   const browserStore = readText(join(REPO_ROOT, "apps/web/src/lib/partner-demo/browser-store.ts"));
   const diagnostics = readText(join(REPO_ROOT, "apps/web/src/app/admin/diagnostics/page.tsx"));
+  const partnerDemoConsole = readText(
+    join(REPO_ROOT, "apps/web/src/components/stage4b/PartnerDemoConsole.tsx"),
+  );
+  const adminSettlementsPage = readText(
+    join(REPO_ROOT, "apps/web/src/app/admin/partner-settlements/page.tsx"),
+  );
+  const adminSettlementDetailPage = readText(
+    join(REPO_ROOT, "apps/web/src/app/admin/partner-settlements/[settlementId]/page.tsx"),
+  );
+  const partnerSettlementsPage = readText(
+    join(REPO_ROOT, "apps/web/src/app/partner/settlements/page.tsx"),
+  );
 
   assertContains(calculations, "Math.floor((spentWon * shareRatePercent) / 100)", "integer share calculation");
   assertContains(calculations, "calculateStage4BSettlement", "settlement calculation function");
@@ -127,6 +148,28 @@ function main() {
   assertContains(browserStore, "STAGE4B_LOCAL_STORAGE_KEY", "isolated browser store");
   assertContains(browserStore, "resetStore", "Partner Demo Reset");
   assertContains(diagnostics, "Stage 4-B partner dashboard investor demo markers", "diagnostics marker");
+  assertContains(adminSettlementsPage, 'view="admin-settlements"', "admin settlement list route");
+  assertContains(
+    adminSettlementDetailPage,
+    'view="admin-settlement-detail"',
+    "admin settlement detail route",
+  );
+  assertContains(partnerSettlementsPage, 'view="settlements"', "partner settlement list route");
+  assertContains(
+    adminSettlementDetailPage,
+    "관리자 파트너 정산 상세 Demo",
+    "admin detail shell marker",
+  );
+  assertContains(
+    partnerDemoConsole,
+    'detailHrefBase="/admin/partner-settlements"',
+    "admin settlement detail href base",
+  );
+  assertContains(
+    partnerDemoConsole,
+    'detailHrefBase = "/partner/settlements"',
+    "partner settlement detail href default",
+  );
   assertContains(fixtures, "partnerId: STAGE4B_DEMO_PARTNER.id", "advertiser partner_id fixed in fixture");
   assertContains(fixtures, "contractStatus: \"active\"", "partner contract status fixture");
   assertContains(combined, "terminated", "terminated taxonomy documented in type/fixture sources");
@@ -136,6 +179,39 @@ function main() {
   assertContains(combined, "cancelled", "settlement cancelled status support");
 
   verifyExecutableSettlementMath(fixtures);
+
+  const adminListBody = extractFunctionBody(partnerDemoConsole, "AdminSettlementList");
+  const settlementCardBody = extractFunctionBody(partnerDemoConsole, "SettlementCard");
+  const settlementDetailBody = extractFunctionBody(partnerDemoConsole, "SettlementDetail");
+  const adminDetailBody = extractFunctionBody(partnerDemoConsole, "AdminSettlementDetail");
+  assertContains(
+    adminListBody,
+    'detailHrefBase="/admin/partner-settlements"',
+    "admin list uses admin detail href",
+  );
+  assert(
+    !adminListBody.includes('detailHrefBase="/partner/settlements"'),
+    "admin list must not use partner settlement detail href",
+  );
+  assertContains(
+    settlementCardBody,
+    'detailHrefBase = "/partner/settlements"',
+    "partner list keeps partner detail href",
+  );
+  assertContains(
+    settlementDetailBody + adminDetailBody,
+    "calculateStage4BSettlement(settlement)",
+    "admin and partner detail share settlement calculation",
+  );
+  assertContains(settlementDetailBody, "정산 기간", "admin detail period marker");
+  assertContains(settlementDetailBody, "광고비 소진 총액", "admin detail gross marker");
+  assertContains(settlementDetailBody, "파트너 수익 공유율", "admin detail share marker");
+  assertContains(settlementDetailBody, "기본 정산액", "admin detail base marker");
+  assertContains(settlementDetailBody, "조정 금액", "admin detail adjustment marker");
+  assertContains(settlementDetailBody, "최종 지급 예정액", "admin detail payout marker");
+  assertContains(settlementDetailBody, "현재 상태", "admin detail status marker");
+  assertContains(settlementDetailBody, "상태 Timeline", "admin detail timeline marker");
+  assertContains(settlementDetailBody, "광고주별 breakdown", "admin detail breakdown marker");
 
   const forbiddenPatterns = [
     [/\.from\(\s*["'`]partners["'`]\s*\)\s*\.\s*(insert|update|delete|upsert)\s*\(/i, "partners mutation"],

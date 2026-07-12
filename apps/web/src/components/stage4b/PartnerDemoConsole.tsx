@@ -62,8 +62,9 @@ export function PartnerDemoConsole({
   const advertiser =
     STAGE4B_DEMO_ADVERTISERS.find((item) => item.id === advertiserId) ??
     STAGE4B_DEMO_ADVERTISERS[0];
-  const settlement =
-    settlements.find((item) => item.id === settlementId) ?? settlements[0];
+  const settlement = settlementId
+    ? settlements.find((item) => item.id === settlementId)
+    : settlements[0];
 
   function confirmReset() {
     resetStore();
@@ -103,7 +104,12 @@ export function PartnerDemoConsole({
       )}
       {view === "advertiser-detail" && <AdvertiserDetail advertiser={advertiser} />}
       {view === "settlements" && <SettlementList settlements={settlements} />}
-      {view === "settlement-detail" && <SettlementDetail settlement={settlement} />}
+      {view === "settlement-detail" &&
+        (settlement ? (
+          <SettlementDetail settlement={settlement} />
+        ) : (
+          <SettlementEmptyState />
+        ))}
       {view === "insights" && <RegionalInsights />}
       {view === "admin-settlements" && (
         <AdminSettlementList
@@ -112,10 +118,14 @@ export function PartnerDemoConsole({
         />
       )}
       {view === "admin-settlement-detail" && (
-        <AdminSettlementDetail
-          settlement={settlement}
-          updateStatus={(status) => updateSettlementStatus(settlement.id, status)}
-        />
+        settlement ? (
+          <AdminSettlementDetail
+            settlement={settlement}
+            updateStatus={(status) => updateSettlementStatus(settlement.id, status)}
+          />
+        ) : (
+          <SettlementEmptyState admin />
+        )
       )}
       {resetOpen && (
         <ResetModal onCancel={() => setResetOpen(false)} onConfirm={confirmReset} />
@@ -422,7 +432,13 @@ function SettlementList({ settlements }: { settlements: Stage4BSettlement[] }) {
   );
 }
 
-function SettlementCard({ settlement }: { settlement: Stage4BSettlement }) {
+function SettlementCard({
+  settlement,
+  detailHrefBase = "/partner/settlements",
+}: {
+  settlement: Stage4BSettlement;
+  detailHrefBase?: "/partner/settlements" | "/admin/partner-settlements";
+}) {
   const result = calculateStage4BSettlement(settlement);
   return (
     <article className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
@@ -441,7 +457,7 @@ function SettlementCard({ settlement }: { settlement: Stage4BSettlement }) {
         <Info label="조정 금액" value={formatStage4BWon(result.adjustmentWon)} />
         <Info label="최종 지급 예정액" value={formatStage4BWon(result.finalPayoutWon)} />
       </dl>
-      <Link href={`/partner/settlements/${settlement.id}`} className="mt-4 secondary-link">
+      <Link href={`${detailHrefBase}/${settlement.id}`} className="mt-4 secondary-link">
         상세 보기
       </Link>
     </article>
@@ -455,6 +471,10 @@ function SettlementDetail({ settlement }: { settlement: Stage4BSettlement }) {
       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
         <h2 className="text-lg font-semibold text-zinc-900">{settlement.periodLabel} 정산 상세</h2>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Info
+            label="정산 기간"
+            value={`${settlement.periodStart} ~ ${settlement.periodEnd}`}
+          />
           <Info label="대상 광고주 수" value={formatStage4BNumber(settlement.breakdown.length)} />
           <Info
             label="대상 캠페인 수"
@@ -462,12 +482,12 @@ function SettlementDetail({ settlement }: { settlement: Stage4BSettlement }) {
               settlement.breakdown.reduce((sum, item) => sum + item.campaignCount, 0),
             )}
           />
-          <Info label="총 광고비 소진액" value={formatStage4BWon(result.grossSpentWon)} />
+          <Info label="광고비 소진 총액" value={formatStage4BWon(result.grossSpentWon)} />
           <Info label="파트너 수익 공유율" value={`${result.shareRatePercent}%`} />
           <Info label="기본 정산액" value={formatStage4BWon(result.basePartnerShareWon)} />
           <Info label="조정 금액" value={formatStage4BWon(result.adjustmentWon)} />
           <Info label="최종 지급 예정액" value={formatStage4BWon(result.finalPayoutWon)} />
-          <Info label="지급 상태" value={STAGE4B_SETTLEMENT_STATUS_LABELS[settlement.status]} />
+          <Info label="현재 상태" value={STAGE4B_SETTLEMENT_STATUS_LABELS[settlement.status]} />
         </div>
         <SandboxNotice />
       </div>
@@ -566,7 +586,11 @@ function AdminSettlementList({
         Partner Demo Reset
       </button>
       {settlements.map((settlement) => (
-        <SettlementCard key={settlement.id} settlement={settlement} />
+        <SettlementCard
+          key={settlement.id}
+          settlement={settlement}
+          detailHrefBase="/admin/partner-settlements"
+        />
       ))}
     </section>
   );
@@ -581,6 +605,17 @@ function AdminSettlementDetail({
 }) {
   return (
     <section className="space-y-4">
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-950">
+        <h2 className="text-lg font-semibold">
+          관리자 파트너 정산 상세 Demo
+        </h2>
+        <p className="mt-1 font-semibold">
+          Stage 4-B Partner Dashboard Investor Demo
+        </p>
+        <p className="mt-1">
+          Demo / Sandbox — 실제 승인·송금·세금 처리 없음
+        </p>
+      </section>
       <SettlementDetail settlement={settlement} />
       <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
         <h3 className="font-semibold text-amber-950">Demo status action</h3>
@@ -603,6 +638,26 @@ function AdminSettlementDetail({
           </button>
         </div>
       </section>
+    </section>
+  );
+}
+
+function SettlementEmptyState({ admin = false }: { admin?: boolean }) {
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
+      <h2 className="text-lg font-semibold text-zinc-900">
+        {admin ? "관리자 파트너 정산 상세 Demo" : "정산 상세"}
+      </h2>
+      <p className="mt-2 text-sm text-zinc-600">
+        요청한 demo 정산을 찾을 수 없습니다. 내부 stack, 원시 fixture, 개인정보는
+        노출하지 않습니다.
+      </p>
+      <Link
+        href={admin ? "/admin/partner-settlements" : "/partner/settlements"}
+        className="mt-4 secondary-link"
+      >
+        정산 목록으로 돌아가기
+      </Link>
     </section>
   );
 }
