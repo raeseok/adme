@@ -39,6 +39,10 @@ import {
   STAGE4A_VISIBLE_MARKERS,
   getStage4AAdvertiserConsoleDemoState,
 } from "@/lib/advertiser-demo/stage4a-advertiser-console-demo";
+import {
+  STAGE4B_VISIBLE_MARKERS,
+  getStage4BPartnerDashboardDemoState,
+} from "@/lib/partner-demo/stage4b-partner-dashboard-demo";
 import { getStage3DDiagnosticsState } from "@/lib/rewards/stage3d-diagnostics";
 import { getStage3EDiagnosticsState } from "@/lib/rewards/stage3e-diagnostics";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -149,6 +153,7 @@ export default async function DiagnosticsPage() {
   const stage3QCashRedemptionDemo =
     getStage3QCashRedemptionDemoStateMachineState();
   const stage4AAdvertiserConsoleDemo = getStage4AAdvertiserConsoleDemoState();
+  const stage4BPartnerDashboardDemo = getStage4BPartnerDashboardDemoState();
 
   return (
     <ShellCard title="AdMe diagnostics">
@@ -233,6 +238,14 @@ export default async function DiagnosticsPage() {
           className="font-medium text-blue-600 hover:text-blue-800"
         >
           Stage 4-A advertiser campaign review demo 상세 →
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-zinc-600">
+        <Link
+          href="/admin/partner-settlements"
+          className="font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-B partner settlement demo 상세 →
         </Link>
       </p>
       <section
@@ -327,6 +340,26 @@ export default async function DiagnosticsPage() {
           </p>
         ))}
         {Object.entries(stage4AAdvertiserConsoleDemo).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 4-B partner dashboard investor demo markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-cyan-500 bg-cyan-50 px-3 py-3 font-mono text-xs text-cyan-950"
+      >
+        {STAGE4B_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        <p>stage4BPartnerDashboardDemoComplete=true</p>
+        <p>deterministicFixture=true</p>
+        <p>settlementCalculationStatus=integer-30-percent</p>
+        <p>demoSandboxStatus=browser-only</p>
+        <p>productionDbMutationAllowed=false</p>
+        {Object.entries(stage4BPartnerDashboardDemo).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

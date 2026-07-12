@@ -1,10 +1,10 @@
 import { ShellCard } from "@/components/ShellCard";
 import { PartnerDemoConsole } from "@/components/stage4b/PartnerDemoConsole";
 
-export default function PartnerPage() {
+export default function PartnerDashboardPage() {
   return (
-    <ShellCard title="파트너 대시보드">
-      <PartnerDemoConsole view="home" />
+    <ShellCard title="Partner Dashboard">
+      <PartnerDemoConsole view="dashboard" />
     </ShellCard>
   );
 }

@@ -60,6 +60,18 @@ export default function AdminPage() {
         >
           Stage 4-A advertiser console →
         </Link>
+        <Link
+          href="/admin/partner-settlements"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-B partner settlement review demo →
+        </Link>
+        <Link
+          href="/partner"
+          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          Stage 4-B partner dashboard →
+        </Link>
       </div>
     </ShellCard>
   );
