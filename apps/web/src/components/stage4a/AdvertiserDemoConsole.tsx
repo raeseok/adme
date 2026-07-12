@@ -1222,7 +1222,7 @@ function CampaignDetail({
           )}
         </div>
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          정답은 서버 전용 정보이며 소비자 화면에 노출되지 않습니다.
+          정답은 서버 전용 정보이며 정답은 소비자 화면에 표시되지 않습니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link href={`/advertiser/campaigns/${campaign.id}/preview`} className="secondary-link">
