@@ -5,6 +5,21 @@ import { STAGE4A_LOCAL_STORAGE_KEY, STAGE4A_SCHEMA_VERSION } from "./constants";
 import { createStage4AInitialStore } from "./fixtures";
 import type { Stage4ADemoStore } from "./types";
 
+export function sanitizeStage4AStoreForBrowser(store: Stage4ADemoStore): Stage4ADemoStore {
+  return {
+    schemaVersion: store.schemaVersion,
+    statusByCampaignId: { ...store.statusByCampaignId },
+    eventsByCampaignId: Object.fromEntries(
+      Object.entries(store.eventsByCampaignId).map(([campaignId, events]) => [
+        campaignId,
+        events.map((event) => ({ ...event })),
+      ]),
+    ),
+    resetVersion: store.resetVersion,
+    submittedCampaignId: store.submittedCampaignId,
+  };
+}
+
 function isStage4ADemoStore(value: unknown): value is Stage4ADemoStore {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<Stage4ADemoStore>;
@@ -32,7 +47,10 @@ function readStage4AStoreFromBrowser(): Stage4ADemoStore {
 
 function writeStage4AStoreToBrowser(store: Stage4ADemoStore) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STAGE4A_LOCAL_STORAGE_KEY, JSON.stringify(store));
+  window.localStorage.setItem(
+    STAGE4A_LOCAL_STORAGE_KEY,
+    JSON.stringify(sanitizeStage4AStoreForBrowser(store)),
+  );
 }
 
 export function useStage4ADemoStore() {
@@ -50,8 +68,9 @@ export function useStage4ADemoStore() {
   }, []);
 
   const setStore = useCallback((next: Stage4ADemoStore) => {
-    setStoreState(next);
-    writeStage4AStoreToBrowser(next);
+    const sanitized = sanitizeStage4AStoreForBrowser(next);
+    setStoreState(sanitized);
+    writeStage4AStoreToBrowser(sanitized);
   }, []);
 
   const resetStore = useCallback(() => {

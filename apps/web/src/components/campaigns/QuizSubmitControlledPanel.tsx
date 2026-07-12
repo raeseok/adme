@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useId, useMemo, useState, useTransition } from "react";
-import { submitConsumerQuizForRewardAction } from "@/app/consumer/ads/[campaignId]/actions";
+import {
+  submitConsumerQuizForRewardAction,
+  submitStage4A2ShortAnswerDemoAction,
+} from "@/app/consumer/ads/[campaignId]/actions";
 import type { ConsumerAdCardDto } from "@/lib/consumer-ads/types";
 import type { Stage3CSubmitResult } from "@/lib/quiz-rewards/stage3c-types";
 import { AdViewSessionStarter } from "./AdViewSessionStarter";
@@ -20,10 +23,12 @@ export function QuizSubmitControlledPanel({
   const [viewSessionReady, setViewSessionReady] = useState(false);
   const [attemptsRemaining, setAttemptsRemaining] = useState(2);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [shortAnswer, setShortAnswer] = useState("");
   const [timerComplete, setTimerComplete] = useState(false);
   const [submitResult, setSubmitResult] = useState<Stage3CSubmitResult | null>(
     null,
   );
+  const [shortAnswerResult, setShortAnswerResult] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const submitDisabledByResult =
@@ -40,7 +45,7 @@ export function QuizSubmitControlledPanel({
   const canSubmit =
     viewSessionReady &&
     timerComplete &&
-    selectedOptionId != null &&
+    (card.quizType === "short_answer" ? Boolean(shortAnswer.trim()) : selectedOptionId != null) &&
     !isPending &&
     attemptsRemaining > 0 &&
     !submitDisabledByResult;
@@ -63,9 +68,19 @@ export function QuizSubmitControlledPanel({
   );
 
   function handleSubmit() {
-    if (!canSubmit || !selectedOptionId) return;
+    if (!canSubmit) return;
 
     startTransition(async () => {
+      if (card.quizType === "short_answer") {
+        const result = await submitStage4A2ShortAnswerDemoAction({
+          campaignId: card.campaignId,
+          quizId: card.quizId,
+          responseText: shortAnswer,
+        });
+        setShortAnswerResult(result.message);
+        return;
+      }
+      if (!selectedOptionId) return;
       const result = await submitConsumerQuizForRewardAction({
         campaignId: card.campaignId,
         quizId: card.quizId,
@@ -128,24 +143,41 @@ export function QuizSubmitControlledPanel({
           <p className="mt-2 text-sm font-medium text-zinc-900">
             {card.quizQuestion}
           </p>
-          <ul className="mt-3 space-y-2" role="list">
-            {card.quizOptions.map((option) => (
-              <li key={option.optionId}>
-                <label className="flex cursor-pointer items-start gap-2 rounded-md border border-violet-100 bg-white px-3 py-2 text-sm text-zinc-800">
-                  <input
-                    type="radio"
-                    name={`quiz-controlled-${card.campaignId}`}
-                    value={option.optionId}
-                    checked={selectedOptionId === option.optionId}
-                    onChange={() => setSelectedOptionId(option.optionId)}
-                    className="mt-0.5"
-                    aria-label={option.label}
-                  />
-                  <span>{option.label}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
+          {card.quizType === "multiple_choice" ? (
+            <ul className="mt-3 space-y-2" role="list">
+              {card.quizOptions.map((option) => (
+                <li key={option.optionId}>
+                  <label className="flex cursor-pointer items-start gap-2 rounded-md border border-violet-100 bg-white px-3 py-2 text-sm text-zinc-800">
+                    <input
+                      type="radio"
+                      name={`quiz-controlled-${card.campaignId}`}
+                      value={option.optionId}
+                      checked={selectedOptionId === option.optionId}
+                      onChange={() => setSelectedOptionId(option.optionId)}
+                      className="mt-0.5"
+                      aria-label={option.label}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-3">
+              <label className="text-sm font-medium text-zinc-700">
+                단답형 답안
+                <input
+                  value={shortAnswer}
+                  onChange={(event) => setShortAnswer(event.target.value)}
+                  className="mt-1 w-full rounded-md border border-violet-100 bg-white px-3 py-2 text-sm"
+                  placeholder="광고 내용을 보고 답안을 입력하세요"
+                />
+              </label>
+              <p className="mt-2 text-xs text-zinc-600">
+                단답형 demo는 서버 전용 registry로 채점하며 정답 원문을 응답에 포함하지 않습니다.
+              </p>
+            </div>
+          )}
 
           <p
             data-testid="attempts-remaining"
@@ -178,6 +210,14 @@ export function QuizSubmitControlledPanel({
                 중복 제출 보호가 적용되었습니다. 추가 적립은 없습니다.
               </p>
             )}
+          </div>
+        )}
+        {shortAnswerResult && (
+          <div
+            data-testid="quiz-controlled-result"
+            className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-800"
+          >
+            <p data-testid="quiz-controlled-result-message">{shortAnswerResult}</p>
           </div>
         )}
 

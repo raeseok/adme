@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   STAGE4A_BUILD_NAME,
   STAGE4A_DEMO_CATEGORIES,
   STAGE4A_DEMO_DAYS,
+  STAGE4A_DEMO_IMAGE_URL,
+  STAGE4A_DEMO_POSTER_URL,
+  STAGE4A_DEMO_VIDEO_URL,
   STAGE4A_DEMO_REGIONS,
   STAGE4A_MIN_VIEW_SECONDS_MAX,
   STAGE4A_MIN_VIEW_SECONDS_MIN,
@@ -28,12 +32,28 @@ import {
   STAGE4A_WIZARD_DEFAULTS,
 } from "@/lib/advertiser-demo/fixtures";
 import {
+  createPublicCreative,
+  createPublicQuiz,
+  getLandingHostname,
+  recordLandingClickDemoState,
+  switchQuizType,
+  validateCreativeMedia,
+  validateLandingUrl,
+  validateMultipleChoiceQuiz,
+} from "@/lib/advertiser-demo/creative-quiz";
+import {
   selectStage4ACampaign,
   selectStage4ACampaigns,
   selectStage4ADashboardTotals,
 } from "@/lib/advertiser-demo/selectors";
 import { applyStage4ATransition } from "@/lib/advertiser-demo/state-machine";
-import type { Stage4ACampaign, Stage4ACampaignStatus } from "@/lib/advertiser-demo/types";
+import type {
+  AdCreativePublic,
+  AdQuizType,
+  AdvertiserQuizAuthoringSecret,
+  Stage4ACampaign,
+  Stage4ACampaignStatus,
+} from "@/lib/advertiser-demo/types";
 
 type AdvertiserDemoConsoleProps = {
   view:
@@ -293,7 +313,11 @@ function CampaignWizard({
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<WizardForm>(STAGE4A_WIZARD_DEFAULTS);
-  const [authorChoice, setAuthorChoice] = useState("지역 할인");
+  const [authoringSecret, setAuthoringSecret] = useState<AdvertiserQuizAuthoringSecret>({
+    multipleChoiceSelection: 0,
+    shortAnswer: "",
+    acceptedAnswers: [],
+  });
   const [error, setError] = useState("");
   const estimatedReach = estimateStage4AReach({
     regionCount: form.targetRegions.length,
@@ -316,16 +340,39 @@ function CampaignWizard({
     if (step === 2 && (form.targetRegions.length === 0 || form.exposureDays.length === 0)) {
       return "타겟 지역과 노출 요일을 1개 이상 선택해 주세요.";
     }
-    if (
-      step === 3 &&
-      (form.minViewSeconds < STAGE4A_MIN_VIEW_SECONDS_MIN ||
+    if (step === 3) {
+      const creative = createPublicCreative({
+        type: form.creativeType,
+        title: form.creativeTitle,
+        body: form.creativeBody,
+        imageUrl: form.imageUrl,
+        imageAlt: form.imageAlt,
+        videoUrl: form.videoUrl,
+        videoPosterUrl: form.videoPosterUrl,
+        videoCaption: form.videoCaption,
+        linkEnabled: form.linkEnabled,
+        landingUrl: form.landingUrl,
+        ctaLabel: form.ctaLabel,
+      });
+      const landing = form.linkEnabled ? validateLandingUrl(form.landingUrl) : { ok: true };
+      const multipleChoice = validateMultipleChoiceQuiz(
+        form.quizOptions,
+        authoringSecret.multipleChoiceSelection ?? null,
+      );
+      const shortAnswerRegistered = Boolean(authoringSecret.shortAnswer?.trim());
+      if (
+        form.minViewSeconds < STAGE4A_MIN_VIEW_SECONDS_MIN ||
         form.minViewSeconds > STAGE4A_MIN_VIEW_SECONDS_MAX ||
         form.pointPerPass < STAGE4A_POINT_MIN ||
         form.pointPerPass > STAGE4A_POINT_MAX ||
+        !validateCreativeMedia(creative) ||
+        !landing.ok ||
         !form.quizQuestion.trim() ||
-        form.quizOptions.some((option) => !option.trim()))
-    ) {
-      return "최소 열람 시간, 퀴즈, 지급 포인트 범위를 확인해 주세요.";
+        (form.quizType === "multiple_choice" && !multipleChoice.ok) ||
+        (form.quizType === "short_answer" && !shortAnswerRegistered)
+      ) {
+        return "광고 메인 콘텐츠, 랜딩 URL, 퀴즈 유형, 지급 포인트 범위를 확인해 주세요.";
+      }
     }
     if (step === 4 && form.demoBudgetPoints < form.pointPerPass) {
       return "Demo 예산은 지급 포인트보다 커야 합니다.";
@@ -410,8 +457,8 @@ function CampaignWizard({
           <WizardStepThree
             form={form}
             setForm={setForm}
-            authorChoice={authorChoice}
-            setAuthorChoice={setAuthorChoice}
+            authoringSecret={authoringSecret}
+            setAuthoringSecret={setAuthoringSecret}
           />
         )}
         {step === 4 && (
@@ -428,6 +475,7 @@ function CampaignWizard({
             estimatedReach={estimatedReach}
             estimatedVerifiedEngagements={estimatedVerifiedEngagements}
             estimate={estimate}
+            authoringSecret={authoringSecret}
             onSubmit={submitDemo}
             goToStep={setStep}
           />
@@ -579,66 +627,327 @@ function WizardStepTwo({
 function WizardStepThree({
   form,
   setForm,
-  authorChoice,
-  setAuthorChoice,
+  authoringSecret,
+  setAuthoringSecret,
 }: {
   form: WizardForm;
   setForm: (form: WizardForm) => void;
-  authorChoice: string;
-  setAuthorChoice: (value: string) => void;
+  authoringSecret: AdvertiserQuizAuthoringSecret;
+  setAuthoringSecret: (value: AdvertiserQuizAuthoringSecret) => void;
 }) {
+  const landing = form.linkEnabled ? validateLandingUrl(form.landingUrl) : null;
+
+  function setQuizType(quizType: AdQuizType) {
+    const switched = switchQuizType(quizType);
+    setForm({
+      ...form,
+      quizType,
+      quizOptions:
+        quizType === "multiple_choice"
+          ? form.quizOptions.length >= 2
+            ? form.quizOptions
+            : ["", ""]
+          : [],
+    });
+    setAuthoringSecret(switched.authoringSecret);
+  }
+
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <NumberInput
-          label="최소 열람 시간 (3~15초)"
-          value={form.minViewSeconds}
-          onChange={(minViewSeconds) => setForm({ ...form, minViewSeconds })}
+      <section className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <h3 className="font-semibold text-zinc-900">A. 광고 열람 조건</h3>
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <NumberInput
+            label="최소 열람 시간 (3~15초)"
+            value={form.minViewSeconds}
+            onChange={(minViewSeconds) => setForm({ ...form, minViewSeconds })}
+          />
+          <NumberInput
+            label="퀴즈 통과 지급 포인트 (50~500P)"
+            value={form.pointPerPass}
+            onChange={(pointPerPass) => setForm({ ...form, pointPerPass })}
+          />
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
+        <h3 className="font-semibold text-zinc-900">B. 광고 메인 콘텐츠</h3>
+        <p className="mt-1 text-sm text-zinc-600">
+          텍스트, 이미지, 동영상 demo 소재를 선택합니다. 실제 파일 업로드나 Storage 저장은
+          없습니다.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {(["text", "image", "video"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setForm({ ...form, creativeType: type })}
+              className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
+                form.creativeType === type
+                  ? "border-violet-300 bg-violet-50 text-violet-900"
+                  : "border-zinc-200 bg-zinc-50 text-zinc-600"
+              }`}
+            >
+              {type === "text" ? "텍스트" : type === "image" ? "이미지" : "동영상"}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <TextInput
+            label="광고 제목"
+            value={form.creativeTitle}
+            onChange={(creativeTitle) => setForm({ ...form, creativeTitle })}
+          />
+          <TextInput
+            label="CTA 문구"
+            value={form.ctaLabel}
+            onChange={(ctaLabel) => setForm({ ...form, ctaLabel })}
+          />
+        </div>
+        <label className="mt-4 block text-sm font-medium text-zinc-700">
+          광고 본문 또는 설명
+          <textarea
+            value={form.creativeBody}
+            onChange={(event) => setForm({ ...form, creativeBody: event.target.value })}
+            className="mt-1 min-h-28 w-full rounded-lg border border-zinc-300 px-3 py-2"
+          />
+        </label>
+        {form.creativeType === "image" && (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <TextInput
+              label="이미지 URL"
+              value={form.imageUrl}
+              onChange={(imageUrl) => setForm({ ...form, imageUrl })}
+            />
+            <TextInput
+              label="이미지 대체 텍스트"
+              value={form.imageAlt}
+              onChange={(imageAlt) => setForm({ ...form, imageAlt })}
+            />
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, imageUrl: STAGE4A_DEMO_IMAGE_URL })}
+              className="secondary-button"
+            >
+              Demo 이미지 선택
+            </button>
+          </div>
+        )}
+        {form.creativeType === "video" && (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <TextInput
+              label="동영상 URL"
+              value={form.videoUrl}
+              onChange={(videoUrl) => setForm({ ...form, videoUrl })}
+            />
+            <TextInput
+              label="Poster 이미지 URL"
+              value={form.videoPosterUrl}
+              onChange={(videoPosterUrl) => setForm({ ...form, videoPosterUrl })}
+            />
+            <TextInput
+              label="동영상 설명 또는 자막용 텍스트"
+              value={form.videoCaption}
+              onChange={(videoCaption) => setForm({ ...form, videoCaption })}
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  videoUrl: STAGE4A_DEMO_VIDEO_URL,
+                  videoPosterUrl: STAGE4A_DEMO_POSTER_URL,
+                })
+              }
+              className="secondary-button"
+            >
+              Demo 동영상 선택
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
+        <h3 className="font-semibold text-zinc-900">C. 랜딩페이지 연결</h3>
+        <label className="mt-3 flex items-center gap-2 text-sm font-medium text-zinc-700">
+          <input
+            type="checkbox"
+            checked={form.linkEnabled}
+            onChange={(event) => setForm({ ...form, linkEnabled: event.target.checked })}
+          />
+          랜딩페이지 링크 활성화
+        </label>
+        {form.linkEnabled && (
+          <div className="mt-3 grid gap-4 md:grid-cols-2">
+            <TextInput
+              label="랜딩페이지 URL"
+              value={form.landingUrl}
+              onChange={(landingUrl) => setForm({ ...form, landingUrl })}
+            />
+            <Metric label="랜딩 hostname" value={getLandingHostname(form.landingUrl) || "검증 필요"} />
+            {landing && !landing.ok && (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 md:col-span-2">
+                안전하지 않거나 올바르지 않은 URL입니다. https URL만 사용해 주세요.
+              </p>
+            )}
+            <p className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900 md:col-span-2">
+              외부 사이트로 이동합니다. 링크 클릭은 퀴즈 통과나 포인트 적립으로 인정되지
+              않습니다.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
+        <h3 className="font-semibold text-zinc-900">D. 퀴즈 유형과 문항</h3>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setQuizType("multiple_choice")}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
+              form.quizType === "multiple_choice"
+                ? "border-violet-300 bg-violet-50 text-violet-900"
+                : "border-zinc-200 bg-zinc-50 text-zinc-600"
+            }`}
+          >
+            선택형
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuizType("short_answer")}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
+              form.quizType === "short_answer"
+                ? "border-violet-300 bg-violet-50 text-violet-900"
+                : "border-zinc-200 bg-zinc-50 text-zinc-600"
+            }`}
+          >
+            단답형
+          </button>
+        </div>
+        <TextInput
+          label="퀴즈 문항"
+          value={form.quizQuestion}
+          onChange={(quizQuestion) => setForm({ ...form, quizQuestion })}
         />
+        {form.quizType === "multiple_choice" && (
+          <div className="mt-4 space-y-3">
+            <div className="grid gap-3 md:grid-cols-2">
+              {form.quizOptions.map((option, index) => (
+                <div key={`option-${index}`} className="flex gap-2">
+                  <TextInput
+                    label={`선택지 ${index + 1}`}
+                    value={option}
+                    onChange={(next) => {
+                      const quizOptions = [...form.quizOptions];
+                      quizOptions[index] = next;
+                      setForm({ ...form, quizOptions });
+                    }}
+                  />
+                  {form.quizOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const quizOptions = form.quizOptions.filter((_, optionIndex) => optionIndex !== index);
+                        setForm({ ...form, quizOptions });
+                        setAuthoringSecret({ multipleChoiceSelection: null });
+                      }}
+                      className="mt-6 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+                    >
+                      삭제
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {form.quizOptions.length < 4 && (
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, quizOptions: [...form.quizOptions, ""] })}
+                className="secondary-button"
+              >
+                선택지 추가
+              </button>
+            )}
+            <label className="block text-sm font-medium text-zinc-700">
+              작성 중 서버 등록 선택값 (transient form state)
+              <select
+                value={authoringSecret.multipleChoiceSelection ?? ""}
+                onChange={(event) =>
+                  setAuthoringSecret({
+                    multipleChoiceSelection:
+                      event.target.value === "" ? null : Number(event.target.value),
+                  })
+                }
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
+              >
+                <option value="">정답 선택 필요</option>
+                {form.quizOptions.map((option, index) => (
+                  <option key={`${option}-${index}`} value={index}>
+                    선택지 {index + 1}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+        {form.quizType === "short_answer" && (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <TextInput
+              label="기준 정답 (transient)"
+              value={authoringSecret.shortAnswer ?? ""}
+              onChange={(shortAnswer) =>
+                setAuthoringSecret({
+                  shortAnswer,
+                  acceptedAnswers: authoringSecret.acceptedAnswers ?? [],
+                })
+              }
+            />
+            {(authoringSecret.acceptedAnswers ?? [""]).slice(0, 5).map((answer, index) => (
+              <TextInput
+                key={`short-answer-${index}`}
+                label={`허용 답안 ${index + 1}`}
+                value={answer}
+                onChange={(next) => {
+                  const acceptedAnswers = [...(authoringSecret.acceptedAnswers ?? [])];
+                  acceptedAnswers[index] = next;
+                  setAuthoringSecret({
+                    shortAnswer: authoringSecret.shortAnswer ?? "",
+                    acceptedAnswers,
+                  });
+                }}
+              />
+            ))}
+            {(authoringSecret.acceptedAnswers ?? []).length < 5 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setAuthoringSecret({
+                    shortAnswer: authoringSecret.shortAnswer ?? "",
+                    acceptedAnswers: [...(authoringSecret.acceptedAnswers ?? []), ""],
+                  })
+                }
+                className="secondary-button"
+              >
+                허용 답안 추가
+              </button>
+            )}
+          </div>
+        )}
+        <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          정답은 작성 중 transient form state에서만 존재합니다. 제출 결과에는
+          answerRegistered와 acceptedAnswerCount만 남기며 Preview, diagnostics, URL query,
+          browser store에 정답 원문을 저장하지 않습니다.
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <h3 className="font-semibold text-zinc-900">E. 리워드 포인트</h3>
         <NumberInput
           label="퀴즈 통과 지급 포인트 (50~500P)"
           value={form.pointPerPass}
           onChange={(pointPerPass) => setForm({ ...form, pointPerPass })}
         />
-      </div>
-      <TextInput
-        label="퀴즈 문항"
-        value={form.quizQuestion}
-        onChange={(quizQuestion) => setForm({ ...form, quizQuestion })}
-      />
-      <div className="grid gap-3 md:grid-cols-2">
-        {form.quizOptions.map((option, index) => (
-          <TextInput
-            key={`option-${index}`}
-            label={`선택지 ${index + 1}`}
-            value={option}
-            onChange={(next) => {
-              const quizOptions = [...form.quizOptions];
-              quizOptions[index] = next;
-              setForm({ ...form, quizOptions });
-            }}
-          />
-        ))}
-      </div>
-      <label className="block text-sm font-medium text-zinc-700">
-        작성 중 서버 등록 선택값 (transient form state)
-        <select
-          value={authorChoice}
-          onChange={(event) => setAuthorChoice(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
-        >
-          {form.quizOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
-      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        정답은 작성 중 transient form state에서만 존재합니다. 제출 결과에는
-        answerRegistered=true만 남기며 Preview, 성과 Dashboard, diagnostics, URL query,
-        browser store에 선택값을 저장하지 않습니다.
-      </p>
+      </section>
     </div>
   );
 }
@@ -694,6 +1003,7 @@ function WizardStepFive({
   estimatedReach,
   estimatedVerifiedEngagements,
   estimate,
+  authoringSecret,
   onSubmit,
   goToStep,
 }: {
@@ -701,9 +1011,29 @@ function WizardStepFive({
   estimatedReach: number;
   estimatedVerifiedEngagements: number;
   estimate: ReturnType<typeof calculateStage4ABudgetEstimate>;
+  authoringSecret: AdvertiserQuizAuthoringSecret;
   onSubmit: () => void;
   goToStep: (step: number) => void;
 }) {
+  const creative = createPublicCreative({
+    type: form.creativeType,
+    title: form.creativeTitle,
+    body: form.creativeBody,
+    imageUrl: form.imageUrl,
+    imageAlt: form.imageAlt,
+    videoUrl: form.videoUrl,
+    videoPosterUrl: form.videoPosterUrl,
+    videoCaption: form.videoCaption,
+    linkEnabled: form.linkEnabled,
+    landingUrl: form.landingUrl,
+    ctaLabel: form.ctaLabel,
+  });
+  const quiz = createPublicQuiz({
+    type: form.quizType,
+    question: form.quizQuestion,
+    options: form.quizOptions,
+    authoringSecret,
+  });
   const previewCampaign: Stage4ACampaign = {
     ...STAGE4A_DEMO_CAMPAIGNS[2],
     name: form.name,
@@ -717,10 +1047,15 @@ function WizardStepFive({
     birthYearRange: { from: form.birthYearFrom, to: form.birthYearTo },
     exposureDays: form.exposureDays,
     exposureTime: { start: form.startTime, end: form.endTime },
+    creativeLabel: form.creativeType,
+    creative,
     minViewSeconds: form.minViewSeconds,
+    quizType: quiz.type,
     quizQuestion: form.quizQuestion,
-    quizOptions: form.quizOptions,
-    answerRegistered: true,
+    quizOptions: quiz.type === "multiple_choice" ? quiz.options ?? [] : [],
+    quiz,
+    answerRegistered: quiz.answerRegistered,
+    acceptedAnswerCount: quiz.acceptedAnswerCount,
     pointPerPass: form.pointPerPass,
     demoBudgetPoints: form.demoBudgetPoints,
     estimatedReach,
@@ -758,6 +1093,86 @@ function WizardStepFive({
   );
 }
 
+function creativeTypeLabel(type: AdCreativePublic["type"]) {
+  if (type === "text") return "텍스트";
+  if (type === "image") return "이미지";
+  return "동영상";
+}
+
+function quizTypeLabel(type: AdQuizType) {
+  return type === "multiple_choice" ? "선택형" : "단답형";
+}
+
+function CreativeBlock({ creative }: { creative: AdCreativePublic }) {
+  const [clickState, setClickState] = useState({
+    ctaClickCount: 0,
+    quizPassGranted: false,
+    rewardGranted: false,
+  });
+  return (
+    <section className="mt-3 rounded-xl border border-zinc-200 bg-white px-4 py-4">
+      <p className="text-xs font-semibold text-violet-700">광고 메인 콘텐츠 · {creativeTypeLabel(creative.type)}</p>
+      <h3 className="mt-1 text-lg font-bold text-zinc-900">{creative.title}</h3>
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">{creative.body}</p>
+      {creative.type === "image" && (
+        <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+          {creative.imageUrl ? (
+            <Image
+              src={creative.imageUrl}
+              alt={creative.imageAlt ?? "광고 이미지"}
+              width={640}
+              height={360}
+              className="h-auto max-h-72 w-full object-contain"
+            />
+          ) : (
+            <p className="px-4 py-6 text-sm text-zinc-500">이미지 로드 실패 상태</p>
+          )}
+        </div>
+      )}
+      {creative.type === "video" && (
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+          <video
+            src={creative.videoUrl}
+            poster={creative.videoPosterUrl}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full rounded-lg"
+          >
+            {creative.videoCaption}
+          </video>
+          <p className="mt-2 text-xs text-zinc-600">{creative.videoCaption}</p>
+        </div>
+      )}
+      {creative.linkEnabled && creative.landingUrl && (
+        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-950">
+          <p>{creative.externalLinkNotice}</p>
+          <a
+            href={creative.landingUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            onClick={() =>
+              setClickState((current) =>
+                recordLandingClickDemoState(current.ctaClickCount),
+              )
+            }
+            className="mt-3 inline-block rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white"
+          >
+            {creative.ctaLabel ?? "자세히 보기"}
+          </a>
+          <p className="mt-2 text-xs text-blue-900">
+            Landing hostname: {creative.landingHostname}. 링크 클릭은 quiz pass 또는 reward 상태를 변경하지 않습니다.
+          </p>
+          <p className="mt-1 text-xs text-blue-900">
+            CTA demo clicks={clickState.ctaClickCount}; quizPassGranted=
+            {String(clickState.quizPassGranted)}; rewardGranted={String(clickState.rewardGranted)}
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function CampaignDetail({
   campaign,
   storeEvents,
@@ -777,9 +1192,34 @@ function CampaignDetail({
         </div>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <Info label="카테고리" value={campaign.category} />
+          <Info label="광고 소재 유형" value={creativeTypeLabel(campaign.creative.type)} />
+          <Info
+            label="랜딩페이지 hostname"
+            value={campaign.creative.landingHostname ?? "연결 없음"}
+          />
+          <Info label="퀴즈 유형" value={quizTypeLabel(campaign.quiz.type)} />
           <Info label="지급 포인트" value={formatStage4APoints(campaign.pointPerPass)} />
           <Info label="Demo 예산" value={formatStage4APoints(campaign.demoBudgetPoints)} />
-          <Info label="정답 등록 여부" value={campaign.answerRegistered ? "등록됨" : "미등록"} />
+          <Info label="정답 등록 여부" value={campaign.answerRegistered ? "정답 등록 완료" : "미등록"} />
+        </div>
+        <div className="mt-4">
+          <CreativeBlock creative={campaign.creative} />
+        </div>
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <p className="text-sm font-semibold text-zinc-900">{campaign.quiz.question}</p>
+          {campaign.quiz.type === "multiple_choice" ? (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {(campaign.quiz.options ?? []).map((option) => (
+                <div key={option} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm">
+                  {option}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-zinc-600">
+              단답형 정답 등록 완료 · 허용 답안 수 {campaign.quiz.acceptedAnswerCount ?? 0}개
+            </p>
+          )}
         </div>
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           정답은 서버 전용 정보이며 소비자 화면에 노출되지 않습니다.
@@ -812,27 +1252,37 @@ function CampaignPreview({
     <section className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
       {!compact && <h2 className="text-lg font-semibold text-zinc-900">소비자 화면 Preview</h2>}
       <div className="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-        <div className="rounded-xl bg-gradient-to-br from-violet-100 to-blue-100 p-5 text-sm text-violet-950">
-          <p className="font-semibold">{campaign.advertiserName}</p>
-          <h3 className="mt-2 text-xl font-bold">{campaign.adTitle}</h3>
-          <p className="mt-2">{campaign.description}</p>
-        </div>
+        <p className="text-sm font-semibold text-violet-900">{campaign.advertiserName}</p>
+        <h3 className="mt-1 text-xl font-bold text-zinc-900">{campaign.name}</h3>
+        <CreativeBlock creative={campaign.creative} />
         <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+          <Info label="광고 소재 유형" value={creativeTypeLabel(campaign.creative.type)} />
           <Info label="카테고리" value={campaign.category} />
           <Info label="지역" value={campaign.targetRegions.join(", ")} />
           <Info label="최소 열람 시간" value={`${campaign.minViewSeconds}초`} />
+          <Info label="퀴즈 유형" value={quizTypeLabel(campaign.quiz.type)} />
           <Info label="지급 포인트" value={formatStage4APoints(campaign.pointPerPass)} />
         </dl>
         <div className="mt-4 rounded-xl border border-zinc-200 bg-white px-4 py-3">
-          <p className="font-semibold text-zinc-900">{campaign.quizQuestion}</p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {campaign.quizOptions.map((option) => (
-              <div key={option} className="rounded-lg border border-zinc-200 px-3 py-2 text-sm">
-                {option}
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-sm text-zinc-600">정답 미표시 · answerRegistered=true</p>
+          <p className="font-semibold text-zinc-900">{campaign.quiz.question}</p>
+          {campaign.quiz.type === "multiple_choice" ? (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {(campaign.quiz.options ?? []).map((option) => (
+                <div key={option} className="rounded-lg border border-zinc-200 px-3 py-2 text-sm">
+                  {option}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <input
+              readOnly
+              placeholder="단답형 답안을 입력합니다"
+              className="mt-3 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            />
+          )}
+          <p className="mt-3 text-sm text-zinc-600">
+            정답 등록 완료 · 정답은 소비자 화면에 표시되지 않습니다 · 실제 채점은 서버에서 처리됩니다.
+          </p>
         </div>
         <p className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
           소비자의 개인 식별 정보는 광고주에게 제공되지 않습니다.
@@ -902,13 +1352,23 @@ function AdminReviewDetail({
       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
         <h3 className="font-semibold text-zinc-900">검토 요약</h3>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <Info label="광고 제목" value={campaign.creative.title} />
+          <Info label="소재 유형" value={creativeTypeLabel(campaign.creative.type)} />
+          <Info label="랜딩 URL hostname" value={campaign.creative.landingHostname ?? "연결 없음"} />
+          <Info label="CTA 문구" value={campaign.creative.ctaLabel ?? "없음"} />
+          <Info label="외부 링크 여부" value={campaign.creative.linkEnabled ? "활성" : "비활성"} />
+          <Info label="퀴즈 유형" value={quizTypeLabel(campaign.quiz.type)} />
           <Info label="타겟 조건" value={campaign.targetRegions.join(", ")} />
           <Info
             label="노출 시간"
             value={`${campaign.exposureDays.join(", ")} ${campaign.exposureTime.start}-${campaign.exposureTime.end}`}
           />
           <Info label="최소 열람 시간" value={`${campaign.minViewSeconds}초`} />
-          <Info label="정답 등록 여부" value={campaign.answerRegistered ? "등록됨" : "미등록"} />
+          <Info label="정답 등록 여부" value={campaign.answerRegistered ? "정답 등록 완료" : "미등록"} />
+          <Info
+            label="허용 답안 수"
+            value={campaign.quiz.type === "short_answer" ? String(campaign.quiz.acceptedAnswerCount ?? 0) : "선택형"}
+          />
           <Info label="지급 포인트" value={formatStage4APoints(campaign.pointPerPass)} />
           <Info label="Demo 예산" value={formatStage4APoints(campaign.demoBudgetPoints)} />
           <Info label="예상 도달" value={formatStage4ANumber(campaign.estimatedReach)} />

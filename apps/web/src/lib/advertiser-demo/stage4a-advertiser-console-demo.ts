@@ -1,7 +1,13 @@
 import { getDeployCommit } from "@/lib/deploy-info";
-import { STAGE4A_BUILD_NAME, STAGE4A_VISIBLE_MARKERS } from "./constants";
+import {
+  STAGE4A2_BUILD_NAME,
+  STAGE4A2_VISIBLE_MARKERS,
+  STAGE4A_BUILD_NAME,
+  STAGE4A_VISIBLE_MARKERS,
+} from "./constants";
 
 export { STAGE4A_VISIBLE_MARKERS } from "./constants";
+export { STAGE4A2_VISIBLE_MARKERS } from "./constants";
 
 export type Stage4AAdvertiserConsoleDemoState = {
   stage: typeof STAGE4A_BUILD_NAME;
@@ -55,6 +61,42 @@ export function getStage4AAdvertiserConsoleDemoState(): Stage4AAdvertiserConsole
     overallDemoStatus: "ready",
     localStorageKey: "adme-stage4a-advertiser-demo-v1",
     visibleMarkers: STAGE4A_VISIBLE_MARKERS,
+    deployCommit: getDeployCommit(),
+  };
+}
+
+export type Stage4A2AdCreativeLinkDualQuizDemoState = {
+  stage: typeof STAGE4A2_BUILD_NAME;
+  stage4A2AdCreativeLinkDualQuizDemoComplete: true;
+  creativeTypes: "text/image/video";
+  landingLinkSafety: "safe https external link";
+  quizTypes: "multiple choice / short answer";
+  answerExposureGuardActive: true;
+  advertiserBrowserStoreContainsNoAnswerValue: true;
+  linkClickDoesNotGrantReward: true;
+  productionDbMutationAllowed: false;
+  productionMigrationImplemented: false;
+  storageBucketCreated: false;
+  actualCampaignMutationImplemented: false;
+  visibleMarkers: typeof STAGE4A2_VISIBLE_MARKERS;
+  deployCommit: string;
+};
+
+export function getStage4A2AdCreativeLinkDualQuizDemoState(): Stage4A2AdCreativeLinkDualQuizDemoState {
+  return {
+    stage: STAGE4A2_BUILD_NAME,
+    stage4A2AdCreativeLinkDualQuizDemoComplete: true,
+    creativeTypes: "text/image/video",
+    landingLinkSafety: "safe https external link",
+    quizTypes: "multiple choice / short answer",
+    answerExposureGuardActive: true,
+    advertiserBrowserStoreContainsNoAnswerValue: true,
+    linkClickDoesNotGrantReward: true,
+    productionDbMutationAllowed: false,
+    productionMigrationImplemented: false,
+    storageBucketCreated: false,
+    actualCampaignMutationImplemented: false,
+    visibleMarkers: STAGE4A2_VISIBLE_MARKERS,
     deployCommit: getDeployCommit(),
   };
 }

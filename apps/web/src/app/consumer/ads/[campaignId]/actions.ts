@@ -6,6 +6,10 @@ import {
   submitQuizAttempt,
 } from "@/lib/consumer-ads/stage2c-ad-views.server";
 import { resolveMinViewSeconds } from "@/lib/consumer-ads/min-view";
+import {
+  gradeStage4A2ShortAnswer,
+  type Stage4A2ShortAnswerGradeResult,
+} from "@/lib/consumer-ads/stage4a2-short-answer.server";
 import { submitConsumerQuizForReward } from "@/lib/quiz-rewards/stage3c-submit.server";
 import type {
   Stage3CSubmitResult,
@@ -80,6 +84,14 @@ export async function submitConsumerQuizForRewardAction(
     userId: user?.id ?? null,
     input,
   });
+}
+
+export async function submitStage4A2ShortAnswerDemoAction(input: {
+  campaignId: string;
+  quizId: string;
+  responseText: string;
+}): Promise<Stage4A2ShortAnswerGradeResult> {
+  return gradeStage4A2ShortAnswer(input);
 }
 
 /** Stage 2-B historical action — unchanged client-timer preview path. */

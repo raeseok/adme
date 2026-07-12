@@ -36,7 +36,9 @@ import {
   getStage3QCashRedemptionDemoStateMachineState,
 } from "@/lib/rewards/stage3q-cash-redemption-demo-state-machine";
 import {
+  STAGE4A2_VISIBLE_MARKERS,
   STAGE4A_VISIBLE_MARKERS,
+  getStage4A2AdCreativeLinkDualQuizDemoState,
   getStage4AAdvertiserConsoleDemoState,
 } from "@/lib/advertiser-demo/stage4a-advertiser-console-demo";
 import {
@@ -153,6 +155,8 @@ export default async function DiagnosticsPage() {
   const stage3QCashRedemptionDemo =
     getStage3QCashRedemptionDemoStateMachineState();
   const stage4AAdvertiserConsoleDemo = getStage4AAdvertiserConsoleDemoState();
+  const stage4A2AdCreativeLinkDualQuizDemo =
+    getStage4A2AdCreativeLinkDualQuizDemoState();
   const stage4BPartnerDashboardDemo = getStage4BPartnerDashboardDemoState();
 
   return (
@@ -340,6 +344,28 @@ export default async function DiagnosticsPage() {
           </p>
         ))}
         {Object.entries(stage4AAdvertiserConsoleDemo).map(([key, value]) => (
+          <p key={key}>
+            {key}={String(value)}
+          </p>
+        ))}
+      </section>
+      <section
+        aria-label="Stage 4-A-2 ad creative landing link dual quiz demo markers"
+        className="mt-4 space-y-1 rounded-lg border border-dashed border-purple-500 bg-purple-50 px-3 py-3 font-mono text-xs text-purple-950"
+      >
+        {STAGE4A2_VISIBLE_MARKERS.map((marker) => (
+          <p key={marker} className="font-sans text-sm">
+            {marker}
+          </p>
+        ))}
+        <p>Creative types: text / image / video</p>
+        <p>Landing link: safe https external link</p>
+        <p>Quiz types: multiple choice / short answer</p>
+        <p>Answer exposure guard: active</p>
+        <p>Advertiser browser store contains no answer value</p>
+        <p>Link click does not grant reward</p>
+        <p>Production DB mutation 없음</p>
+        {Object.entries(stage4A2AdCreativeLinkDualQuizDemo).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}
           </p>

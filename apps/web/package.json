@@ -108,6 +108,7 @@
     "verify:stage3p-dev-kyc-tax-terms-schema-foundation": "node scripts/verify-stage3p-dev-kyc-tax-terms-schema-foundation.mjs",
     "verify:stage3q-cash-redemption-demo-state-machine": "node scripts/verify-stage3q-cash-redemption-demo-state-machine.mjs",
     "verify:stage4a-advertiser-console-demo": "node scripts/verify-stage4a-advertiser-console-demo.mjs",
+    "verify:stage4a2-ad-creative-link-dual-quiz-demo": "node scripts/verify-stage4a2-ad-creative-link-dual-quiz-demo.mjs",
     "verify:stage4b-partner-dashboard-demo": "node scripts/verify-stage4b-partner-dashboard-demo.mjs",
     "verify:supabase-dev-link-safety": "node scripts/verify-supabase-dev-link-safety.mjs",
     "verify:prod-kakao-oauth-authorize": "node scripts/verify-prod-kakao-oauth-authorize.mjs",

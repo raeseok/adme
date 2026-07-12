@@ -11,6 +11,41 @@ export type Stage4ACampaignStatus =
 
 export type Stage4AGenderTarget = "all" | "male" | "female" | "undisclosed";
 
+export type AdCreativeType = "text" | "image" | "video";
+
+export type AdQuizType = "multiple_choice" | "short_answer";
+
+export type AdCreativePublic = {
+  type: AdCreativeType;
+  title: string;
+  body: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  videoUrl?: string;
+  videoPosterUrl?: string;
+  videoCaption?: string;
+  linkEnabled: boolean;
+  landingUrl?: string;
+  landingHostname?: string;
+  ctaLabel?: string;
+  openInNewTab: boolean;
+  externalLinkNotice: string;
+};
+
+export type AdvertiserQuizPublic = {
+  type: AdQuizType;
+  question: string;
+  options?: string[];
+  answerRegistered: boolean;
+  acceptedAnswerCount?: number;
+};
+
+export type AdvertiserQuizAuthoringSecret = {
+  multipleChoiceSelection?: number | null;
+  shortAnswer?: string;
+  acceptedAnswers?: string[];
+};
+
 export type Stage4ACampaign = {
   id: string;
   name: string;
@@ -31,11 +66,14 @@ export type Stage4ACampaign = {
     end: string;
   };
   creativeLabel: string;
+  creative: AdCreativePublic;
   minViewSeconds: number;
-  quizType: "multiple_choice";
+  quizType: AdQuizType;
   quizQuestion: string;
   quizOptions: string[];
+  quiz: AdvertiserQuizPublic;
   answerRegistered: boolean;
+  acceptedAnswerCount?: number;
   pointPerPass: number;
   demoBudgetPoints: number;
   estimatedReach: number;

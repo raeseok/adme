@@ -116,11 +116,17 @@ function mapCampaignToCard(
     categoryLabel: labels.categoryMap.get(campaign.category_id) ?? "관심 분야",
     regionLabel: labels.regionMap.get(campaign.region_id) ?? "지역",
     bodyExcerpt: excerpt(campaign.ad_content_text ?? campaign.description),
+    creativeType: "text",
+    creativeTitle: campaign.title,
+    creativeBody: excerpt(campaign.ad_content_text ?? campaign.description, 1200),
+    linkEnabled: false,
     pointPreviewLabel: formatPointPreview(campaign.reward_per_view),
     rewardPointsPreview: campaign.reward_per_view,
     minViewSecondsPreview: resolveMinViewSeconds(null),
+    quizType: "multiple_choice",
     quizQuestion: quiz.question_text,
     quizOptions: parseQuizOptions(quiz.options),
+    answerRegistered: true,
     readOnlyMode: true,
   };
 }
@@ -181,5 +187,5 @@ export async function fetchConsumerAdCards(
     return { cards: getStage2AFixtureAdCards(), dataSource: "fixture" };
   }
 
-  return { cards, dataSource: "database" };
+  return { cards: [...cards, ...getStage2AFixtureAdCards()], dataSource: "database" };
 }

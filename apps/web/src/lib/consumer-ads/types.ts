@@ -12,11 +12,27 @@ export type ConsumerAdCardDto = {
   categoryLabel: string;
   regionLabel: string;
   bodyExcerpt: string;
+  creativeType: "text" | "image" | "video";
+  creativeTitle: string;
+  creativeBody: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  videoUrl?: string;
+  videoPosterUrl?: string;
+  videoCaption?: string;
+  linkEnabled: boolean;
+  landingUrl?: string;
+  landingHostname?: string;
+  ctaLabel?: string;
+  externalLinkNotice?: string;
   pointPreviewLabel: string;
   rewardPointsPreview: number;
   minViewSecondsPreview: number;
+  quizType: "multiple_choice" | "short_answer";
   quizQuestion: string;
   quizOptions: QuizOptionDto[];
+  answerRegistered: boolean;
+  acceptedAnswerCount?: number;
   readOnlyMode: true;
 };
 

@@ -1,11 +1,17 @@
 import {
+  STAGE4A_DEMO_IMAGE_URL,
+  STAGE4A_DEMO_POSTER_URL,
+  STAGE4A_DEMO_VIDEO_URL,
   STAGE4A_DEMO_CATEGORIES,
   STAGE4A_DEMO_DAYS,
   STAGE4A_DEMO_REGIONS,
   STAGE4A_SCHEMA_VERSION,
 } from "./constants";
 import { calculateStage4ABudgetEstimate } from "./calculations";
+import { createPublicCreative, createPublicQuiz } from "./creative-quiz";
 import type {
+  AdCreativeType,
+  AdQuizType,
   Stage4ACampaign,
   Stage4ADemoEvent,
   Stage4ADemoStore,
@@ -34,10 +40,24 @@ export const STAGE4A_DEMO_CAMPAIGNS: Stage4ACampaign[] = [
     exposureDays: ["월", "화", "수", "목", "금"],
     exposureTime: { start: "10:30", end: "13:30" },
     creativeLabel: "branded-local-food-card",
+    creative: createPublicCreative({
+      type: "text",
+      title: "평일 점심 15% 할인 쿠폰",
+      body: "백석역 근처 직장인과 주민을 위한 평일 점심 15% 할인 혜택입니다. 매장 방문 전 메뉴와 운영 시간을 확인해 보세요.",
+      linkEnabled: true,
+      landingUrl: "https://example.com/baekseok-table",
+      ctaLabel: "메뉴 자세히 보기",
+    }),
     minViewSeconds: 7,
     quizType: "multiple_choice",
     quizQuestion: "이 캠페인의 평일 점심 할인율은 얼마인가요?",
     quizOptions: ["5%", "10%", "15%", "20%"],
+    quiz: createPublicQuiz({
+      type: "multiple_choice",
+      question: "이 캠페인의 평일 점심 할인율은 얼마인가요?",
+      options: ["5%", "10%", "15%", "20%"],
+      authoringSecret: { multipleChoiceSelection: 2 },
+    }),
     answerRegistered: true,
     pointPerPass: 300,
     demoBudgetPoints: 260000,
@@ -72,11 +92,31 @@ export const STAGE4A_DEMO_CAMPAIGNS: Stage4ACampaign[] = [
     exposureDays: ["월", "수", "금"],
     exposureTime: { start: "18:00", end: "21:00" },
     creativeLabel: "pet-care-demo-card",
+    creative: createPublicCreative({
+      type: "image",
+      title: "여름철 반려동물 건강검진 패키지",
+      body: "반려동물 보호자를 위한 여름철 건강검진과 피부 관리 상담을 안내합니다.",
+      imageUrl: STAGE4A_DEMO_IMAGE_URL,
+      imageAlt: "반려동물 건강검진 demo 이미지",
+      linkEnabled: true,
+      landingUrl: "https://example.com/ilsan-petcare-booking",
+      ctaLabel: "예약 페이지 열기",
+    }),
     minViewSeconds: 6,
-    quizType: "multiple_choice",
+    quizType: "short_answer",
     quizQuestion: "검진 패키지가 안내하는 주요 대상은 무엇인가요?",
-    quizOptions: ["반려동물", "자동차", "주택", "여행"],
+    quizOptions: [],
+    quiz: createPublicQuiz({
+      type: "short_answer",
+      question: "검진 패키지가 안내하는 주요 대상은 무엇인가요?",
+      options: [],
+      authoringSecret: {
+        shortAnswer: "반려동물",
+        acceptedAnswers: ["반려동물 건강검진", "펫 건강검진"],
+      },
+    }),
     answerRegistered: true,
+    acceptedAnswerCount: 3,
     pointPerPass: 250,
     demoBudgetPoints: 140000,
     estimatedReach: 1280,
@@ -110,10 +150,27 @@ export const STAGE4A_DEMO_CAMPAIGNS: Stage4ACampaign[] = [
     exposureDays: ["월", "화", "수", "목"],
     exposureTime: { start: "17:30", end: "20:30" },
     creativeLabel: "after-work-demo-card",
+    creative: createPublicCreative({
+      type: "video",
+      title: "퇴근길 픽업 전용 프로모션",
+      body: "종로 업무지구 소비자를 위한 퇴근길 픽업 혜택과 주문 동선을 영상 demo로 안내합니다.",
+      videoUrl: STAGE4A_DEMO_VIDEO_URL,
+      videoPosterUrl: STAGE4A_DEMO_POSTER_URL,
+      videoCaption: "퇴근길 픽업 혜택을 설명하는 deterministic demo 영상 설명",
+      linkEnabled: true,
+      landingUrl: "https://example.com/jongno-refresh-pickup",
+      ctaLabel: "상품 확인하기",
+    }),
     minViewSeconds: 5,
     quizType: "multiple_choice",
     quizQuestion: "이 프로모션이 주로 노출되는 시간대는 언제인가요?",
     quizOptions: ["출근 전", "점심 직후", "퇴근길", "새벽"],
+    quiz: createPublicQuiz({
+      type: "multiple_choice",
+      question: "이 프로모션이 주로 노출되는 시간대는 언제인가요?",
+      options: ["출근 전", "점심 직후", "퇴근길", "새벽"],
+      authoringSecret: { multipleChoiceSelection: null },
+    }),
     answerRegistered: false,
     pointPerPass: 200,
     demoBudgetPoints: 90000,
@@ -148,10 +205,26 @@ export const STAGE4A_DEMO_CAMPAIGNS: Stage4ACampaign[] = [
     exposureDays: ["금", "토", "일"],
     exposureTime: { start: "11:00", end: "18:00" },
     creativeLabel: "bakery-demo-card",
+    creative: createPublicCreative({
+      type: "image",
+      title: "신메뉴 체험단 방문 혜택",
+      body: "동네 베이커리 신메뉴 체험 혜택과 방문 조건을 이미지 demo 소재로 안내합니다.",
+      imageUrl: STAGE4A_DEMO_IMAGE_URL,
+      imageAlt: "베이커리 신메뉴 demo 이미지",
+      linkEnabled: true,
+      landingUrl: "https://example.com/local-bakery-menu",
+      ctaLabel: "홈페이지 방문",
+    }),
     minViewSeconds: 8,
     quizType: "multiple_choice",
     quizQuestion: "신메뉴 체험 혜택은 어떤 업종의 캠페인인가요?",
     quizOptions: ["베이커리", "세탁", "정비", "학원"],
+    quiz: createPublicQuiz({
+      type: "multiple_choice",
+      question: "신메뉴 체험 혜택은 어떤 업종의 캠페인인가요?",
+      options: ["베이커리", "세탁", "정비", "학원"],
+      authoringSecret: { multipleChoiceSelection: 0 },
+    }),
     answerRegistered: true,
     pointPerPass: 150,
     demoBudgetPoints: 120000,
@@ -188,8 +261,22 @@ export type Stage4AWizardDefaults = {
   startTime: string;
   endTime: string;
   minViewSeconds: number;
+  creativeType: AdCreativeType;
+  creativeTitle: string;
+  creativeBody: string;
+  imageUrl: string;
+  imageAlt: string;
+  videoUrl: string;
+  videoPosterUrl: string;
+  videoCaption: string;
+  linkEnabled: boolean;
+  landingUrl: string;
+  ctaLabel: string;
+  quizType: AdQuizType;
   quizQuestion: string;
   quizOptions: string[];
+  shortAnswerPrompt: string;
+  acceptedAnswerCount: number;
   pointPerPass: number;
   demoBudgetPoints: number;
 };
@@ -210,8 +297,23 @@ export const STAGE4A_WIZARD_DEFAULTS: Stage4AWizardDefaults = {
   startTime: "10:30",
   endTime: "13:30",
   minViewSeconds: 7,
+  creativeType: "text",
+  creativeTitle: "동네 고객에게 검증형 혜택 알리기",
+  creativeBody:
+    "AdMe는 광고 콘텐츠를 확인한 소비자에게만 퀴즈 참여 기회를 제공하는 투자자 demo입니다.",
+  imageUrl: STAGE4A_DEMO_IMAGE_URL,
+  imageAlt: "AdMe demo 이미지 소재",
+  videoUrl: STAGE4A_DEMO_VIDEO_URL,
+  videoPosterUrl: STAGE4A_DEMO_POSTER_URL,
+  videoCaption: "AdMe demo 동영상 설명",
+  linkEnabled: true,
+  landingUrl: "https://example.com/adme-demo",
+  ctaLabel: "자세히 보기",
+  quizType: "multiple_choice",
   quizQuestion: "이 광고는 어떤 혜택을 안내하나요?",
   quizOptions: ["지역 할인", "해외 배송", "계좌 등록", "세금 신고"],
+  shortAnswerPrompt: "",
+  acceptedAnswerCount: 0,
   pointPerPass: 300,
   demoBudgetPoints: 260000,
 };
