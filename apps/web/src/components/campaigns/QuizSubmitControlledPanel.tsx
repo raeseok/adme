@@ -43,7 +43,7 @@ export function QuizSubmitControlledPanel({
       submitResult.resultCode !== "STAGE3B_WRONG_RETRY_ALLOWED");
 
   const canSubmit =
-    viewSessionReady &&
+    (viewSessionReady || card.quizType === "short_answer") &&
     timerComplete &&
     (card.quizType === "short_answer" ? Boolean(shortAnswer.trim()) : selectedOptionId != null) &&
     !isPending &&
@@ -128,7 +128,7 @@ export function QuizSubmitControlledPanel({
           onReady={handleViewReady}
         />
 
-        {viewSessionReady && (
+        {(viewSessionReady || card.quizType === "short_answer") && (
           <div className="mt-4">
             <MinViewTimer
               key={`${card.campaignId}-${card.minViewSecondsPreview}`}
