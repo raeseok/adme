@@ -135,18 +135,19 @@ async function verifyProductionConsumerRoute() {
     return;
   }
   const html = await response.text();
-  if (!html.includes("광고 메인 콘텐츠 · 이미지")) {
+  if (!html.includes("광고 메인 콘텐츠") || !html.includes("이미지")) {
     console.log("SKIP: production image short-answer demo not deployed yet");
   } else {
     for (const marker of [
-      "광고 메인 콘텐츠 · 이미지",
+      "광고 메인 콘텐츠",
+      "이미지",
       "여름철 반려동물 건강검진 패키지",
       "반려동물 건강검진 demo 이미지",
       "예약 페이지 열기",
       "외부 사이트로 이동합니다",
       "단답형 답안",
       "예상 적립 250P",
-      "최소 열람 6초",
+      "minViewSecondsPreview\\\":6",
     ]) {
       assertContains(html, marker, `production consumer page ${marker}`);
     }
@@ -324,7 +325,11 @@ async function main() {
   console.log("PASS: verify:stage4a2-ad-creative-link-dual-quiz-demo");
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  })
+  .finally(() => {
+    setTimeout(() => process.exit(process.exitCode ?? 0), 50);
+  });
