@@ -365,6 +365,12 @@ export default async function DiagnosticsPage() {
         <p>Advertiser browser store contains no answer value</p>
         <p>Link click does not grant reward</p>
         <p>Production DB mutation 없음</p>
+        <p>
+          Consumer image short-answer demo:{" "}
+          <Link href="/consumer/ads/stage4a2-image-short-answer-demo" className="underline">
+            /consumer/ads/stage4a2-image-short-answer-demo
+          </Link>
+        </p>
         {Object.entries(stage4A2AdCreativeLinkDualQuizDemo).map(([key, value]) => (
           <p key={key}>
             {key}={String(value)}

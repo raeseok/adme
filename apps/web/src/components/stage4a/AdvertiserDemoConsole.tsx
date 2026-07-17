@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   STAGE4A_BUILD_NAME,
+  STAGE4A2_ADVERTISER_IMAGE_SHORT_ANSWER_DEMO_ID,
+  STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE,
   STAGE4A_DEMO_CATEGORIES,
   STAGE4A_DEMO_DAYS,
   STAGE4A_DEMO_IMAGE_URL,
@@ -1234,6 +1236,11 @@ function CampaignDetail({
           <Link href={`/admin/campaign-review/${campaign.id}`} className="secondary-link">
             관리자 검토 화면으로 이동
           </Link>
+          {campaign.id === STAGE4A2_ADVERTISER_IMAGE_SHORT_ANSWER_DEMO_ID && (
+            <Link href={STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE} className="secondary-link">
+              소비자 Demo 보기
+            </Link>
+          )}
         </div>
       </div>
       <Timeline events={storeEvents} />
@@ -1409,6 +1416,11 @@ function AdminReviewDetail({
           <button type="button" onClick={() => apply("under_review", "관리자 검토 시작")} className="primary-button">
             검토 시작
           </button>
+          {campaign.id === STAGE4A2_ADVERTISER_IMAGE_SHORT_ANSWER_DEMO_ID && (
+            <Link href={STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE} className="secondary-link">
+              소비자 Demo 확인
+            </Link>
+          )}
           <button type="button" onClick={() => apply("changes_requested", "수정 요청")} className="secondary-button">
             수정 요청
           </button>

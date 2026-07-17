@@ -1,6 +1,7 @@
 import { getDeployCommit } from "@/lib/deploy-info";
 import {
   STAGE4A2_BUILD_NAME,
+  STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE,
   STAGE4A2_VISIBLE_MARKERS,
   STAGE4A_BUILD_NAME,
   STAGE4A_VISIBLE_MARKERS,
@@ -78,6 +79,7 @@ export type Stage4A2AdCreativeLinkDualQuizDemoState = {
   productionMigrationImplemented: false;
   storageBucketCreated: false;
   actualCampaignMutationImplemented: false;
+  consumerImageShortAnswerDemoRoute: typeof STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE;
   visibleMarkers: typeof STAGE4A2_VISIBLE_MARKERS;
   deployCommit: string;
 };
@@ -96,6 +98,7 @@ export function getStage4A2AdCreativeLinkDualQuizDemoState(): Stage4A2AdCreative
     productionMigrationImplemented: false,
     storageBucketCreated: false,
     actualCampaignMutationImplemented: false,
+    consumerImageShortAnswerDemoRoute: STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE,
     visibleMarkers: STAGE4A2_VISIBLE_MARKERS,
     deployCommit: getDeployCommit(),
   };

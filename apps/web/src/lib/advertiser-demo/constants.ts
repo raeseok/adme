@@ -19,6 +19,14 @@ export const STAGE4A_VISIBLE_MARKERS = [
 export const STAGE4A2_BUILD_NAME =
   "Stage 4-A-2 Ad Creative Content, Landing Link and Dual Quiz Type Demo";
 
+export const STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ID =
+  "stage4a2-image-short-answer-demo" as const;
+
+export const STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ROUTE =
+  `/consumer/ads/${STAGE4A2_IMAGE_SHORT_ANSWER_CONSUMER_DEMO_ID}` as const;
+
+export const STAGE4A2_ADVERTISER_IMAGE_SHORT_ANSWER_DEMO_ID = "ilsan-pet-review" as const;
+
 export const STAGE4A2_VISIBLE_MARKERS = [
   STAGE4A2_BUILD_NAME,
   "광고 메인 콘텐츠",
@@ -32,6 +40,7 @@ export const STAGE4A2_VISIBLE_MARKERS = [
   "단답형",
   "정답 등록 완료",
   "정답은 소비자 화면에 표시되지 않습니다",
+  "image short-answer consumer demo",
   "Production DB mutation 없음",
 ] as const;
 

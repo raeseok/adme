@@ -8,6 +8,13 @@ type ShortAnswerRegistryEntry = {
 };
 
 const SHORT_ANSWER_REGISTRY: Record<string, ShortAnswerRegistryEntry> = {
+  "stage4a2-image-short-answer-demo": {
+    quizId: "stage4a2-image-short-answer-quiz",
+    acceptedAnswers: normalizeAcceptedAnswers("반려동물", [
+      "반려동물 건강검진",
+      "펫 건강검진",
+    ]),
+  },
   "stage4a2-short-answer-demo": {
     quizId: "stage4a2-short-answer-quiz",
     acceptedAnswers: normalizeAcceptedAnswers("백석동 지역 할인", [

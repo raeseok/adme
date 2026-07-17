@@ -169,6 +169,37 @@ export function getStage2AFixtureAdCards(): ConsumerAdCardDto[] {
       ],
       answer: "퇴근길",
     }),
+    toCard("stage4a2-image-short-answer-demo", {
+      title: "일산 반려동물 건강검진 안내",
+      advertiserDisplayName: "일산펫케어센터",
+      categoryLabel: "반려동물",
+      regionLabel: "경기도 고양시 일산동구",
+      bodyExcerpt:
+        "반려동물 관심 소비자에게 건강검진 필요성과 예약 혜택을 안내하는 이미지·단답형 deterministic demo입니다.",
+      creativeType: "image",
+      creativeTitle: "여름철 반려동물 건강검진 패키지",
+      creativeBody:
+        "반려동물 보호자를 위한 여름철 건강검진과 피부 관리 상담을 안내합니다.",
+      imageUrl: "/window.svg",
+      imageAlt: "반려동물 건강검진 demo 이미지",
+      linkEnabled: true,
+      landingUrl: "https://example.com/ilsan-petcare-booking",
+      landingHostname: "example.com",
+      ctaLabel: "예약 페이지 열기",
+      externalLinkNotice:
+        "외부 사이트로 이동합니다. 외부 사이트의 내용과 개인정보 처리방침은 해당 사이트의 정책을 따릅니다.",
+      pointPreviewLabel: "예상 적립 250P (미리보기)",
+      rewardPointsPreview: 250,
+      minViewSecondsPreview: 6,
+      quizType: "short_answer",
+      answerRegistered: true,
+      acceptedAnswerCount: 3,
+    }, {
+      quizId: "stage4a2-image-short-answer-quiz",
+      question: "검진 패키지가 안내하는 주요 대상은 무엇인가요?",
+      options: [],
+      answer: "server-only-short-answer",
+    }),
     toCard("stage4a2-short-answer-demo", {
       title: "Stage 4-A-2 단답형 광고 — 백석동 할인",
       advertiserDisplayName: "백석온테이블",
