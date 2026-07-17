@@ -145,6 +145,7 @@
     "eslint-config-next": "16.2.10",
     "iconv-lite": "^0.7.3",
     "playwright": "^1.51.1",
+    "supabase": "^2.20.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
